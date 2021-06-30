@@ -1,6 +1,18 @@
-import React from 'react';
+import React, {createContext} from 'react';
 import socketio from "socket.io-client";
 import { SOCKET_URL } from "../config";
 
-export const socket = socketio.connect(SOCKET_URL);
-export const SocketContext = React.createContext();
+export const SocketContext = createContext();
+
+const SocketContextProvider = (props) => {
+
+    const socket = socketio.connect(SOCKET_URL)
+
+    return (
+        <SocketContext.Provider value={{ socket }}>
+            {props.children}
+        </SocketContext.Provider>
+    )
+}
+
+export default SocketContextProvider

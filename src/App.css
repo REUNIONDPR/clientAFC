@@ -20,9 +20,9 @@
 .primary-d-color        { background-color: var(--primary-d-color); color: white;}
 .primary-h-color:hover  { background-color: var(--primary-h-color)!important;color: white;}
 
-.secondary-color        { background-color: var(--secondary-color); }
-.secondary-l-color      { background-color: var(--secondary-l-color); }
-.secondary-d-color      { background-color: var(--secondary-d-color); }
+.secondary-color        { background-color: var(--secondary-color);   color: white;}
+.secondary-l-color      { background-color: var(--secondary-l-color); color: white;}
+.secondary-d-color      { background-color: var(--secondary-d-color); color: white;}
 .secondary-h-color:hover{ background-color: var(--secondary-h-color)!important;color: black;}
 
 body{
@@ -42,4 +42,7 @@ body{
   display: flex;
   align-items: center;
   flex-direction: column
+}
+.MuiSvgIcon-root .color-white{
+  fill: white !important;
 }

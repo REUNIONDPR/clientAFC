@@ -4,7 +4,7 @@ import './index.css';
 import App from './App';
 import UserContextProvider from './context/user.context';
 import { BrowserRouter } from 'react-router-dom';
-import {SocketContext, socket} from './context/socket.context';
+import SocketContextProvider from './context/socket.context';
 // import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
@@ -12,11 +12,11 @@ ReactDOM.render(
     <div>
 
 
-      <SocketContext.Provider value={socket}>
+      <SocketContextProvider>
       <UserContextProvider>
         <App />
       </UserContextProvider>
-      </SocketContext.Provider>
+      </SocketContextProvider>
       
     </div>
 

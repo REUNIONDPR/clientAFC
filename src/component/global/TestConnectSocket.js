@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import SnackBar from './SnackBar/SnackBar';
-import {socket} from '../../context/socket.context';
+import {SocketContext} from '../../context/socket.context';
 
 export default function Test() {
     const [openSnackBar,    setOpenSnackBar   ] = useState(false);
     const [messageSnackBar, setMessageSnackBar] = useState('');
     const [severity, setSeverity] = useState('success');
-    
+    const { socket } = useContext(SocketContext);
+
     const handleClose = (reason) => {
         if (reason === 'clickaway') {
         return;
@@ -14,13 +15,15 @@ export default function Test() {
         setOpenSnackBar(false);
         setMessageSnackBar('');
     };
-
-    // Etat de la connection de socket
-    socket.on('etatConnection', (data) => {
-        setOpenSnackBar(true);
-        setMessageSnackBar(data.message);
-        setSeverity(data.severity);
-    })
+    
+    useEffect(() => {
+        socket.on('etatConnection', (data) => {
+            console.log(data)
+            setOpenSnackBar(true);
+            setMessageSnackBar(data.message);
+            setSeverity(data.severity);
+        })
+      }, [socket])
 
     return (
         <SnackBar 

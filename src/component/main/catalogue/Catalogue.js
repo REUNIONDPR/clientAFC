@@ -2,42 +2,100 @@ import axios from 'axios';
 import React, { useContext, useEffect, useState } from 'react';
 import Table from '../../global/table/Table';
 import Cookie from 'js-cookie';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
 import { UserContext } from '../../../context/user.context';
+import Row from './Row';
 
-export default function Catalogue(){
-    const { user }  = useContext(UserContext);
-    const [ columns, setColumns ] = useState([]);
-    const [ rowsZ, setRowsZ ] = useState([]);
-    const [ rows, setRows ] = useState([]);
+export default function Catalogue() {
 
-    useEffect(() => {
-        setColumns(['#', 'intitule', 'prix', 'nArticle', 'objectif', 'niveau']);
-    },[])
-    
+    const { user } = useContext(UserContext);
+    const [columns, setColumns] = useState([]);
+    const [rows, setRows] = useState([]);
+    const [displayRows, setDisplayRows] = useState([])
+
+    // --------------- SnackBar
+    const [openSnackBar, setOpenSnackBar] = useState(false);
+    const [messageSnackBar, setMessageSnackBar] = useState('');
+    const [severity, setSeverity] = useState('success');
+
+    const handleCloseSnackbar = (reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setOpenSnackBar(false);
+        setMessageSnackBar('');
+    };
+    // ----------------------------
+
+    const [lotSelected, setLotSelected] = useState('none');
+
+    const [lotList, setLotList] = useState([]);
     useEffect(() => {
         axios({
-            method:'GET',
-            url: '/catalogue/getAll',
+            method: 'GET',
+            url: '/global/getLot',
             headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
-        }).then((response) => {setRows(response.data)
-            Object.entries(response.data).map(([key, value]) => {
-                if(key==0){
-                    setColumns(Object.keys(value))
-                }
-            })
-        
-        });
-    },[user])
+        }).then((response) => { setLotList(response.data) })
+    }, [])
 
-    return(
-        <>  
-            
-                <h1>Page aze2</h1>
-                <Button variant="contained" color="secondary" >Get</Button>
-                <Table columns={columns} rows={rows} name='Catalogue'/>
-            
-        </>
+    // useEffect(() => {
+    //     setColumns(['#', 'intitule', 'prix', 'nArticle', 'objectif', 'niveau']);
+    // }, [])
+
+    const handleChangeFilter = (event) => {
+        setLotSelected(event.target.value);
+        event.target.value === 'none'
+            ? setDisplayRows(rows)
+            : setDisplayRows(rows.filter((r) => {
+                if (parseInt(r.lot) === parseInt(event.target.value)) { return r; }else{ return false;}
+            }))
+    };
+    // ----------------------------------
+
+
+    useEffect(() => {
+        axios({
+            method: 'GET',
+            url: '/catalogue/findAll',
+            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+        }).then((response) => {
+            setRows(response.data)
+            setDisplayRows(response.data)
+            Object.entries(response.data).map(([key, index]) => (key === '0')?setColumns(Object.keys(index)):false)
+        });
+    }, [user])
+
+    const handleEditSubmitClick = (dataRow) => {
+        axios({
+            method: 'put',
+            url: '/catalogue/update',
+            data: dataRow,
+            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+        }).then((response) => {
+            if (response.status === 200) {
+                setMessageSnackBar('Mise à jour réussi.');
+                setSeverity('success');
+                // updateDataRow(displayRows, dataRow);
+            } else {
+                setMessageSnackBar('Echec de la mise à jour.');
+                setSeverity('error');
+            }
+            setOpenSnackBar(true);
+        })
+    }
+    
+    return (<>
+        <Table columns={columns} rows={rows} propsTableName='Catalogue'
+            Row={Row}
+            handleEditSubmitClick={handleEditSubmitClick}
+            displayRows={displayRows}
+            filter={[{ 'name': 'Lot', 'displayName': 'Tout les lots', 'handleChange': handleChangeFilter, 'data': lotList, valueSelected:lotSelected}]}
+            handleChangeFilter={handleChangeFilter} 
+            handleCloseSnackbar={handleCloseSnackbar}
+            openSnackBar={openSnackBar}
+            messageSnackBar={messageSnackBar}
+            severity={severity}
+            user={user}
+            /></>
+
     )
 }

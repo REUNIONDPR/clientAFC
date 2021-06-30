@@ -1,8 +1,4 @@
-import React from 'react';
-import Box from '@material-ui/core/Box';
-import { lighten, makeStyles, withStyles } from '@material-ui/core/styles';
-import Collapse from '@material-ui/core/Collapse';
-import IconButton from '@material-ui/core/IconButton';
+import React, { useState } from 'react';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -10,178 +6,105 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
-import TablePagination  from '@material-ui/core/TablePagination';
-import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
-import Typography from '@material-ui/core/Typography';
+import TablePagination from '@material-ui/core/TablePagination';
 import { codeToName } from '../../../utilities/Function';
-import FilterListIcon from '@material-ui/icons/FilterList';
-import CloseIcon from '@material-ui/icons/Close';
-import Toolbar from '@material-ui/core/Toolbar'; 
-import Tooltip from '@material-ui/core/Tooltip'; 
-
+import SnackBar from '../SnackBar/SnackBar';
+import ToolbarPersonnalize from './Toolbar';
 import './table.css';
 
-const useToolbarStyles = makeStyles((theme) => ({
-  root: {
-    paddingLeft: theme.spacing(2),
-    paddingRight: theme.spacing(1),
-  },
-  highlight:{
-    color: theme.palette.secondary.main,
-    backgroundColor: '#c51162',
-  },
-  title: {
-    flex: '1 1 100%',
-  },
-}));
+export default function CollapsibleTable(props) {
 
-const StyledTableRow = withStyles((theme) => ({
-  root: {
-    '&:nth-of-type(odd)': {
-      backgroundColor: theme.palette.action.hover,
-    },
-  },
-}))(TableRow);
-
-
-function Row(props) {
-  const { row } = props;
-  const [open, setOpen] = React.useState(false);
-
-  // Pour ajouter un tableau collapsé il faut ajouter une entrée à l'objet Row
-  // nommé history = [{key:value, key2:value2},{...}, ...]
-
-  return (
-    <React.Fragment>
-      <StyledTableRow >
-        <TableCell>
-        {row.hasOwnProperty('history') &&
-          <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
-            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
-        }
-        </TableCell>
-        <TableCell component="th" scope="row" className='nowrap'>
-          {row.lot}
-        </TableCell>
-        <TableCell component="th" scope="row" className='nowrap'>
-          {row.n_Article}
-        </TableCell>
-        <TableCell className='nowrap'>{row.intitule_form_marche}</TableCell>
-        <TableCell align="right">{row.nb_heure_ent}</TableCell>
-        <TableCell align="right">{row.nb_heure_appui}</TableCell>
-        <TableCell align="right">{row.nb_heure_soutien}</TableCell>
-        <TableCell align="right">{row.prixTrancheA}</TableCell>
-        <TableCell align="right">{row.prixTrancheB}</TableCell>
-      </StyledTableRow>
-      {row.hasOwnProperty('history') &&
-      <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box margin={1}>
-              
-              <Table size="small" aria-label="purchases">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Date</TableCell>
-                    <TableCell>Customer</TableCell>
-                    <TableCell align="right">Amount</TableCell>
-                    <TableCell align="right">Total price ($)</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {row.history.map((historyRow) => (
-                    <TableRow key={historyRow.date}>
-                      <TableCell component="th" scope="row">
-                        {historyRow.date}
-                      </TableCell>
-                      <TableCell>{historyRow.customerId}</TableCell>
-                      <TableCell align="right">{historyRow.amount}</TableCell>
-                      <TableCell align="right">
-                        {Math.round(historyRow.amount * row.price * 100) / 100}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow>
-      }
-    </React.Fragment>
-  );
-}
-
-export default function CollapsibleTable(props) {  
-
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
-
-  const classes = useToolbarStyles();
-
+  const Row = props.Row;
+  const { displayRows } = props;
+  const propsTableName = props.propsTableName;
+  
+  // ------------ Pagination
+  const [page, setPage] = useState(0);
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
 
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(+event.target.value);
+    setRowsPerPage(event.target.value);
     setPage(0);
   };
 
+   // ------------ Snackbar
+  const openSnackBar = props.openSnackBar;
+  const messageSnackBar = props.messageSnackBar;
+  const severitySnackBar = props.severity;
+  const handleCloseSnackBar = props.handleCloseSnackbar;
+
+   // ------------ Create Row
+  const [ creatingRow, setCreatingRow ] = useState(false);
+  const handleCreateRow = () => {
+    setCreatingRow(true)
+  }
+
+  const handleExitEditClick = () => {
+    setEditingRow(false);
+  }
+   // ------------ SaveEditChange
+  const [editingRow, setEditingRow] = useState(false);
+  const handleEditSubmitClick = (row) => {
+    setEditingRow(false);
+    props.handleEditSubmitClick(row)
+  }
+  
   return (
-    <Paper style={{maxHeight: '80%', overflow: 'auto'}} >
-      <Toolbar className={classes.highlight}>
-        
-        <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-          {props.name}
-        </Typography>
+    <Paper style={{ maxHeight: '80%', overflow: 'auto' }} >
 
-        {2 > 0 ? (
-          <Tooltip title="Fermer">
-            <IconButton aria-label="fermer">
-              <CloseIcon />
-            </IconButton>
-          </Tooltip>
-        ) : (
-          <Tooltip title="Filtre">
-            <IconButton aria-label="filtre">
-              <FilterListIcon />
-            </IconButton>
-          </Tooltip>
-        )}
+      <SnackBar
+        open={openSnackBar}
+        message={messageSnackBar}
+        severity={severitySnackBar}
+        handleClose={handleCloseSnackBar}
+      />
 
-      </Toolbar>
+      <ToolbarPersonnalize filter={props.filter} propsTableName={propsTableName} handleChangeFilter={props.handleChangeFilter} user={props.user} handleCreateRow={handleCreateRow}/>
+
       <TableContainer>
-      <Table aria-label="collapsible table" size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell />
-            {props.columns.filter((col)=>{if(col!='id'){return col;} }).map((col) => (
-              <TableCell align="center" className='nowrap' key={col}>{codeToName(col)}</TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-        
-          {props.rows
-            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-            .map((row) => (
-            <Row key={row.id+'_'+row.n_Article} row={row} />
-          ))}
-        </TableBody>
-      </Table>
-     </TableContainer>
+        <Table aria-label="collapsible table" size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell />
+              {props.columns.filter((col) => { if (col !== 'id') { return col; }else{return false;} }).map((col) => (
+                <TableCell align="center" className='nowrap' key={col}>{codeToName(col)}</TableCell>
+              ))}
+              <TableCell align="center" className='nowrap' key='actionT'>Action</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {creatingRow && (<Row key="newRow" row={''} handleExitEditClick={() => {setCreatingRow(false)}} />)}
+            {Array.isArray(displayRows) ?
+              displayRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((row) => <Row key={row.id} row={row} editingRow={editingRow}
+                handleEditClick={() => {setEditingRow(row.id) }}
+                handleExitEditClick={handleExitEditClick}
+                handleEditSubmitClick={handleEditSubmitClick}
+                editing={editingRow}
+                user={props.user} />)
+                : <Row key={displayRows.id} row={displayRows} editingRow={editingRow}
+                handleEditClick={() => {setEditingRow(displayRows.id) }}
+                handleExitEditClick={handleExitEditClick}
+                handleEditSubmitClick={handleEditSubmitClick}
+                editing={editingRow}
+                user={props.user} />
+            }
+
+          </TableBody>
+        </Table>
+      </TableContainer>
       <TablePagination
-        rowsPerPageOptions={[10, 25, 100]}
+        rowsPerPageOptions={[10, 30, 100]}
         component="div"
-        count={props.rows.length}
+        count={displayRows.length}
         rowsPerPage={rowsPerPage}
         page={page}
         onChangePage={handleChangePage}
         onChangeRowsPerPage={handleChangeRowsPerPage}
       />
-      </Paper>
+    </Paper>
   );
 }
