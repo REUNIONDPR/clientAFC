@@ -8,7 +8,7 @@ import './App.css';
 // import { subscribeToTimer } from './api';
 import Tab from './component/Tab.js';
 import openSocket from 'socket.io-client';
-
+import {WordSearch} from './component/SearchGame/SearchGame'
 const  socket = openSocket('http://localhost:3000');
 
 
@@ -96,6 +96,7 @@ render() {
             <Button type="submit" variant="contained" color="secondary">
               Envoyer
             </Button>
+            <WordSearch/>
           </form>
           <p>{this.state.responseToPost}</p>
           </div>
