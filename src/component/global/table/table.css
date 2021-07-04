@@ -1,0 +1,29 @@
+.nowrap{
+    white-space: nowrap;
+}    
+.mw-100{
+    min-width: 100px;
+}
+.toolbar-select{
+    color: white;
+}
+
+/* INPUT select filtre */
+.toolbar-select .MuiFormLabel-root,
+.toolbar-select .MuiInputBase-root,
+.toolbar-select .MuiFocused,
+.toolbar-select .MuiFormLabel-root.Mui-focused{color: rgb(255 255 255)}
+.toolbar-select svg{ fill: white}
+.toolbar-select fieldset{ border-color: rgb(255 255 255 / 30%)}
+.toolbar-select .MuiInputBase-root:hover, 
+.toolbar-select .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline,
+.toolbar-select .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline{ 
+    border-color: rgb(255 255 255)
+}
+
+/* INPUT dans le tableau ligne modifie */
+.MuiTableRow-root .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline{ border-color: var(--secondary-color)}
+.MuiTableRow-root .MuiFocused,
+.MuiTableRow-root .MuiFormLabel-root.Mui-focused{
+    color: var(--secondary-color)
+}

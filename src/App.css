@@ -1,15 +1,48 @@
+
+:root {
+
+  --secondary-l-color: #d04081;
+  --secondary-h-color: #d0408150;
+  --secondary-color: #c51162;
+  --secondary-d-color: #890b44;
+
+  --primary-l-color: #4dabf5;
+  --primary-h-color: #4dabf550;
+  --primary-color: #2196f3;
+  --primary-d-color: #1769aa;
+
+  --grey-l-color: #d0d0d0;
+
+  --tritanopia: #5CABA4;
+}
+.primary-color          { background-color: var(--primary-color);   color: white;}
+.primary-l-color        { background-color: var(--primary-l-color); color: white;}
+.primary-d-color        { background-color: var(--primary-d-color); color: white;}
+.primary-h-color:hover  { background-color: var(--primary-h-color)!important;color: white;}
+
+.secondary-color        { background-color: var(--secondary-color);   color: white;}
+.secondary-l-color      { background-color: var(--secondary-l-color); color: white;}
+.secondary-d-color      { background-color: var(--secondary-d-color); color: white;}
+.secondary-h-color:hover{ background-color: var(--secondary-h-color)!important;color: black;}
+
 body{
   background-color: #ececec;
 }.App{
   /* background-color: red; */
+  min-height: 90vh;
+  display: flex;
+}
+.containerMain{
   max-width: 80%;
   margin-left: auto;
   margin-right: auto;
   margin-top: 5vh;
-  min-height: 90vh;
 }
 .container{
   display: flex;
   align-items: center;
   flex-direction: column
+}
+.MuiSvgIcon-root .color-white{
+  fill: white !important;
 }
