@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import Table from '../../global/table/Table';
 import Cookie from 'js-cookie';
 import { UserContext } from '../../../context/user.context';
-import Row from './Row';
+import ModalCatalogue from './ModalCatalogue';
 
 export default function Catalogue() {
 
@@ -16,6 +16,16 @@ export default function Catalogue() {
     const [openSnackBar, setOpenSnackBar] = useState(false);
     const [messageSnackBar, setMessageSnackBar] = useState('');
     const [severity, setSeverity] = useState('success');
+    const [openModal, setOpenModal] = useState(false);
+    const [updateRow, setupdateRow] = useState({});
+    
+    const handleCloseModal = () => {
+        setOpenModal(false)
+    }
+    const handleOpenModal = (row) => {
+        setupdateRow(row)
+        setOpenModal(true)
+    }
 
     const handleCloseSnackbar = (reason) => {
         if (reason === 'clickaway') {
@@ -46,7 +56,7 @@ export default function Catalogue() {
         event.target.value === 'none'
             ? setDisplayRows(rows)
             : setDisplayRows(rows.filter((r) => {
-                if (parseInt(r.lot) === parseInt(event.target.value)) { return r; }else{ return false;}
+                if (parseInt(r.lot) === parseInt(event.target.value)) { return r; } else { return false; }
             }))
     };
     // ----------------------------------
@@ -60,7 +70,7 @@ export default function Catalogue() {
         }).then((response) => {
             setRows(response.data)
             setDisplayRows(response.data)
-            Object.entries(response.data).map(([key, index]) => (key === '0')?setColumns(Object.keys(index)):false)
+            Object.entries(response.data).map(([key, index]) => (key === '0') ? setColumns(Object.keys(index)) : false)
         });
     }, [user])
 
@@ -81,21 +91,34 @@ export default function Catalogue() {
             }
             setOpenSnackBar(true);
         })
+        // console.log(dataRow)
     }
-    
-    return (<>
-        <Table columns={columns} rows={rows} propsTableName='Catalogue'
-            Row={Row}
-            handleEditSubmitClick={handleEditSubmitClick}
-            displayRows={displayRows}
-            filter={[{ 'name': 'Lot', 'displayName': 'Tout les lots', 'handleChange': handleChangeFilter, 'data': lotList, valueSelected:lotSelected}]}
-            handleChangeFilter={handleChangeFilter} 
-            handleCloseSnackbar={handleCloseSnackbar}
-            openSnackBar={openSnackBar}
-            messageSnackBar={messageSnackBar}
-            severity={severity}
-            user={user}
-            /></>
+
+    return (
+        <>
+            <Table columns={columns} rows={rows} propsTableName='Catalogue'
+                handleEditSubmitClick={handleEditSubmitClick}
+                displayRows={displayRows}
+                filter={[{ 'name': 'Lot', 'displayName': 'Tout les lots', 'handleChange': handleChangeFilter, 'data': lotList, valueSelected: lotSelected }]}
+                handleChangeFilter={handleChangeFilter}
+                handleCloseSnackbar={handleCloseSnackbar}
+                openSnackBar={openSnackBar}
+                messageSnackBar={messageSnackBar}
+                severity={severity}
+                user={user}
+                handleOpenModal={handleOpenModal}
+            />
+            <ModalCatalogue openModal={openModal} handleCloseModal={handleCloseModal} handleEditSubmitClickToParent={handleEditSubmitClick} updateRow={updateRow}/>
+
+            <div>
+                <div>Add / remove adresse</div>
+                <div>Add / édite Formation</div> 
+            </div>
+        </>
 
     )
 }
+
+// https://agent.pole-emploi.intra/ihm-synthesemap/synthesesre/v2/
+// login?authn=agent&
+// idRCI=1410760608
