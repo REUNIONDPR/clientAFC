@@ -11,12 +11,13 @@ import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
 import DashboardIcon from '@material-ui/icons/Dashboard';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { UserContext } from './../../../context/user.context'
-import { Link } from '@material-ui/core';
+// import { Link } from '@material-ui/core';
+import { Link } from 'react-router-dom';
 import './Navbar.css';
 import { SocketContext } from '../../../context/socket.context';
 import { IsPermitted } from '../../../utilities/Function';
 
-const drawerWidth = 240;
+const drawerWidth = 280;
 
 const StyledBadgeConnected = withStyles((theme) => ({
   badge: {
@@ -50,7 +51,7 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'flex-end',
   },
   listItem: {
-    "&:hover": {
+    "&:selected": {
       backgroundColor: "blue",
     }
   }, navBar: {
@@ -78,7 +79,6 @@ export default function PermanentDrawerLeft() {
 
   const handleListItemClick = (event, index) => {
     setSelectedIndex(index);
-    console.log(index)
   };
 
   return (
@@ -127,29 +127,29 @@ export default function PermanentDrawerLeft() {
       <Divider />
       <List>
         {IsPermitted(user, 'sollicitation', 'view') &&
-          <ListItem button className='secondary-h-color' component={Link} href="/home" selected={selectedIndex === 1}
+          <ListItem button className='secondary-h-color' component={Link} to="/home" selected={selectedIndex === 1}
             onClick={(event) => handleListItemClick(event, 1)}>
             <ListItemIcon><CreateNewFolderIcon /></ListItemIcon>
             <ListItemText primary='Sollicitation' />
           </ListItem>}
-
+          
         {IsPermitted(user, 'catalogue', 'view') &&
-          <ListItem button className='secondary-h-color' component={Link} href="catalogue" selected={selectedIndex === 2}
-            onClick={(event) => handleListItemClick(event, 1)}>
+          <ListItem button className='secondary-h-color' component={Link} to="catalogue" selected={selectedIndex === 2}
+            onClick={(event) => handleListItemClick(event, 2)}>
             <ListItemIcon><DvrIcon /></ListItemIcon>
             <ListItemText primary='Catalogue' />
           </ListItem>}
 
         {IsPermitted(user, 'brs', 'view') &&
           <ListItem button className='secondary-h-color' component={Link} href="#" selected={selectedIndex === 3}
-            onClick={(event) => handleListItemClick(event, 1)}>
+            onClick={(event) => handleListItemClick(event, 3)}>
             <ListItemIcon><FileCopyIcon /></ListItemIcon>
             <ListItemText primary='BRS' />
           </ListItem>}
 
         {IsPermitted(user, 'dashboard', 'view') &&
           <ListItem button className='secondary-h-color' component={Link} href="#" selected={selectedIndex === 4}
-            onClick={(event) => handleListItemClick(event, 1)}>
+            onClick={(event) => handleListItemClick(event, 4)}>
             <ListItemIcon><DashboardIcon /></ListItemIcon>
             <ListItemText primary='Tableau de bord' />
           </ListItem>}

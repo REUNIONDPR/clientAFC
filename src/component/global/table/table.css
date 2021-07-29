@@ -27,3 +27,14 @@
 .MuiTableRow-root .MuiFormLabel-root.Mui-focused{
     color: var(--secondary-color)
 }
+.listColumn{
+    position: absolute !important;
+    z-index: 1;
+    top: 50px;
+    right: 0;
+    width:200px;
+    height: 200px;
+    overflow-y: scroll;
+    background-color: #fff;
+    border: 1px solid var(--secondary-color);
+}

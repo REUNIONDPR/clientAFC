@@ -10,16 +10,12 @@ import SocketContextProvider from './context/socket.context';
 ReactDOM.render(
   <BrowserRouter>
     <div>
-
-
       <SocketContextProvider>
       <UserContextProvider>
         <App />
       </UserContextProvider>
       </SocketContextProvider>
-      
     </div>
-
   </BrowserRouter>,
   document.getElementById('root')
 );

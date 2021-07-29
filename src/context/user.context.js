@@ -27,7 +27,7 @@ const UserContextProvider = (props) => {
                 Authorization: 'Bearer ' + Cookies.get('authToken')
             }
         })
-        .then((res) => setUser(res.data))
+        .then((res) => {setUser(res.data);})
     };
 
     const logUser = () => {

@@ -8,6 +8,8 @@ import home from './component/main/sollicitation/Sollicitation';
 import PrivateRoute from './hoc/PrivateRoute';
 import { UserContext } from './context/user.context';
 
+import NavbarV from './component/global/Navbar/Navbar';
+import { makeStyles } from '@material-ui/core/styles';
 import Cookie from 'js-cookie';
 import { frFR } from '@material-ui/core/locale';
 
@@ -39,22 +41,37 @@ function App() {
       },
     },
   }, frFR);
+
+  const drawerWidth = 280;
+
+  const useStyles = makeStyles((theme) => ({
+    drawer: {
+      minWidth: drawerWidth,
+      backgroundColor: '#fff',
+      position: 'relative',
+    },
+  }));
+
   const { user, logUser } = useContext(UserContext);
+  const classes = useStyles();
 
   useEffect(() => {
-    if (!Cookie.get('authToken') && !user.hawOwnProperty('idgasi')) {
+    if (!Cookie.get('authToken') && !user.hasOwnProperty('idgasi')) {
       logUser()
     }
   }, [user, logUser]);
-
 
   return (
 
     <div className="App">
 
-
       {/* <TestConnectSocket /> */}
       <ThemeProvider theme={theme}>
+
+        <div className={classes.drawer}>
+          <NavbarV />
+        </div>
+
         <Switch>
           <Main>
             <Route exact path="/" component={home} />

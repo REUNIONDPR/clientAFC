@@ -1,28 +1,23 @@
 import React from 'react';
-// { useContext, useEffect, useState }
 import { makeStyles } from '@material-ui/core/styles';
-import NavbarV from '../global/Navbar/Navbar';
 import Grid from '@material-ui/core/Grid';
-// import { SocketContext } from '../../context/socket.context';
-// import SnackBar from '../global/SnackBar/SnackBar';
-
-const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    display: 'flex',
-  },
-  drawer: {
-    width: drawerWidth,
-    backgroundColor: '#fff',
-    position: 'relative',
-  },
   main: {
     overflow: 'hidden',
-    width: '70%',
+    width: '90%',
     marginLeft: 'auto',
     marginRight: 'auto',
-    marginTop: '2%'
+    marginTop: '2%',
+    [theme.breakpoints.up(600)]:{
+      width: '60%',
+    },
+    [theme.breakpoints.up(1200)]:{
+      width: '60%',
+    },
+    [theme.breakpoints.up(1600)]:{
+      width: '50%',
+    },
   }
 }));
 
@@ -30,38 +25,12 @@ const useStyles = makeStyles((theme) => ({
 export default function Main(props) {
 
   const classes = useStyles();
-  // const [openSnackBar, setOpenSnackBar] = useState(false);
-  // const [messageSnackBar, setMessageSnackBar] = useState('');
-  // const [severity, setSeverity] = useState('success');
-  // const { socket } = useContext(SocketContext);
-
-  // const handleClose = () => {
-  //   setOpenSnackBar(false);
-  // }
-
-  // useEffect(() => {
-  //   socket.on('etatConnection', (data) => {
-  //     setOpenSnackBar(true);
-  //     setMessageSnackBar(data.message);
-  //     setSeverity(data.severity);
-  //   })
-  // }, [socket])
 
   return (
-    <>
-      {/* <SnackBar open={openSnackBar}
-        message={messageSnackBar}
-        handleClose={handleClose}
-        severity={severity}
-      /> */}
-      <div className={classes.drawer}>
-        <NavbarV />
-      </div>
-      <div className={classes.main}>
-        <Grid>
-          {props.children}
-        </Grid>
-      </div>
-    </>
+    <div className={classes.main}>
+      <Grid>
+        {props.children}
+      </Grid>
+    </div>
   )
 };

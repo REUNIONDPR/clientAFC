@@ -11,7 +11,15 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
+import ListRoundedIcon from '@material-ui/icons/ListRounded';
 import { useState } from 'react';
+import { codeToName } from '../../../utilities/Function';
+
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import Checkbox from '@material-ui/core/Checkbox';
 
 import { IsPermitted } from '../../../utilities/Function';
 
@@ -28,13 +36,14 @@ export default function ToolbarPersonnalize(props) {
 
     const classes = useToolbarStyles();
     const [openFilter, setOpenFilter] = useState(false)
-    const handleCreateRow = props.handleCreateRow;
+    const [openListCol, setOpenListCol] = useState(false);
+    const handleCreateRow = props.modal;
     // ----------------- Filtres
     const handleChangeFilter = props.handleChangeFilter;
     const filters = props.filter;
 
     return (
-        <Toolbar className='secondary-color'>
+        <Toolbar className='secondary-color-gradient'>
             {openFilter ? (<>
 
                 <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
@@ -64,24 +73,76 @@ export default function ToolbarPersonnalize(props) {
                         <CloseIcon />
                     </IconButton>
                 </Tooltip>
-            </>) : (<>
+            </>) : <>
                 <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
                     {props.propsTableName}
                 </Typography>
 
-                {IsPermitted(props.user, 'catalogue', 'create') &&
-                <Tooltip title="Ajouter">
-                    <IconButton aria-label="Ajouter" color='inherit' onClick={handleCreateRow}>
-                        <AddIcon />
-                    </IconButton>
-                </Tooltip>}
 
                 <Tooltip title="Filtre">
                     <IconButton aria-label="filtre" color='inherit' onClick={() => setOpenFilter(!openFilter)}>
                         <FilterListIcon />
                     </IconButton>
                 </Tooltip>
-            </>)}
+            </>
+            }
+
+
+            {
+                IsPermitted(props.user, 'catalogue', 'create') &&
+                <Tooltip title="Créer">
+                    <IconButton aria-label="Créer" color='inherit' onClick={() => props.btnAddAction()}>
+                        <AddIcon />
+                    </IconButton>
+                </Tooltip>
+            }
+            <div style={{ position: 'relative' }}>
+
+                {openListCol
+                    ? <Tooltip title="Fermer">
+                    <IconButton aria-label="fermer" color='inherit' onClick={() => setOpenListCol(!openListCol)}>
+                        <CloseIcon />
+                    </IconButton>
+                </Tooltip>
+                    : <Tooltip title="Colonnes"><IconButton aria-label="delete" color="inherit" onClick={() => setOpenListCol(!openListCol)}>
+                    <ListRoundedIcon />
+                </IconButton></Tooltip>}
+                {openListCol &&
+                    <List dense={true} className='listColumn'>
+                        <ListItem key={'check_all'} dense button onClick={(props.handleCheckAll)}>
+                            <ListItemIcon>
+                                <Checkbox
+                                    edge="start"
+                                    checked={props.checkAll}
+                                    tabIndex={-1}
+                                    disableRipple
+                                    inputProps={{ 'aria-labelledby': 'check_all' }}
+                                />
+                            </ListItemIcon>
+                            <ListItemText id='check_all' primary={props.checkAll ? 'Tout décocher' : 'Tout cocher'} />
+                        </ListItem>
+
+                        {props.columns.map((value) => {
+                            const labelId = `checkbox-list-label-${codeToName(value)}`;
+
+                            return (
+                                <ListItem key={value} role={undefined} dense button onClick={props.handleToggle(value)}>
+                                    <ListItemIcon>
+                                        <Checkbox
+                                            edge="start"
+                                            checked={props.checkColumnsVisible.indexOf(value) !== -1}
+                                            tabIndex={-1}
+                                            disableRipple
+                                            inputProps={{ 'aria-labelledby': labelId }}
+                                        />
+                                    </ListItemIcon>
+                                    <ListItemText id={labelId} primary={`${codeToName(value)}`} />
+                                </ListItem>
+                            );
+                        })}
+                    </List>
+                }
+            </div>
         </Toolbar >
     )
 }
