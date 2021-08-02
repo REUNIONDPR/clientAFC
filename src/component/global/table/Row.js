@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
@@ -8,7 +8,6 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import AddIcon from '@material-ui/icons/Add';
 import Tooltip from '@material-ui/core/Tooltip';
-import { SocketContext } from '../../../context/socket.context';
 import { IsPermitted } from '../../../utilities/Function';
 import axios from "axios";
 import Chip from '@material-ui/core/Chip';
@@ -52,27 +51,12 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Row(props) {
 
-    const [row, setRow] = useState(props.row);
+    const row = props.row;
     const [showAdresse, setShowAdresse] = useState(false);
     const [dataAdresse, setDataAdresse] = useState([]);
     const [dataAdresseReceive, setDataAdresseReceive] = useState(false)
     const classes = useStyles();
     const handleEditClick = props.handleEditClick;
-
-    const isMountedRef = useRef(true);
-    const { socket } = useContext(SocketContext);
-
-    const updateDataRow = useCallback((data) => {
-        if (row.id === data.id) { setRow(data) }
-    }, [row])
-
-    useEffect(() => () => { isMountedRef.current = false; }, [])
-
-    useEffect(() => {
-        if (isMountedRef.current) {
-            socket.on('updateRow', updateDataRow)
-        }
-    }, [socket, updateDataRow])
 
     const handleShowAdresse = (id_catalogue) => {
         if (!showAdresse) {

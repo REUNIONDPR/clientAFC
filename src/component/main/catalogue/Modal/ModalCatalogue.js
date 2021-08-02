@@ -56,7 +56,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ModalCatalogue(props) {
   const classes = useStyles();
-  const [isSubmit, setIsSubmit] = useState(false)
+  const [isSubmit, setIsSubmit] = useState(false) // Gestion des erreurs (champs vide)
   const [dataRow, setDataRow] = useState({});
 
   useEffect(() => {
@@ -118,7 +118,7 @@ export default function ModalCatalogue(props) {
         <Fade in={props.openModal}>
           <div className={classes.paper}>
             <div className={classes.titleModal}>
-              <div><h2 id="transition-modal-title">Ajouter une formation</h2></div>
+              <div><h2 id="transition-modal-title">{dataRow.id === '' || dataRow.id === 0 ? "Ajouter une" : "Modifier la"} formation</h2></div>
               <div>
                 <Tooltip title="Supprimer" aria-label="delete">
                   <IconButton aria-label="delete" color="secondary" onClick={() => props.handleDeleteClick(dataRow)}>

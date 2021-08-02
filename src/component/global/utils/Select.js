@@ -9,6 +9,7 @@ import axios from 'axios';
 export default function SelectPersonnalize(props) {
     const [data, setData] = useState();
     const [isMounted, setIsMounted] = useState(false)
+
     useEffect(() => {
         if (!isMounted) {
             axios({
@@ -18,7 +19,7 @@ export default function SelectPersonnalize(props) {
             }).then((response) => setData(response.data));
             setIsMounted(true)
         }
-    }, [props.label])
+    }, [props.label, props.table, isMounted])
 
     return (
         <FormControl size="small" variant="outlined" error={props.error}>

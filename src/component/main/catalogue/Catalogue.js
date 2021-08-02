@@ -1,7 +1,7 @@
 import axios from 'axios';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Table from '../../global/table/Table';
-import Cookie, { set } from 'js-cookie';
+import Cookie from 'js-cookie';
 import { UserContext } from '../../../context/user.context';
 import ModalCatalogue from './Modal/ModalCatalogue';
 import { SocketContext } from '../../../context/socket.context';
@@ -38,11 +38,14 @@ export default function Catalogue() {
         setMessageSnackBar('');
     };
     // ----------------------------
+    // useEffect(() => {
+    //     console.log(displayRows)
+    // }, [displayRows])
 
-    const [lotSelected, setLotSelected] = useState('none');
+    const [filterSelected, setFilterSelected] = useState({})
+    const [nbFilter, setNbFilter] = useState(0);
     const [lotList, setLotList] = useState([]);
 
-    // useEffect(() => () => {  }, [])
     useEffect(() => {
         axios({
             method: 'GET',
@@ -51,26 +54,46 @@ export default function Catalogue() {
         }).then((response) => { setLotList(response.data) })
     }, [])
 
-    const isMountedRef = useRef(true);
+    // const isMountedRef = useRef(true);
     useEffect(() => {
-        if (isMountedRef.current) {
+        // if (isMountedRef.current) {
             socket.on('updateRow', (updateDataRow) => {
                 setRows(updateDataRow)
-                setDisplayRows(updateDataRow)
             })
-        }
+        // }
     }, [socket])
 
-    const handleChangeFilter = (value) => {
-        setLotSelected(value);
-        // setDisplayRows(rows)
-        // if (value !== 'none') {
-        //     setDisplayRows(rows.filter((r) => parseInt(r.display_lot) === parseInt(value)))
-        // }
+    const handleChangeFilter = (key, value) => {
+        setFilterSelected({ ...filterSelected, [key]: value })
+        value !== 'none' ? setNbFilter(nbFilter + 1) : nbFilter > 0 ? setNbFilter(nbFilter - 1) : setNbFilter(0)
     };
-    // ----------------------------------
 
-    // useEffect(() => () => { isMountedRef.current = false; })
+    useEffect(() => {
+        let myFilter = Object.entries(filterSelected)[0]
+        let result = [];
+        if (myFilter) {
+            // eslint-disable-next-line array-callback-return
+            result = rows.filter((row) => {
+                for (let i = 0; i < myFilter.length; i++) {
+                    if (myFilter[i + 1] !== 'none') {
+                        if (row[myFilter[i]] === myFilter[i + 1]) {
+                            return row;
+                        } else {
+                            i++
+                        }
+                    } else {
+                        i++
+                        return row;
+                    }
+                }
+            })
+        } else {
+            result = rows;
+        }
+        setDisplayRows(result)
+    }, [filterSelected, rows])
+
+    // ---------------------------------- CRUD
     useEffect(() => {
         axios({
             method: 'GET',
@@ -78,7 +101,6 @@ export default function Catalogue() {
             headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
         }).then((response) => {
             setRows(response.data)
-            setDisplayRows(response.data)
             Object.entries(response.data).map(([key, index]) => (key === '0') ? setColumns(Object.keys(index)) : false)
         });
 
@@ -98,7 +120,13 @@ export default function Catalogue() {
             headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
         }).then((response) => {
             if (response.status === 200) {
-                console.log(response)
+                let newDataRow = rows;
+                console.log(rows, dataRow);
+                newDataRow.push(dataRow);
+                newDataRow.id = response.data.insertId;
+                newDataRow.adresse = '';
+                socket.emit("updateCatalogue", newDataRow);
+                setRows(newDataRow)
                 setMessageSnackBar('Enregistrement réussi.');
                 setSeverity('success');
                 setOpenModal(false)
@@ -119,10 +147,20 @@ export default function Catalogue() {
             headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
         }).then((response) => {
             if (response.status === 200) {
+                let newDataRow = rows.map((v,i) => {
+                    if (v.id === dataRow.id) {
+                        Object.keys(v).map((k) => {
+                            return v[k] = dataRow[k]
+                        })
+                        return v=dataRow;
+                    }else return v;
+                })
+                setRows(newDataRow)
+                setDisplayRows(newDataRow)
+                socket.emit("updateCatalogue", newDataRow);
                 setMessageSnackBar('Modification enregistré.');
                 setSeverity('success');
                 setOpenModal(false)
-                socket.emit("updateCatalogue", dataRow);
                 // updateDataRow(displayRows, dataRow);
             } else {
                 setMessageSnackBar('Echec de la modification.');
@@ -133,28 +171,21 @@ export default function Catalogue() {
     }
 
     const handleDeleteClick = (dataRow) => {
-        let newDataRow = rows.filter((v) => v.id !== dataRow.id)
-        setOpenModal(false)
-        socket.emit("updateCatalogue", newDataRow);
-
-        setRows(newDataRow)
-        setDisplayRows(newDataRow)
-
         axios({
             method: 'put',
             url: '/catalogue/delete',
             data: dataRow,
             headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
         }).then((response) => {
-            console.log(dataRow)
             if (response.status === 200) {
                 let newDataRow = rows.filter((v) => v.id !== dataRow.id)
                 socket.emit("updateCatalogue", newDataRow);
+                setRows(newDataRow)
                 setMessageSnackBar('Suppression réussi.');
                 setSeverity('success');
                 setOpenModal(false)
-                setRows(newDataRow) // Met à jour le tableau au cas ou la socket ne répond pas.
-                setDisplayRows(newDataRow) // Met à jour le tableau au cas ou la socket ne répond pas.
+                // setRows(newDataRow) // Met à jour le tableau au cas ou la socket ne répond pas.
+                // setDisplayRows(newDataRow) // Met à jour le tableau au cas ou la socket ne répond pas.
             } else {
                 setMessageSnackBar('Echec de la suppréssion.');
                 setSeverity('error');
@@ -165,10 +196,11 @@ export default function Catalogue() {
 
     return (
         <>
-            <Table columns={columns} rows={rows} propsTableName='Catalogue'
+            <Table columns={columns} propsTableName='Catalogue'
                 handleEditSubmitClick={handleEditSubmitClick}
                 displayRows={displayRows}
-                filter={[{ 'name': 'Lot', 'displayName': 'Tout les lots', 'handleChange': handleChangeFilter, 'data': lotList, valueSelected: lotSelected, varName:'display_lot' }]}
+                filter={[{ 'name': 'Lot', 'displayName': 'Tout les lots', 'handleChange': handleChangeFilter, 'data': lotList, valueSelected: filterSelected, varName: 'display_lot' }]}
+                nbFilter={nbFilter}
                 handleChangeFilter={handleChangeFilter}
                 handleCloseSnackbar={handleCloseSnackbar}
                 openSnackBar={openSnackBar}
@@ -186,8 +218,6 @@ export default function Catalogue() {
                 handleDeleteClick={handleDeleteClick} />
 
             <div>
-                <div>Probleme de filtre + pagination</div>
-                <div>ajouter la ligne lors de la création d'une formation</div>
                 <div>Add / remove adresse</div>
             </div>
         </>

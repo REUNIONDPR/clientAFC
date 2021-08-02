@@ -13,10 +13,10 @@ const useStyles = makeStyles((theme) => ({
       width: '60%',
     },
     [theme.breakpoints.up(1200)]:{
-      width: '60%',
+      width: '75%',
     },
     [theme.breakpoints.up(1600)]:{
-      width: '50%',
+      width: '80%',
     },
   }
 }));

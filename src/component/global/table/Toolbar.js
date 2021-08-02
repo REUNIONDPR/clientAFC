@@ -14,7 +14,7 @@ import Select from '@material-ui/core/Select';
 import ListRoundedIcon from '@material-ui/icons/ListRounded';
 import { useState } from 'react';
 import { codeToName } from '../../../utilities/Function';
-
+import Badge from '@material-ui/core/Badge';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -26,6 +26,7 @@ import { IsPermitted } from '../../../utilities/Function';
 const useToolbarStyles = makeStyles({
     toolbarFilter: {
         display: 'flex',
+        width: '100%',
         justifyContent: 'space-between',
         alignItems: 'center',
     },
@@ -50,7 +51,7 @@ export default function ToolbarPersonnalize(props) {
     const [openListCol, setOpenListCol] = useState(false);
     // ----------------- Filtres
     const filters = props.filters;
-
+    
     return (
         <Toolbar className='secondary-color-gradient'>
             <div className={classes.toolbarFilter} >
@@ -63,7 +64,7 @@ export default function ToolbarPersonnalize(props) {
                                         <InputLabel id="demo-simple-select-outlined-label">{filter.name}</InputLabel>
                                         <Select
                                             labelId="demo-simple-select-outlined-label"
-                                            value={filter.valueSelected}
+                                            value={filter.valueSelected[filter.varName] ? filter.valueSelected[filter.varName] : 'none'}
                                             onChange={(event) => props.handleChangeFilter(filter.varName, event.target.value)}
                                             label={filter.name}
                                         >
@@ -92,9 +93,14 @@ export default function ToolbarPersonnalize(props) {
                         </Tooltip>
                         :
                         <Tooltip title="Filtre">
+
                             <IconButton aria-label="filtre" color='inherit' onClick={() => setOpenFilter(!openFilter)}>
-                                <FilterListIcon />
+                                {props.nbFilter > 0 
+                                    ?<Badge badgeContent={props.nbFilter} color="primary"><FilterListIcon /></Badge>
+                                    :<FilterListIcon />
+                                }
                             </IconButton>
+
                         </Tooltip>}
 
                     {

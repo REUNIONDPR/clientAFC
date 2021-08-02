@@ -13,7 +13,7 @@ import ToolbarPersonnalize from './Toolbar';
 import Row from './Row';
 import './table.css';
 
-export default function CollapsibleTable(props) {
+export default function TablePersonnalize(props) {
 
   const { displayRows } = props;
   const propsTableName = props.propsTableName;
@@ -36,22 +36,6 @@ export default function CollapsibleTable(props) {
   const severitySnackBar = props.severity;
   const handleCloseSnackBar = props.handleCloseSnackbar;
 
-  // ------------ Create Row
-  const [creatingRow, setCreatingRow] = useState(false);
-  const handleCreateRow = () => {
-    setCreatingRow(true)
-  }
-
-  const handleExitEditClick = () => {
-    setEditingRow(false);
-  }
-  // ------------ SaveEditChange
-  const [editingRow, setEditingRow] = useState(false);
-  const handleEditSubmitClick = (row) => {
-    setEditingRow(false);
-    props.handleEditSubmitClick(row)
-  }
-
   // ------------ Toggle show column
   const [columns, SetColumns] = useState(props.columns);
   const [checkColumnsVisible, SetCheckColumnsVisible] = useState([]);
@@ -63,6 +47,7 @@ export default function CollapsibleTable(props) {
     SetCheckColumnsVisible(col);
   }, [props.columns])
 
+  // Toggle toolbar
   const handleToggle = (value) => () => {
     const currentIndex = checkColumnsVisible.indexOf(value);
     const newColumn = [...checkColumnsVisible];
@@ -85,19 +70,7 @@ export default function CollapsibleTable(props) {
     setCheckAll(!checkAll)
   }
   // ----------------------------
-  const [filter, setFilter] = useState({})
-
-  useEffect(() => {
-    props.filter.map((v) => setFilter({ ...filter, [v.varName]: v.valueSelected }))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-
-  }, [props.filter])
-
-  const handleChangeFilter = (key, value) => {
-    setFilter({ ...filter, [key]: value })
-    props.handleChangeFilter(value)
-  }
-
+  
   return (
     <Paper style={{ maxHeight: '80%', overflow: 'auto', marginBottom: 20 }} >
 
@@ -110,10 +83,10 @@ export default function CollapsibleTable(props) {
 
       <ToolbarPersonnalize
         filters={props.filter} propsTableName={propsTableName}
+        nbFilter={props.nbFilter}
         // handleChangeFilter={props.handleChangeFilter} 
-        handleChangeFilter={handleChangeFilter}
+        handleChangeFilter={props.handleChangeFilter}
         user={props.user}
-        handleCreateRow={handleCreateRow}
         handleToggle={handleToggle}
         handleCheckAll={handleCheckAll} checkAll={checkAll}
         columns={columns}
@@ -135,83 +108,28 @@ export default function CollapsibleTable(props) {
             </TableRow>
           </TableHead>
           <TableBody>
-
-            {creatingRow && (<Row key="newRow" row={''} handleExitEditClick={() => { setCreatingRow(false) }} />)}
-            {/* Si plusieur lignes ? */}
-            {/* {Array.isArray(displayRows)
-              ? displayRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row, index) => <Row key={row.id + '_' + index} row={row} editingRow={editingRow}
+            {displayRows
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((row, index) =>
+                <Row key={row.id + '_' + index} row={row}
                   checkColumnsVisible={checkColumnsVisible}
-                  // handleEditClick={() => { setEditingRow(row.id) }}
                   handleEditClick={props.handleOpenModal}
-                  handleExitEditClick={handleExitEditClick}
-                  handleEditSubmitClick={handleEditSubmitClick}
-                  editing={editingRow}
                   user={props.user} />)
-              : <Row key={displayRows.id} row={displayRows} editingRow={editingRow}
-                checkColumnsVisible={checkColumnsVisible}
-                // handleEditClick={() => { setEditingRow(displayRows.id) }}
-                handleEditClick={props.handleOpenModal}
-                handleExitEditClick={handleExitEditClick}
-                handleEditSubmitClick={handleEditSubmitClick}
-                editing={editingRow}
-                user={props.user} />
-            } */}
-            {Object.entries(filter).map(([k, v]) => (
-              v !== 'none'
-                ? displayRows.filter((r) => r[k] === v)
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row, index) =>
-                    <Row key={row.id + '_' + index} row={row} editingRow={editingRow}
-                      checkColumnsVisible={checkColumnsVisible}
-                      // handleEditClick={() => { setEditingRow(row.id) }}
-                      handleEditClick={props.handleOpenModal}
-                      handleExitEditClick={handleExitEditClick}
-                      handleEditSubmitClick={handleEditSubmitClick}
-                      editing={editingRow}
-                      user={props.user} />
-                  )
-                : displayRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row, index) =>
-                    <Row key={row.id + '_' + index} row={row} editingRow={editingRow}
-                      checkColumnsVisible={checkColumnsVisible}
-                      // handleEditClick={() => { setEditingRow(row.id) }}
-                      handleEditClick={props.handleOpenModal}
-                      handleExitEditClick={handleExitEditClick}
-                      handleEditSubmitClick={handleEditSubmitClick}
-                      editing={editingRow}
-                      user={props.user} />
-                  )
-            ))}
-
-
+            }
           </TableBody>
         </Table>
       </TableContainer>
-      {Object.entries(filter).map(([k, v]) => (
-        v !== 'none'
-          ? displayRows.filter((r) => r[k] === v).length > rowsPerPage &&
-            <TablePagination
-              rowsPerPageOptions={[10, 30, 100]}
-              component="div"
-              count={displayRows.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onChangePage={handleChangePage}
-              onChangeRowsPerPage={handleChangeRowsPerPage}
-            />
-          : displayRows.length > rowsPerPage &&
-            <TablePagination
-              rowsPerPageOptions={[10, 30, 100]}
-              component="div"
-              count={displayRows.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onChangePage={handleChangePage}
-              onChangeRowsPerPage={handleChangeRowsPerPage}
-            />
-      ))}
-
+      {displayRows.length > rowsPerPage &&
+        <TablePagination
+          rowsPerPageOptions={[10, 30, 100]}
+          component="div"
+          count={displayRows.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onChangePage={handleChangePage}
+          onChangeRowsPerPage={handleChangeRowsPerPage}
+        />
+      }
     </Paper>
   );
 }
