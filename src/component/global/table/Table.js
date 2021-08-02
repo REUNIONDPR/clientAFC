@@ -85,9 +85,21 @@ export default function CollapsibleTable(props) {
     setCheckAll(!checkAll)
   }
   // ----------------------------
+  const [filter, setFilter] = useState({})
+
+  useEffect(() => {
+    props.filter.map((v) => setFilter({ ...filter, [v.varName]: v.valueSelected }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+  }, [props.filter])
+
+  const handleChangeFilter = (key, value) => {
+    setFilter({ ...filter, [key]: value })
+    props.handleChangeFilter(value)
+  }
 
   return (
-    <Paper style={{ maxHeight: '80%', overflow: 'auto',  marginBottom: 20 }} >
+    <Paper style={{ maxHeight: '80%', overflow: 'auto', marginBottom: 20 }} >
 
       <SnackBar
         open={openSnackBar}
@@ -97,8 +109,10 @@ export default function CollapsibleTable(props) {
       />
 
       <ToolbarPersonnalize
-        filter={props.filter} propsTableName={propsTableName}
-        handleChangeFilter={props.handleChangeFilter} user={props.user}
+        filters={props.filter} propsTableName={propsTableName}
+        // handleChangeFilter={props.handleChangeFilter} 
+        handleChangeFilter={handleChangeFilter}
+        user={props.user}
         handleCreateRow={handleCreateRow}
         handleToggle={handleToggle}
         handleCheckAll={handleCheckAll} checkAll={checkAll}
@@ -121,8 +135,10 @@ export default function CollapsibleTable(props) {
             </TableRow>
           </TableHead>
           <TableBody>
+
             {creatingRow && (<Row key="newRow" row={''} handleExitEditClick={() => { setCreatingRow(false) }} />)}
-            {Array.isArray(displayRows)
+            {/* Si plusieur lignes ? */}
+            {/* {Array.isArray(displayRows)
               ? displayRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => <Row key={row.id + '_' + index} row={row} editingRow={editingRow}
                   checkColumnsVisible={checkColumnsVisible}
@@ -140,22 +156,62 @@ export default function CollapsibleTable(props) {
                 handleEditSubmitClick={handleEditSubmitClick}
                 editing={editingRow}
                 user={props.user} />
-            }
+            } */}
+            {Object.entries(filter).map(([k, v]) => (
+              v !== 'none'
+                ? displayRows.filter((r) => r[k] === v)
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row, index) =>
+                    <Row key={row.id + '_' + index} row={row} editingRow={editingRow}
+                      checkColumnsVisible={checkColumnsVisible}
+                      // handleEditClick={() => { setEditingRow(row.id) }}
+                      handleEditClick={props.handleOpenModal}
+                      handleExitEditClick={handleExitEditClick}
+                      handleEditSubmitClick={handleEditSubmitClick}
+                      editing={editingRow}
+                      user={props.user} />
+                  )
+                : displayRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row, index) =>
+                    <Row key={row.id + '_' + index} row={row} editingRow={editingRow}
+                      checkColumnsVisible={checkColumnsVisible}
+                      // handleEditClick={() => { setEditingRow(row.id) }}
+                      handleEditClick={props.handleOpenModal}
+                      handleExitEditClick={handleExitEditClick}
+                      handleEditSubmitClick={handleEditSubmitClick}
+                      editing={editingRow}
+                      user={props.user} />
+                  )
+            ))}
+
 
           </TableBody>
         </Table>
       </TableContainer>
-      {displayRows.length > rowsPerPage &&
-        <TablePagination
-          rowsPerPageOptions={[10, 30, 100]}
-          component="div"
-          count={displayRows.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onChangePage={handleChangePage}
-          onChangeRowsPerPage={handleChangeRowsPerPage}
-        />
-      }
+      {Object.entries(filter).map(([k, v]) => (
+        v !== 'none'
+          ? displayRows.filter((r) => r[k] === v).length > rowsPerPage &&
+            <TablePagination
+              rowsPerPageOptions={[10, 30, 100]}
+              component="div"
+              count={displayRows.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onChangePage={handleChangePage}
+              onChangeRowsPerPage={handleChangeRowsPerPage}
+            />
+          : displayRows.length > rowsPerPage &&
+            <TablePagination
+              rowsPerPageOptions={[10, 30, 100]}
+              component="div"
+              count={displayRows.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onChangePage={handleChangePage}
+              onChangeRowsPerPage={handleChangeRowsPerPage}
+            />
+      ))}
+
     </Paper>
   );
 }

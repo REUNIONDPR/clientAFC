@@ -1,9 +1,8 @@
 import HAB from './permissions';
-import axios from 'axios';
-import Cookie from 'js-cookie';
 
 export function codeToName(str) {
   switch (str) {
+
     case 'lot': return 'Lot';
     case 'n_Article': return 'N° Article';
     case 'intitule_form_marche': return 'Intitulé';
@@ -19,7 +18,6 @@ export function codeToName(str) {
     case 'adresse': return 'Adresse';
 
     case 'user': return 'Utilisateur';
-    case 's_formation': return 'Statut';
     case 'agent_referent': return 'Agent référant';
     case 'agence_referente': return 'Agence référante';
     case 'dispositif': return 'Dispositif';
@@ -39,6 +37,42 @@ export function codeToName(str) {
     case 'nbJ': return 'Nombre de jour de la session';
     case 'nbJ_apresDateInt': return 'Nombre de jour après les date d\'interrupt';
 
+    case 'dispositif_1': return 'Sans';
+    case 'dispositif_2': return 'Mission Locale';
+    case 'dispositif_3': return 'PEC Excellence';
+
+    case 's_formation': return 'Statut';
+    case 's_formation_1': return 'En attente de validation';
+    case 's_formation_2': return 'En attente de conventionnement';
+
+    case 'niveau_form': return 'Niveau';
+    case 'niveau_1': return 'Indéterminé';
+    case 'niveau_2': return 'Niveau I et II Bac+3 ou 4';
+    case 'niveau_3': return 'Niveau III Bac+2';
+    case 'niveau_4': return 'Niveau IV Bac, BTN, BT, BP';
+    case 'niveau_5': return 'Niveau V BEPC, BEP, CAP';
+    case 'niveau_6': return 'Attestation de formation';
+
+    case 'objectif_form': return 'Objectif';
+    case 'objectif_1': return 'Certification';
+    case 'objectif_2': return 'Professionnalisation';
+    case 'objectif_3': return 'Préparation à la qualification';
+
+    case 'lot_1': return 'LOT 1 TRANSPORT';
+    case 'lot_2': return 'LOT 2 - LOGISTIQUE';
+    case 'lot_4': return 'LOT 4 - BATIMENT GROS OEUVRE, BATIMENT SECOND OEUV...';
+    case 'lot_5': return 'LOT 5 - PRODUCTION ALIMENTAIRE, PRODUCTION CULINAI...';
+    case 'lot_6': return 'LOT 6 - PRODUCTION AGRICOLE, SYLVICOLE, ELEVAGE, P...';
+    case 'lot_8': return 'LOT 8 - SECRETARIAT, BUREAUTIQUE, COMPTABILITE, RE...';
+    case 'lot_9': return 'LOT 9 - COMMERCE';
+    case 'lot_10': return 'LOT 10 - EDUCATION, AIDE A LA PERSONNE, TRAVAIL SO...';
+    case 'lot_11': return 'LOT 11 - HOTELLERIE, RESTAURATION TOURISME';
+    case 'lot_12': return 'LOT 12 - NETTOYAGE, ENVIRONNEMENT';
+    case 'lot_13': return 'LOT 13 - SECURITE, GARDIENNAGE';
+    case 'lot_14': return 'LOT 14 - COMPETENCES TRANSVERSALES';
+    case 'lot_15': return 'LOT 15 - METIER DU NUMERIQUE';
+    case 'lot_16': return 'LOT 16 - CREATION D ENTREPRISE';
+
     default: return str;
   }
 }
@@ -54,18 +88,13 @@ export function IsPermitted(user, target, action) {
 
 }
 
-export function displayName(variable, table) {
-  // let response;
-  // axios.get(`global/findName?v=2&t=dispositif`, {
-  //       headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
-  //     }).then((r) => {console.log(r.data[0].libelle)});
-  //     return response;
-  // let result;
-  // const initFetch = async () => {
-  //   const req = await 
-  //   result = req.data[0];
-  //   console.log('azezaezaeaz', result)
-  //   return result;
-  // }
-  // initFetch();
+export function dateFormat(date) {
+  if(!date){return false;}
+  let newDate = date;
+  if (date.includes('T')) {
+    newDate = date.split('T')[0];
+    let newDate_tmp = newDate.split('-');
+    newDate = newDate_tmp[2]+'/'+newDate_tmp[1]+'/'+newDate_tmp[0]
+  }
+  return newDate;
 }

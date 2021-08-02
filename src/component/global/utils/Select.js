@@ -21,7 +21,7 @@ export default function SelectPersonnalize(props) {
     }, [props.label])
 
     return (
-        <FormControl size="small" variant="outlined">
+        <FormControl size="small" variant="outlined" error={props.error}>
             <InputLabel id="demo-simple-select-outlined-label">{props.label}</InputLabel>
             {data &&
                 <Select

@@ -14,7 +14,6 @@ import axios from "axios";
 import Chip from '@material-ui/core/Chip';
 import Cookie from "js-cookie";
 import { codeToName } from '../../../utilities/Function';
-import DisplayName from '../utils/DisplayName';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 const StyledTableRow = withStyles((theme) => ({
@@ -56,24 +55,22 @@ export default function Row(props) {
     const [row, setRow] = useState(props.row);
     const [showAdresse, setShowAdresse] = useState(false);
     const [dataAdresse, setDataAdresse] = useState([]);
+    const [dataAdresseReceive, setDataAdresseReceive] = useState(false)
     const classes = useStyles();
     const handleEditClick = props.handleEditClick;
+
     const isMountedRef = useRef(true);
     const { socket } = useContext(SocketContext);
 
     const updateDataRow = useCallback((data) => {
         if (row.id === data.id) { setRow(data) }
-        console.log(row)
     }, [row])
 
     useEffect(() => () => { isMountedRef.current = false; }, [])
 
     useEffect(() => {
         if (isMountedRef.current) {
-            socket.on('updateCatalogue2', (data) => {
-                console.log(data)
-            })
-            socket.on('updateCatalogue', updateDataRow)
+            socket.on('updateRow', updateDataRow)
         }
     }, [socket, updateDataRow])
 
@@ -84,6 +81,8 @@ export default function Row(props) {
                 url: '/adresse/find?id=' + id_catalogue,
                 headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
             }).then((response) => {
+                console.log(response.data)
+                setDataAdresseReceive(true)
                 setDataAdresse(response.data)
             });
         }
@@ -118,7 +117,7 @@ export default function Row(props) {
                                         </IconButton></div>
                                     <div className={classes.adresse}>
                                         {showAdresse && (
-                                            dataAdresse.length > 0
+                                            dataAdresseReceive
                                                 ?
                                                 <>
                                                     <div className={classes.containerAdresse}>
@@ -143,7 +142,7 @@ export default function Row(props) {
                                     </div>
                                 </div>
                             </TableCell>
-                            : <TableCell key={row.id.toString() + '_' + k} className='nowrap'>{k.includes('display_') ? <DisplayName variable={v} table={k.split('display_')[1]} /> : v}</TableCell>
+                            : <TableCell key={row.id.toString() + '_' + k} className='nowrap'>{k.includes('display_') ? codeToName(k.split('display_')[1]+'_'+v): v}</TableCell>
                     ))
                 ))}
 

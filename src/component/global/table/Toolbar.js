@@ -24,8 +24,19 @@ import Checkbox from '@material-ui/core/Checkbox';
 import { IsPermitted } from '../../../utilities/Function';
 
 const useToolbarStyles = makeStyles({
-    title: {
-        flex: '1 1 100%',
+    toolbarFilter: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    toolbarTitle: {
+        maxWidth: '70%',
+        overflow: 'hidden',
+    },
+    toolbarIcon: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
     },
     formControl: {
         color: 'white',
@@ -37,111 +48,118 @@ export default function ToolbarPersonnalize(props) {
     const classes = useToolbarStyles();
     const [openFilter, setOpenFilter] = useState(false)
     const [openListCol, setOpenListCol] = useState(false);
-    const handleCreateRow = props.modal;
     // ----------------- Filtres
-    const handleChangeFilter = props.handleChangeFilter;
-    const filters = props.filter;
+    const filters = props.filters;
 
     return (
         <Toolbar className='secondary-color-gradient'>
-            {openFilter ? (<>
+            <div className={classes.toolbarFilter} >
+                <div className={classes.toolbarTitle}>
+                    {openFilter
+                        ? <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
+                            {
+                                Object.values(filters).map((filter, key) => (
+                                    <FormControl variant="outlined" className='toolbar-select' key={key.toString()}>
+                                        <InputLabel id="demo-simple-select-outlined-label">{filter.name}</InputLabel>
+                                        <Select
+                                            labelId="demo-simple-select-outlined-label"
+                                            value={filter.valueSelected}
+                                            onChange={(event) => props.handleChangeFilter(filter.varName, event.target.value)}
+                                            label={filter.name}
+                                        >
+                                            <MenuItem value="none">{filter.displayName}</MenuItem>
+                                            {
+                                                filter.data.map((v) => (
+                                                    <MenuItem key={v.value.toString()} value={v.value}>{v.libelle}</MenuItem>
+                                                ))
+                                            }
+                                        </Select>
+                                    </FormControl>
+                                ))}
+                        </Typography>
+                        : <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
+                            {props.propsTableName}
+                        </Typography>
+                    }
+                </div>
 
-                <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
+                <div className={classes.toolbarIcon}>
+                    {openFilter
+                        ? <Tooltip title="Fermer">
+                            <IconButton aria-label="fermer" color='inherit' onClick={() => setOpenFilter(!openFilter)}>
+                                <CloseIcon />
+                            </IconButton>
+                        </Tooltip>
+                        :
+                        <Tooltip title="Filtre">
+                            <IconButton aria-label="filtre" color='inherit' onClick={() => setOpenFilter(!openFilter)}>
+                                <FilterListIcon />
+                            </IconButton>
+                        </Tooltip>}
+
                     {
-                        Object.values(filters).map((filter, key) => (
-                            <FormControl variant="outlined" className='toolbar-select' key={key.toString()}>
-                                <InputLabel id="demo-simple-select-outlined-label">{filter.name}</InputLabel>
-                                <Select
-                                    labelId="demo-simple-select-outlined-label"
-                                    value={filter.valueSelected}
-                                    onChange={handleChangeFilter}
-                                    label={filter.name}
-                                >
-                                    <MenuItem value="none">{filter.displayName}</MenuItem>
-                                    {
-                                        filter.data.map((v) => (
-                                            <MenuItem key={v.value.toString()} value={v.value}>{v.libelle}</MenuItem>
-                                        ))
-                                    }
-                                </Select>
-                            </FormControl>
-                        ))}
-                </Typography>
+                        IsPermitted(props.user, 'catalogue', 'create') &&
+                        <Tooltip title="Créer">
+                            <IconButton aria-label="Créer" color='inherit' onClick={() => props.btnAddAction()}>
+                                <AddIcon />
+                            </IconButton>
+                        </Tooltip>
+                    }
 
-                <Tooltip title="Fermer">
-                    <IconButton aria-label="fermer" color='inherit' onClick={() => setOpenFilter(!openFilter)}>
-                        <CloseIcon />
-                    </IconButton>
-                </Tooltip>
-            </>) : <>
-                <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-                    {props.propsTableName}
-                </Typography>
+                    <div style={{ position: 'relative' }}>
 
-
-                <Tooltip title="Filtre">
-                    <IconButton aria-label="filtre" color='inherit' onClick={() => setOpenFilter(!openFilter)}>
-                        <FilterListIcon />
-                    </IconButton>
-                </Tooltip>
-            </>
-            }
-
-
-            {
-                IsPermitted(props.user, 'catalogue', 'create') &&
-                <Tooltip title="Créer">
-                    <IconButton aria-label="Créer" color='inherit' onClick={() => props.btnAddAction()}>
-                        <AddIcon />
-                    </IconButton>
-                </Tooltip>
-            }
-            <div style={{ position: 'relative' }}>
-
-                {openListCol
-                    ? <Tooltip title="Fermer">
-                    <IconButton aria-label="fermer" color='inherit' onClick={() => setOpenListCol(!openListCol)}>
-                        <CloseIcon />
-                    </IconButton>
-                </Tooltip>
-                    : <Tooltip title="Colonnes"><IconButton aria-label="delete" color="inherit" onClick={() => setOpenListCol(!openListCol)}>
-                    <ListRoundedIcon />
-                </IconButton></Tooltip>}
-                {openListCol &&
-                    <List dense={true} className='listColumn'>
-                        <ListItem key={'check_all'} dense button onClick={(props.handleCheckAll)}>
-                            <ListItemIcon>
-                                <Checkbox
-                                    edge="start"
-                                    checked={props.checkAll}
-                                    tabIndex={-1}
-                                    disableRipple
-                                    inputProps={{ 'aria-labelledby': 'check_all' }}
-                                />
-                            </ListItemIcon>
-                            <ListItemText id='check_all' primary={props.checkAll ? 'Tout décocher' : 'Tout cocher'} />
-                        </ListItem>
-
-                        {props.columns.map((value) => {
-                            const labelId = `checkbox-list-label-${codeToName(value)}`;
-
-                            return (
-                                <ListItem key={value} role={undefined} dense button onClick={props.handleToggle(value)}>
+                        {openListCol
+                            ? <Tooltip title="Fermer">
+                                <IconButton aria-label="fermer" color='inherit' onClick={() => setOpenListCol(!openListCol)}>
+                                    <CloseIcon />
+                                </IconButton>
+                            </Tooltip>
+                            : <Tooltip title="Colonnes"><IconButton aria-label="delete" color="inherit" onClick={() => setOpenListCol(!openListCol)}>
+                                <ListRoundedIcon />
+                            </IconButton></Tooltip>}
+                        {openListCol &&
+                            <List dense={true} className='listColumn'>
+                                <ListItem key={'check_all'} dense button onClick={(props.handleCheckAll)}>
                                     <ListItemIcon>
                                         <Checkbox
                                             edge="start"
-                                            checked={props.checkColumnsVisible.indexOf(value) !== -1}
+                                            checked={props.checkAll}
                                             tabIndex={-1}
                                             disableRipple
-                                            inputProps={{ 'aria-labelledby': labelId }}
+                                            inputProps={{ 'aria-labelledby': 'check_all' }}
                                         />
                                     </ListItemIcon>
-                                    <ListItemText id={labelId} primary={`${codeToName(value)}`} />
+                                    <ListItemText id='check_all' primary={props.checkAll ? 'Tout décocher' : 'Tout cocher'} />
                                 </ListItem>
-                            );
-                        })}
-                    </List>
-                }
+
+                                {props.columns.map((value) => {
+                                    const labelId = `checkbox-list-label-${codeToName(value)}`;
+
+                                    return (
+                                        <ListItem key={value} role={undefined} dense button onClick={props.handleToggle(value)}>
+                                            <ListItemIcon>
+                                                <Checkbox
+                                                    edge="start"
+                                                    checked={props.checkColumnsVisible.indexOf(value) !== -1}
+                                                    tabIndex={-1}
+                                                    disableRipple
+                                                    inputProps={{ 'aria-labelledby': labelId }}
+                                                />
+                                            </ListItemIcon>
+                                            <ListItemText id={labelId} primary={`${value.includes('display_') ? codeToName(value.split('display_')[1]) : codeToName(value)}`} />
+                                        </ListItem>
+                                    );
+                                })}
+                            </List>
+                        }
+                    </div>
+
+                </div>
+
+
+
+
+
             </div>
         </Toolbar >
     )

@@ -1,23 +1,15 @@
 import React, { useContext, useEffect, useState } from 'react';
-import Button from '@material-ui/core/Button';
-import { TextField } from '@material-ui/core';
 import axios from 'axios';
 // import { socket } from '../../../context/socket.context';
-import Tab from '../Tab.js';
 import Cards from './Cards';
 import { UserContext } from '../../../context/user.context';
 import Cookie from 'js-cookie';
 import Table from '../../global/table/Table';
 import ModalSollicitation from './modalSollicitation';
-import { displayName } from '../../../utilities/Function.js';
+import { dateFormat } from '../../../utilities/Function';
 
 export default function Sollicitation() {
     const { user } = useContext(UserContext);
-    const [idgasi, setIdgasi] = useState('');
-    const [nom, setNom] = useState('');
-    const [prenom, setPrenom] = useState('');
-    const [fonction, setFonction] = useState('');
-    const [search, setSearch] = useState('');
     const [columns, setColumns] = useState([]);
     const [rows, setRows] = useState([]);
     const [displayRows, setDisplayRows] = useState([]);
@@ -35,38 +27,10 @@ export default function Sollicitation() {
         setSelectedCard(index)
     }
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        fetch('/user/test', {
-            method: 'post',
-            headers: new Headers({
-                'Content-Type': 'application/json'
-            }),
-            body: JSON.stringify({ idgasi: idgasi, fonction: fonction, nom: nom, prenom: prenom }),
-        })
-            .then((response) => console.log(response));
-
-    };
-
-    const handleSubmitGet = (e) => {
-        e.preventDefault();
-
-        axios({
-            method: 'GET',
-            url: `/user/search?d=${search}`,
-            headers: new Headers({
-                'Content-Type': 'application/json'
-            }),
-        })
-            .then((response) => console.log(response.data));
-
-    };
-
     // --------------- SnackBar
     const [openSnackBar, setOpenSnackBar] = useState(false);
     const [messageSnackBar, setMessageSnackBar] = useState('');
     const [severity, setSeverity] = useState('success');
-    const [test, setTest] = useState({libelle:'aze'});
     const handleCloseSnackbar = (reason) => {
         if (reason === 'clickaway') {
             return;
@@ -103,10 +67,22 @@ export default function Sollicitation() {
             url: `/formation/findAll?s=${selectedCard}`,
             headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
         }).then((response) => {
-            setRows(response.data)
-            setDisplayRows(response.data)
+            if(response.data.dateEntree && response.data.dateEntree.includes('T')){
+                console.log(response.data.dateEntree.split('T')[0])
+            }
+            let data = response.data.map((v) => {
+                return {
+                        ...v, 
+                        dateEntree:dateFormat(v.dateEntree),
+                        dateIcop:dateFormat(v.dateIcop),
+                        dateFin:dateFormat(v.dateFin),
+                    }
+            });
+            console.log(data)
+            setRows(data)
+            setDisplayRows(data)
             if (columns.length === 0) {
-                Object.entries(response.data).map(([key, index]) => (key === '0') ? setColumns(Object.keys(index)) : false)
+                Object.entries(data).map(([key, index]) => (key === '0') ? setColumns(Object.keys(index)) : false)
             }
         });
     // eslint-disable-next-line react-hooks/exhaustive-deps

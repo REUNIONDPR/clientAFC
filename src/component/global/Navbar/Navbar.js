@@ -67,7 +67,7 @@ export default function PermanentDrawerLeft() {
   const classes = useStyles();
   const { user } = useContext(UserContext);
   const { socket } = useContext(SocketContext);
-  const [selectedIndex, setSelectedIndex] = useState(1);
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const [connected, setConnected] = useState(false);
 
   // Etat de la connection de socket
