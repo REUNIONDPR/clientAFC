@@ -9,6 +9,10 @@ import SelectPersonnalize from '../../../global/utils/Select';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { Tooltip } from '@material-ui/core';
+import CloseRoundedIcon from '@material-ui/icons/CloseRounded';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
+import InputLabel from '@material-ui/core/InputLabel';
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -58,30 +62,41 @@ export default function ModalCatalogue(props) {
   const classes = useStyles();
   const [isSubmit, setIsSubmit] = useState(false) // Gestion des erreurs (champs vide)
   const [dataRow, setDataRow] = useState({});
-
+  
   useEffect(() => {
-    if (props.updateRow) {
+    if (props.openModal && props.updateRow) {
       setDataRow(props.updateRow)
-    } 
-    else {
+    } else {
       setDataRow({
         id: '',
         display_lot: '',
-        n_Article: '',
-        intitule_form_marche: '',
-        formacode: '',
-        display_niveau: '',
-        display_objectif: '',
-        nb_heure_socle: '',
-        nb_heure_ent: '',
-        nb_heure_appui: '',
-        nb_heure_soutien: '',
-        prixTrancheA: '',
-        prixTrancheB: '',
+        id_cata: '',
+        user: '',
+        dt: '',
+        statut: '',
+        agent_ref: '',
+        agence_ref: '',
+        dispositif: '',
+        n_article: '',
+        nb_place: '',
+        adresse: '',
+        of_dispensateur: '',
+        date_creation: '',
+        date_entree: '',
+        date_fin: '',
+        date_DDINT1: '',
+        date_DFINT1: '',
+        date_DDINT2: '',
+        date_DFINT2: '',
+        date_conv: '',
+        n_conv: '',
+        date_icop: '',
+        date_validation: '',
+        vague: '',
       })
     }
     setIsSubmit(false)
-  }, [props.updateRow])
+  }, [props.openModal, props.updateRow])
 
   const handleChangeValue = (k, v) => {
     setDataRow({ ...dataRow, [k]: v })
@@ -101,6 +116,11 @@ export default function ModalCatalogue(props) {
       }
     }
   }
+  const [selectedDate, setSelectedDate] = React.useState(new Date('2014-08-18T21:11:54'));
+
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+  };
 
   return (
     <div>
@@ -121,15 +141,37 @@ export default function ModalCatalogue(props) {
             <div className={classes.titleModal}>
               <div><h2 id="transition-modal-title">{dataRow.id === '' || dataRow.id === 0 ? "Ajouter une" : "Modifier la"} formation</h2></div>
               <div>
-                <Tooltip title="Supprimer" aria-label="delete">
+              {(dataRow.id === '' || dataRow.id === 0)
+                ? <Tooltip title="Supprimer" aria-label="delete">
                   <IconButton aria-label="delete" color="secondary" onClick={() => props.handleDeleteClick(dataRow)}>
                     <DeleteIcon />
                   </IconButton>
                 </Tooltip>
+                :<Tooltip title="Fermer" aria-label="close">
+                <IconButton aria-label="close" color="secondary" onClick={() => props.handleCloseModal}>
+                  <CloseRoundedIcon />
+                </IconButton>
+              </Tooltip>
+      }
               </div>
             </div>
+            agent_ref
+            agence_ref
+            dispositif
+            nb_place
+            adresse
+            of_dispensateur
+            date_entree
+            date_fin
+            date_DDINT1
+            date_DFINT1
+            date_DDINT2
+            date_DFINT2
+            date_icop
+            n_conv
+            vague
             <form className={classes.root} noValidate autoComplete="off">
-              <div className={classes.blocFormFullWidth}>
+              <div className={classes.blocForm}>
                 <SelectPersonnalize
                   error={isSubmit && dataRow.display_lot === '' ? true : false}
                   handleChangeValue={handleChangeValue}
@@ -139,51 +181,44 @@ export default function ModalCatalogue(props) {
                   displayvalue='libelle'
                   label='Lot'
                 />
+                {dataRow.display_lot
+                  ? <SelectPersonnalize
+                    error={isSubmit && dataRow.id_cata === '' ? true : false}
+                    handleChangeValue={handleChangeValue}
+                    path={'catalogue/find?table=catalogue&lot=' + dataRow.display_lot}
+                    rowKey='id_cata'
+                    value={dataRow.id_cata}
+                    displayvalue='intitule_form_marche'
+                    label='Catalogue'
+                  />
+                  : <FormControl size="small"  variant="outlined" className={classes.formControl}>
+                    <InputLabel htmlFor="outlined-age-native-simple">Catalogue</InputLabel>
+                    <Select
+                      native
+                      value={''}
+                      label="Catalogue"
+                      inputProps={{
+                        name: 'cata',
+                        id: 'outlined-cata-native-simple',
+                      }}
+                    ><option aria-label="None" value="" />
+                    </Select>
+                  </FormControl>}
               </div>
 
               <div className={classes.blocForm}>
-                <TextField size="small" required label="N° Article" variant="outlined"
-                  error={isSubmit && dataRow.n_Article === '' ? true : false} value={dataRow.n_Article}
-                  onChange={(e) => handleChangeValue('n_Article', e.target.value)} />
-
-                <TextField size="small" required label="Intitulé base Form" variant="outlined"
-                  error={isSubmit && dataRow.intitule_form_marche === '' ? true : false} value={dataRow.intitule_form_marche}
-                  onChange={(e) => handleChangeValue('intitule_form_marche', e.target.value)} />
-
-                <TextField size="small" required label="Intitulé base Art" variant="outlined"
-                  error={isSubmit && dataRow.intitule_form_marche === '' ? true : false} value={dataRow.intitule_form_marche}
-                  onChange={(e) => handleChangeValue('intitule_form_marche', e.target.value)} />
-
               </div>
 
               <div className={classes.blocForm}>
-                <TextField size="small" label="FormaCode" variant="outlined"
-                  error={isSubmit && dataRow.formacode === '' ? true : false} value={dataRow.formacode}
-                  onChange={(e) => handleChangeValue('formacode', e.target.value)} />
-
-                <SelectPersonnalize
-
-                  error={isSubmit && dataRow.display_niveau === '' ? true : false}
-                  handleChangeValue={handleChangeValue}
-                  path={'global/findAll?table=formation_niveau'}
-                  rowKey='display_niveau'
-                  value={dataRow.display_niveau}
-                  displayvalue='libelle'
-                  label='Niveau'
-                />
-                <SelectPersonnalize
-                  error={isSubmit && dataRow.display_objectif === '' ? true : false}
-                  handleChangeValue={handleChangeValue}
-                  path={'global/findAll?table=formation_objectif'}
-                  rowKey='display_objectif'
-                  value={dataRow.display_objectif}
-                  displayvalue='libelle'
-                  label='Objectif'
-                />
-              </div>
-
-              <div className={classes.blocForm}>
-                <TextField required type="number" size="small" label="Heure socle" variant="outlined"
+                <TextField
+                  id="date"
+                  label="Birthday"
+                  type="date"
+                  className={classes.textField}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />   <TextField required type="number" size="small" label="Heure socle" variant="outlined"
                   error={isSubmit && dataRow.nb_heure_socle === '' ? true : false} value={dataRow.nb_heure_socle}
                   onChange={(e) => setDataRow({ ...dataRow, nb_heure_socle: e.target.value })} />
 

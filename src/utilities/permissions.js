@@ -4,13 +4,15 @@ const HAB = {
                 "view": true,
                 "create": true,
                 "update": true,
-                "delete": true
+                "delete": true,
+                "validate":true,
             },
             "sollicitation": {
                 "view": true,
                 "create": true,
                 "update": true,
-                "delete": true
+                "delete": true,
+                "validate":true,
             }
         }
     }

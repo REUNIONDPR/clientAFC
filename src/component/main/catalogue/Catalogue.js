@@ -6,6 +6,13 @@ import { UserContext } from '../../../context/user.context';
 import ModalCatalogue from './Modal/ModalCatalogue';
 import { SocketContext } from '../../../context/socket.context';
 
+import TableCell from '@material-ui/core/TableCell';
+import EditIcon from '@material-ui/icons/Edit';
+import IconButton from '@material-ui/core/IconButton';
+import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
+import CheckIcon from '@material-ui/icons/Check';
+import Tooltip from '@material-ui/core/Tooltip';
+import { IsPermitted } from '../../../utilities/Function';
 
 export default function Catalogue() {
 
@@ -21,6 +28,40 @@ export default function Catalogue() {
     const [severity, setSeverity] = useState('success');
     const [openModal, setOpenModal] = useState(false);
     const [updateRow, setupdateRow] = useState({});
+
+    const ActionTable = (props) => {
+        return (
+            <TableCell align="right">
+                <div className='cell-flex'>
+
+                    {IsPermitted(user, 'sollicitation', 'delete') &&
+                        <Tooltip title="Supprimer">
+                            <IconButton aria-label="Editer" size="small" color="inherit" onClick={() => handleClickTest('delete formation')}>
+                                <DeleteOutlineIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>}
+
+                    {IsPermitted(user, 'sollicitation', 'update') &&
+                        <Tooltip title="Editer">
+                            <IconButton aria-label="Editer" size="small" color="secondary" onClick={() => handleOpenModal(props.row)}>
+                                <EditIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>}
+
+                    {IsPermitted(user, 'sollicitation', 'validate') &&
+                        <Tooltip title="Valider">
+                            <IconButton aria-label="Editer" size="small" color="primary" onClick={() => handleClickTest('valider la formation')}>
+                                <CheckIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>}
+                </div>
+            </TableCell>
+        )
+    }
+
+    const handleClickTest = (e) => {
+        console.log(e)
+    }
 
     const handleCloseModal = () => {
         setOpenModal(false)
@@ -208,6 +249,7 @@ export default function Catalogue() {
                 severity={severity}
                 user={user}
                 handleOpenModal={handleOpenModal}
+                action={ActionTable}
             />
             <ModalCatalogue openModal={openModal}
                 handleCloseModal={handleCloseModal}

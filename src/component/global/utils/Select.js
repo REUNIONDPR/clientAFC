@@ -8,18 +8,15 @@ import axios from 'axios';
 
 export default function SelectPersonnalize(props) {
     const [data, setData] = useState();
-    const [isMounted, setIsMounted] = useState(false)
 
     useEffect(() => {
-        if (!isMounted) {
-            axios({
-                method: 'GET',
-                url: `global/findAll?table=${props.table}`,
-                headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
-            }).then((response) => setData(response.data));
-            setIsMounted(true)
-        }
-    }, [props.label, props.table, isMounted])
+        let url = props.path;
+        axios({
+            method: 'GET',
+            url: url,
+            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+        }).then((response) => setData(response.data));
+    }, [props.path])
 
     return (
         <FormControl size="small" variant="outlined" error={props.error}>
@@ -35,7 +32,7 @@ export default function SelectPersonnalize(props) {
                         <em>None</em>
                     </MenuItem>
                     {data.map((v) => (
-                        <MenuItem key={v.id + '_' + v.libelle} value={v.id}>{v.libelle}</MenuItem>
+                        <MenuItem key={v.id + '_' + v.libelle} value={v.id}>{v[props.displayvalue]}</MenuItem>
                     ))}
                 </Select>
             }

@@ -8,7 +8,6 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import AddIcon from '@material-ui/icons/Add';
 import Tooltip from '@material-ui/core/Tooltip';
-import { IsPermitted } from '../../../utilities/Function';
 import axios from "axios";
 import Chip from '@material-ui/core/Chip';
 import Cookie from "js-cookie";
@@ -50,7 +49,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function Row(props) {
-
+    const ActionTable = props.action;
     const row = props.row;
     const [showAdresse, setShowAdresse] = useState(false);
     const [dataAdresse, setDataAdresse] = useState([]);
@@ -129,16 +128,7 @@ export default function Row(props) {
                             : <TableCell key={row.id.toString() + '_' + k} className='nowrap'>{k.includes('display_') ? codeToName(k.split('display_')[1]+'_'+v): v}</TableCell>
                     ))
                 ))}
-
-                <TableCell align="right">
-                    {IsPermitted(props.user, 'catalogue', 'update') &&
-                        <Tooltip title="Editer">
-                            <IconButton aria-label="Editer" size="small" color="secondary" onClick={() => handleEditClick(row)}>
-                                <EditIcon fontSize="small" />
-                            </IconButton>
-                        </Tooltip>
-                    }
-                </TableCell>
+                <ActionTable row={row}/>
             </StyledTableRow>
 
         </React.Fragment >

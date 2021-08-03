@@ -42,7 +42,7 @@ export default function TablePersonnalize(props) {
   const [checkAll, setCheckAll] = useState(true);
 
   useEffect(() => {
-    let col = props.columns.filter((col) => { if (col !== 'id') { return col; } else { return false; } });
+    let col = props.columns.filter((col) => { if (!col.includes('id')) { return col; } else { return false; } });
     SetColumns(col);
     SetCheckColumnsVisible(col);
   }, [props.columns])
@@ -70,7 +70,7 @@ export default function TablePersonnalize(props) {
     setCheckAll(!checkAll)
   }
   // ----------------------------
-  
+
   return (
     <Paper style={{ maxHeight: '80%', overflow: 'auto', marginBottom: 20 }} >
 
@@ -84,7 +84,6 @@ export default function TablePersonnalize(props) {
       <ToolbarPersonnalize
         filters={props.filter} propsTableName={propsTableName}
         nbFilter={props.nbFilter}
-        // handleChangeFilter={props.handleChangeFilter} 
         handleChangeFilter={props.handleChangeFilter}
         user={props.user}
         handleToggle={handleToggle}
@@ -98,8 +97,6 @@ export default function TablePersonnalize(props) {
         <Table aria-label="collapsible table" size="small">
           <TableHead>
             <TableRow>
-              {/* <TableCell style={{ position: 'relative' }}>
-              </TableCell> */}
               {columns.map((col) => (
                 checkColumnsVisible.indexOf(col) !== -1 &&
                 <TableCell align="center" className='nowrap' key={col}>{col.includes('display_') ? codeToName(col.split('display_')[1]) : codeToName(col)}</TableCell>
@@ -114,7 +111,10 @@ export default function TablePersonnalize(props) {
                 <Row key={row.id + '_' + index} row={row}
                   checkColumnsVisible={checkColumnsVisible}
                   handleEditClick={props.handleOpenModal}
-                  user={props.user} />)
+                  user={props.user}
+                  action={props.action}
+                />
+              )
             }
           </TableBody>
         </Table>
