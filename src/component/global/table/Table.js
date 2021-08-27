@@ -10,7 +10,7 @@ import TablePagination from '@material-ui/core/TablePagination';
 import { codeToName } from '../../../utilities/Function';
 import SnackBar from '../SnackBar/SnackBar';
 import ToolbarPersonnalize from './Toolbar';
-import Row from './Row';
+import Row from '../../main/catalogue/Row';
 import './table.css';
 
 export default function TablePersonnalize(props) {

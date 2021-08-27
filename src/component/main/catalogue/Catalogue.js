@@ -261,6 +261,7 @@ export default function Catalogue() {
 
             <div>
                 <div>Add / remove adresse</div>
+                <div>Supprimer une formation</div>
             </div>
         </>
 

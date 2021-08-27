@@ -24,6 +24,7 @@ export default function Sollicitation() {
     const [selectedCard, setSelectedCard] = useState(0);
     const [openModal, setOpenModal] = useState(false);
     const [updateRow, setUpdateRow] = useState({})
+
     const ActionTable = (props) => {
         return (
             <TableCell align="right">
@@ -169,6 +170,32 @@ export default function Sollicitation() {
         // Clique sur update formation
     }
 
+
+    const handleSubmitModalClick = (row) => {
+        console.log(row)
+        axios({
+            method: 'put',
+            url: '/formation/create',
+            data: row,
+            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+        }).then((response) => {
+            if (response.status === 200) {
+                // let newDataRow = rows.filter((v) => v.id !== dataRow.id)
+                // socket.emit("updateCatalogue", newDataRow);
+                // setRows(newDataRow)
+                // setMessageSnackBar('Suppression réussi.');
+                // setSeverity('success');
+                // setOpenModal(false)
+                // setRows(newDataRow) // Met à jour le tableau au cas ou la socket ne répond pas.
+                // setDisplayRows(newDataRow) // Met à jour le tableau au cas ou la socket ne répond pas.
+            } else {
+                setMessageSnackBar('Echec de la suppréssion.');
+                setSeverity('error');
+            }
+            setOpenSnackBar(true);
+        })
+    }
+
     return (
         <>
             <Cards selectedCard={selectedCard} handleSelectedCard={handleSelectedCard} />
@@ -191,7 +218,9 @@ export default function Sollicitation() {
             <ModalSollicitation
                 openModal={openModal}
                 updateRow={updateRow}
-                handleCloseModal={handleCloseModal} 
+                user={user}
+                handleSubmitModalClick={handleSubmitModalClick}
+                handleCloseModal={handleCloseModal}
             />
             {/* <div >
                 <Button variant="contained" onClick={() => console.log('aze')} color="secondary">

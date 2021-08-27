@@ -13,6 +13,9 @@ import CloseRoundedIcon from '@material-ui/icons/CloseRounded';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
+import Stepper from './Stepper';
+import Cookie from 'js-cookie';
+import axios from 'axios';
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -36,13 +39,21 @@ const useStyles = makeStyles((theme) => ({
       width: '100%',
     },
   },
+  blocFormEnd: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    '& > *': {
+      margin: theme.spacing(1),
+    },
+  },
   paper: {
     backgroundColor: theme.palette.background.paper,
     border: '2px solid',
     borderColor: theme.palette.secondary.main,
     boxShadow: theme.shadows[5],
     padding: theme.spacing(2, 4, 3),
-    maxWidth: '80%',
+    width: '80%',
   },
   btnActionModal: {
     display: 'flex',
@@ -60,9 +71,11 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ModalCatalogue(props) {
   const classes = useStyles();
-  const [isSubmit, setIsSubmit] = useState(false) // Gestion des erreurs (champs vide)
+  const [isSubmit, setIsSubmit] = useState(); // Gestion des erreurs (champs vide)
   const [dataRow, setDataRow] = useState({});
-  
+  const [showBlock_1, setShowBlock_1] = useState(true);
+  const [lot, setLot] = useState('');
+
   useEffect(() => {
     if (props.openModal && props.updateRow) {
       setDataRow(props.updateRow)
@@ -71,12 +84,12 @@ export default function ModalCatalogue(props) {
         id: '',
         display_lot: '',
         id_cata: '',
-        user: '',
+        user: props.user.idgasi,
         dt: '',
         statut: '',
         agent_ref: '',
         agence_ref: '',
-        dispositif: '',
+        dispositif: 1,
         n_article: '',
         nb_place: '',
         adresse: '',
@@ -96,31 +109,69 @@ export default function ModalCatalogue(props) {
       })
     }
     setIsSubmit(false)
-  }, [props.openModal, props.updateRow])
+    setShowBlock_1(false)
+  }, [props])
 
-  const handleChangeValue = (k, v) => {
-    setDataRow({ ...dataRow, [k]: v })
+  // const handleChangeValue = (k, v) => {
+  //   console.log(dataRow)
+  //   if (k === 'id_cata') { setShowBlock_1(true) }
+  //   if (k === 'display_lot') {
+  //     setDataRow({ ...dataRow, id_cata: '', [k]: v })
+  //   } else {
+  //     setDataRow({ ...dataRow, [k]: v })
+  //   }
+  // }
+  const handleChangeValue = (e) => {
+    let v = e.target.value;
+    let k = e.target.name;
+
+    if (k === 'display_lot') {
+      setDataRow({ ...dataRow, id_cata: '', [k]: v })
+    } else if (k === 'id_cata') {
+      setDataRow({
+        ...dataRow,
+        display_lot: dataRow.display_lot,
+        id_cata: v,
+        dt: '',
+        statut: '',
+        agent_ref: '',
+        agence_ref: '',
+        dispositif: 1,
+        n_article: '',
+        nb_place: '',
+        adresse: '',
+        of_dispensateur: '',
+        date_creation: '',
+        date_entree: '',
+        date_fin: '',
+        date_DDINT1: '',
+        date_DFINT1: '',
+        date_DDINT2: '',
+        date_DFINT2: '',
+        date_conv: '',
+        n_conv: '',
+        date_icop: '',
+        date_validation: '',
+        vague: '',
+      })
+    } else {
+      setDataRow({ ...dataRow, [k]: v })
+    }
+
   }
 
   const handleSubmit = (row) => {
-    setIsSubmit(true)
-    let submitting = true;
-    let action = dataRow.id === '' || dataRow.id === 0 ? 'create' : 'update';
-    // eslint-disable-next-line array-callback-return
-    // Object.entries(dataRow).map(([k, v]) => { if (v === '' && k !== 'id') { return submitting = false; } })
-    if (submitting) {
-      switch (action) {
-        case 'create': props.handleSubmitClickToParent(row, action); break;
-        case 'update': props.handleEditSubmitClickToParent(row, action); break;
-        default: props.handleErrorSubmit();
-      }
-    }
-  }
-  const [selectedDate, setSelectedDate] = React.useState(new Date('2014-08-18T21:11:54'));
 
-  const handleDateChange = (date) => {
-    setSelectedDate(date);
-  };
+    setIsSubmit(true)
+    let action = dataRow.id === '' || dataRow.id === 0 ? 'create' : 'update';
+
+    switch (action) {
+      case 'create': props.handleSubmitClickToParent(row, action); break;
+      case 'update': props.handleSubmitModalClick(row, action); break;
+      default: props.handleErrorSubmit();
+    }
+
+  }
 
   return (
     <div>
@@ -140,38 +191,64 @@ export default function ModalCatalogue(props) {
           <div className={classes.paper}>
             <div className={classes.titleModal}>
               <div><h2 id="transition-modal-title">{dataRow.id === '' || dataRow.id === 0 ? "Ajouter une" : "Modifier la"} formation</h2></div>
+              {(dataRow.statut !== '') && <Stepper />}
               <div>
-              {(dataRow.id === '' || dataRow.id === 0)
-                ? <Tooltip title="Supprimer" aria-label="delete">
-                  <IconButton aria-label="delete" color="secondary" onClick={() => props.handleDeleteClick(dataRow)}>
-                    <DeleteIcon />
-                  </IconButton>
-                </Tooltip>
-                :<Tooltip title="Fermer" aria-label="close">
-                <IconButton aria-label="close" color="secondary" onClick={() => props.handleCloseModal}>
-                  <CloseRoundedIcon />
-                </IconButton>
-              </Tooltip>
-      }
+                {(dataRow.id === '' || dataRow.id === 0)
+                  ? <Tooltip title="Fermer" aria-label="delete">
+                    <IconButton aria-label="close" color="secondary" onClick={props.handleCloseModal}>
+                      <CloseRoundedIcon />
+                    </IconButton>
+                  </Tooltip>
+                  : <Tooltip title="Supprimer" aria-label="delete">
+                    <IconButton aria-label="delete" color="secondary" onClick={() => props.handleDeleteClick(dataRow)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </Tooltip>
+                }
               </div>
             </div>
-            agent_ref
-            agence_ref
-            dispositif
-            nb_place
-            adresse
-            of_dispensateur
-            date_entree
-            date_fin
-            date_DDINT1
-            date_DFINT1
-            date_DDINT2
-            date_DFINT2
-            date_icop
-            n_conv
-            vague
             <form className={classes.root} noValidate autoComplete="off">
               <div className={classes.blocForm}>
+                <SelectPersonnalize
+                  error={dataRow.display_lot === '' ? true : false}
+                  handleChangeValue={handleChangeValue}
+                  path={'global/findAll?table=lot'}
+                  rowKey='display_lot'
+                  value={dataRow.display_lot}
+                  displayvalue='libelle'
+                  label='Lot *'
+                />
+                {dataRow.display_lot !== ''
+                  ? <SelectPersonnalize
+                    error={isSubmit && dataRow.id_cata === '' ? true : false}
+                    handleChangeValue={handleChangeValue}
+                    path={`global/find?table=catalogue&condition=${JSON.stringify({ id_lot: dataRow.display_lot })}`}
+                    rowKey='id_cata'
+                    value={dataRow.id_cata}
+                    displayvalue='intitule_form_marche'
+                    label='Catalogue *'
+                  />
+                  : <FormControl size="small" variant="outlined" className={classes.formControl}>
+                    <InputLabel htmlFor="outlined-age-native-simple">Catalogue</InputLabel>
+                    <Select
+                      native
+                      disabled
+                      value={1}
+                      label="Catalogue *"
+                      inputProps={{
+                        name: 'cata',
+                        id: 'outlined-cata-native-simple',
+                      }}
+                    ><option aria-label="Choisir un lot" value={1}>Choisir un lot</option>
+                    </Select>
+                  </FormControl>}
+              </div>
+
+              {(dataRow.display_lot !== '' && dataRow.id_cata !== '') && <> <div className={classes.blocForm}>
+                {/* {true && <> <div className={classes.blocForm}> */}
+                {/* <TextField required type="text" size="small" label="Agent Ref" variant="outlined"
+                  error={isSubmit && dataRow.agent_ref === '' ? true : false} value={dataRow.agent_ref}
+                  onChange={(e) => setDataRow({ ...dataRow, agent_ref: e.target.value })} />
                 <SelectPersonnalize
                   error={isSubmit && dataRow.display_lot === '' ? true : false}
                   handleChangeValue={handleChangeValue}
@@ -179,70 +256,156 @@ export default function ModalCatalogue(props) {
                   rowKey='display_lot'
                   value={dataRow.display_lot}
                   displayvalue='libelle'
-                  label='Lot'
+                  label='Agence Ref'
+                /> */}
+                <TextField required type="number" size="small" label="Nombre de place" variant="outlined"
+                  error={isSubmit && dataRow.nb_place === '' ? true : false} value={dataRow.nb_place}
+                  onChange={(e) => setDataRow({ ...dataRow, nb_place: e.target.value })} />
+                <SelectPersonnalize
+                  error={isSubmit && dataRow.dispositif === '' ? true : false}
+                  handleChangeValue={handleChangeValue}
+                  path={'global/findAll?table=dispositif'}
+                  rowKey='dispositif'
+                  value={dataRow.dispositif}
+                  displayvalue='libelle'
+                  label='Dispositif *'
                 />
-                {dataRow.display_lot
-                  ? <SelectPersonnalize
-                    error={isSubmit && dataRow.id_cata === '' ? true : false}
+                <TextField required type="number" size="small" label="Vague" variant="outlined"
+                  error={isSubmit && dataRow.vague === '' ? true : false} value={dataRow.vague}
+                  onChange={(e) => setDataRow({ ...dataRow, vague: e.target.value })} />
+              </div>
+
+                <div className={classes.blocForm}>
+                  <SelectPersonnalize
+                    error={isSubmit && dataRow.of_dispensateur === '' ? true : false}
                     handleChangeValue={handleChangeValue}
-                    path={'catalogue/find?table=catalogue&lot=' + dataRow.display_lot}
-                    rowKey='id_cata'
-                    value={dataRow.id_cata}
-                    displayvalue='intitule_form_marche'
-                    label='Catalogue'
+                    path={`global/find?table=attributaire&condition=${JSON.stringify({ id_lot: dataRow.display_lot })}&join=${JSON.stringify(
+                      {
+                        0: { table: "attributaire_lot", alias: "x", key: "t.id", fk: 'id_attributaire' }
+                      }
+                    )}`}
+
+                    rowKey='of_dispensateur'
+                    value={dataRow.of_dispensateur}
+                    displayvalue='libelle'
+                    label='OF Dispensateur *'
                   />
-                  : <FormControl size="small"  variant="outlined" className={classes.formControl}>
-                    <InputLabel htmlFor="outlined-age-native-simple">Catalogue</InputLabel>
-                    <Select
-                      native
-                      value={''}
-                      label="Catalogue"
-                      inputProps={{
-                        name: 'cata',
-                        id: 'outlined-cata-native-simple',
+                  <SelectPersonnalize
+                    error={isSubmit && dataRow.adresse === '' ? true : false}
+                    handleChangeValue={handleChangeValue}
+                    path={`global/find?table=adresse&condition=${JSON.stringify({ id_cata: dataRow.id_cata })}&join=${JSON.stringify(
+                      {
+                        0: { table: "adresse_attributaire", alias: "a1", key: "t.id", fk: 'id_adresse' },
+                        1: { table: "adresse_catalogue", alias: "a2", key: "a1.id", fk: 'id_adresse_attributaire' }
+                      }
+                    )}`}
+                    rowKey='adresse'
+                    value={dataRow.adresse}
+                    displayvalue='adresse'
+                    label='Adresse *'
+                  />
+
+                  <TextField
+                    id="dateEntree"
+                    error={isSubmit && dataRow.date_entree === '' ? true : false}
+                    defaultValue={dataRow.date_entree}
+                    size="small"
+                    variant="outlined"
+                    label="Date d'entrée *"
+                    type="date"
+                    onChange={(e) => setDataRow({ ...dataRow, date_entree: e.target.value })}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                  />
+                  <TextField
+                    id="dateICOP"
+                    error={isSubmit && dataRow.date_icop === '' ? true : false}
+                    defaultValue={dataRow.date_icop}
+                    size="small"
+                    variant="outlined"
+                    label="Date d'icop *"
+                    type="date"
+                    onChange={(e) => setDataRow({ ...dataRow, date_icop: e.target.value })}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                  />
+                </div>
+
+                <div className={classes.blocForm}>
+                  <TextField
+                    id="DDINT1"
+                    defaultValue={dataRow.date_DDINT1}
+                    size="small"
+                    variant="outlined"
+                    label="Date début INT 1"
+                    type="date"
+                    onChange={(e) => setDataRow({ ...dataRow, date_DDINT1: e.target.value })}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                  />
+                  <TextField
+                    id="DFINT1"
+                    defaultValue={dataRow.date_DFINT1}
+                    size="small"
+                    variant="outlined"
+                    label="Date fin INT 1"
+                    type="date"
+                    onChange={(e) => setDataRow({ ...dataRow, date_DFINT1: e.target.value })}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                  />
+                  <TextField
+                    id="DDINT2"
+                    defaultValue={dataRow.date_DDINT2}
+                    size="small"
+                    variant="outlined"
+                    label="Date début INT 2"
+                    type="date"
+                    onChange={(e) => setDataRow({ ...dataRow, date_DDINT2: e.target.value })}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                  />
+                  <TextField
+                    id="DFINT2"
+                    defaultValue={dataRow.date_DFINT2}
+                    size="small"
+                    variant="outlined"
+                    label="Date fin INT 2"
+                    type="date"
+                    onChange={(e) => setDataRow({ ...dataRow, date_DFINT2: e.target.value })}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                  />
+                </div>
+
+                <div className={classes.blocFormEnd}>
+                  <div>
+                    <TextField
+                      id="dateFin"
+                      size="small"
+                      variant="outlined"
+                      label="Date de fin"
+                      type="date"
+                      disabled
+                      className={classes.textField}
+                      InputLabelProps={{
+                        shrink: true,
                       }}
-                    ><option aria-label="None" value="" />
-                    </Select>
-                  </FormControl>}
-              </div>
-
-              <div className={classes.blocForm}>
-              </div>
-
-              <div className={classes.blocForm}>
-                <TextField
-                  id="date"
-                  label="Birthday"
-                  type="date"
-                  className={classes.textField}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                />   <TextField required type="number" size="small" label="Heure socle" variant="outlined"
-                  error={isSubmit && dataRow.nb_heure_socle === '' ? true : false} value={dataRow.nb_heure_socle}
-                  onChange={(e) => setDataRow({ ...dataRow, nb_heure_socle: e.target.value })} />
-
-                <TextField required type="text" size="small" label="Heure Ent" variant="outlined"
-                  error={isSubmit && dataRow.nb_heure_ent === '' ? true : false} value={dataRow.nb_heure_ent}
-                  onChange={(e) => setDataRow({ ...dataRow, nb_heure_ent: e.target.value })} />
-
-                <TextField required type="number" size="small" label="Heure Appui" variant="outlined"
-                  error={isSubmit && dataRow.nb_heure_appui === '' ? true : false} value={dataRow.nb_heure_appui}
-                  onChange={(e) => setDataRow({ ...dataRow, nb_heure_appui: e.target.value })} />
-
-                <TextField required type='text' size="small" label="Heure Soutien" variant="outlined"
-                  error={isSubmit && dataRow.nb_heure_soutien === '' ? true : false} value={dataRow.nb_heure_soutien}
-                  onChange={(e) => setDataRow({ ...dataRow, nb_heure_soutien: e.target.value })} />
-
-                <TextField required type="number" size="small" label="Prix < 6 pers" variant="outlined"
-                  error={isSubmit && dataRow.prixTrancheA === '' ? true : false} value={dataRow.prixTrancheA}
-                  onChange={(e) => setDataRow({ ...dataRow, prixTrancheA: e.target.value })} />
-
-                <TextField required type="number" size="small" label="Prix > 6 pers" variant="outlined"
-                  error={isSubmit && dataRow.prixTrancheB === '' ? true : false} value={dataRow.prixTrancheB}
-                  onChange={(e) => setDataRow({ ...dataRow, prixTrancheB: e.target.value })} />
-              </div>
-
+                    />
+                  </div>
+                  {(dataRow.statut === 2) &&
+                    <TextField required type="text" size="small" label="N° Conventionnement" variant="outlined"
+                      error={isSubmit && dataRow.n_conv === '' ? true : false} value={dataRow.n_conv}
+                      onChange={(e) => setDataRow({ ...dataRow, n_conv: e.target.value })} />
+                  }
+                </div>
+              </>}
             </form>
 
             <div className={classes.btnActionModal}>
@@ -250,7 +413,7 @@ export default function ModalCatalogue(props) {
               <Button onClick={props.handleCloseModal} variant="outlined" color="secondary">
                 Annuler
               </Button>
-              <Button onClick={() => handleSubmit(dataRow)} variant="contained" color="secondary">
+              <Button onClick={() => props.handleSubmitModalClick(dataRow)} variant="contained" color="secondary">
                 Enregistrer
               </Button>
 

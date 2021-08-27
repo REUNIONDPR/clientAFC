@@ -11,25 +11,27 @@ export default function SelectPersonnalize(props) {
 
     useEffect(() => {
         let url = props.path;
+        
         axios({
             method: 'GET',
             url: url,
             headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
         }).then((response) => setData(response.data));
     }, [props.path])
-
+    // console.log(props)
     return (
-        <FormControl size="small" variant="outlined" error={props.error}>
+        <FormControl size="small" variant="outlined" error={props.error} disabled={props.disabled}>
             <InputLabel id="demo-simple-select-outlined-label">{props.label}</InputLabel>
             {data &&
                 <Select
                     value={props.value}
-                    onChange={(e) => props.handleChangeValue(props.rowKey, e.target.value)}
+                    onChange={props.handleChangeValue}
                     fullWidth
+                    name={props.rowKey}
                     label={props.label}
                 >
                     <MenuItem value="">
-                        <em>None</em>
+                        <em>Choisir</em>
                     </MenuItem>
                     {data.map((v) => (
                         <MenuItem key={v.id + '_' + v.libelle} value={v.id}>{v[props.displayvalue]}</MenuItem>
