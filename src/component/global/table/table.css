@@ -22,10 +22,10 @@
 }
 
 /* INPUT dans le tableau ligne modifie */
-.MuiTableRow-root .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline{ border-color: var(--secondary-color)}
+.MuiTableRow-root .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline{ border-color: var(--primary-color)}
 .MuiTableRow-root .MuiFocused,
 .MuiTableRow-root .MuiFormLabel-root.Mui-focused{
-    color: var(--secondary-color)
+    color: var(--primary-color)
 }
 .listColumn{
     position: absolute !important;
@@ -36,5 +36,5 @@
     height: 200px;
     overflow-y: scroll;
     background-color: #fff;
-    border: 1px solid var(--secondary-color);
+    border: 1px solid var(--primary-color);
 }

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { makeStyles } from '@material-ui/core';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -13,8 +14,15 @@ import ToolbarPersonnalize from './Toolbar';
 import Row from '../../main/catalogue/Row';
 import './table.css';
 
+const useStyles = makeStyles((theme) => ({
+  table: {
+    maxHeight: 650,
+  },
+}))
+
 export default function TablePersonnalize(props) {
 
+  const classes = useStyles();
   const { displayRows } = props;
   const propsTableName = props.propsTableName;
 
@@ -93,8 +101,8 @@ export default function TablePersonnalize(props) {
         btnAddAction={props.handleOpenModal}
       />
 
-      <TableContainer className={'scrollBar-personnalize'}>
-        <Table aria-label="collapsible table" size="small">
+      <TableContainer className={`${classes.table} scrollBar-personnalize`}>
+        <Table aria-label="collapsible table" size="small" stickyHeader>
           <TableHead>
             <TableRow>
               {columns.map((col) => (
@@ -113,23 +121,25 @@ export default function TablePersonnalize(props) {
                   handleEditClick={props.handleOpenModal}
                   user={props.user}
                   action={props.action}
+                  
+                  handleOpenModalAdresse={props.handleOpenModalAdresse}
                 />
               )
             }
           </TableBody>
         </Table>
       </TableContainer>
-    
-        <TablePagination
-          rowsPerPageOptions={[10, 30, 100]}
-          component="div"
-          count={displayRows.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onChangePage={handleChangePage}
-          onChangeRowsPerPage={handleChangeRowsPerPage}
-        />
-      
+
+      <TablePagination
+        rowsPerPageOptions={[10, 30, 100]}
+        component="div"
+        count={displayRows.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onChangePage={handleChangePage}
+        onChangeRowsPerPage={handleChangeRowsPerPage}
+      />
+
     </Paper>
   );
 }

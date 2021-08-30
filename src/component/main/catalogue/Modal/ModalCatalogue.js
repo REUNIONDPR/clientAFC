@@ -5,7 +5,7 @@ import Backdrop from '@material-ui/core/Backdrop';
 import Fade from '@material-ui/core/Fade';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import SelectPersonnalize from '../../../global/utils/Select';
+import SelectPersonnalize from '../../../global/utils/SelectPersonnalize';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CloseIcon from '@material-ui/icons/Close';
@@ -38,7 +38,7 @@ const useStyles = makeStyles((theme) => ({
   paper: {
     backgroundColor: theme.palette.background.paper,
     border: '2px solid',
-    borderColor: theme.palette.secondary.main,
+    borderColor: theme.palette.primary.main,
     boxShadow: theme.shadows[5],
     padding: theme.spacing(2, 4, 3),
     maxWidth: '80%',
@@ -108,27 +108,27 @@ export default function ModalCatalogue(props) {
                     ? props.deleteClick
                       ? <>
                         <div className={classes.btnActionModal}><span className={classes.msgAlert}>Valider la suppression de la formation</span>
-                          <Button onClick={props.handleHideDeleteIcon} variant="outlined" color="secondary">
+                          <Button onClick={props.handleHideDeleteIcon} variant="outlined" color="primary">
                             Annuler
                           </Button>
-                          <Button onClick={() => props.handleDeleteClick(dataRow)} variant="contained" color="secondary">
+                          <Button onClick={() => props.handleDeleteClick(dataRow)} variant="contained" color="primary">
                             Supprimer
                           </Button>
                         </div>
                       </>
                       : < Tooltip title="Supprimer" aria-label="delete">
-                        <IconButton aria-label="delete" color="secondary" onClick={props.handleShowDeleteIcon}>
+                        <IconButton aria-label="delete" color="primary" onClick={props.handleShowDeleteIcon}>
                           <DeleteIcon />
                         </IconButton>
                       </Tooltip>
 
                     : < Tooltip title="Fermer" aria-label="close">
-                      <IconButton aria-label="fermer" color="secondary" onClick={() => props.handleCloseModal(dataRow)}>
+                      <IconButton aria-label="fermer" color="primary" onClick={() => props.handleCloseModal(dataRow)}>
                         <CloseIcon />
                       </IconButton>
                     </Tooltip>
                   : < Tooltip title="Fermer" aria-label="close">
-                    <IconButton aria-label="fermer" color="secondary" onClick={() => props.handleCloseModal(dataRow)}>
+                    <IconButton aria-label="fermer" color="primary" onClick={() => props.handleCloseModal(dataRow)}>
                       <CloseIcon />
                     </IconButton>
                   </Tooltip>
@@ -225,15 +225,15 @@ export default function ModalCatalogue(props) {
 
             <div className={classes.btnActionModal}>
 
-              <Button onClick={props.handleCloseModal} variant="outlined" color="secondary">
+              <Button onClick={props.handleCloseModal} variant="outlined" color="primary">
                 Annuler
               </Button>
               {clickHandleSubmit
-                ? <Button variant="contained" color="secondary"
+                ? <Button variant="contained" color="primary"
                   endIcon={<CircularProgress size={20} />}>
                   Enregistrer
                 </Button> :
-                <Button onClick={() => {setClickHandleSubmit(true); handleSubmit(dataRow)}} variant="contained" color="secondary" >
+                <Button onClick={() => {setClickHandleSubmit(true); handleSubmit(dataRow)}} variant="contained" color="primary" >
                   Enregistrer
                 </Button> }
 

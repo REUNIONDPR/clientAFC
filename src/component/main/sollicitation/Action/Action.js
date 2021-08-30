@@ -10,7 +10,7 @@ export default function ActionTable() {
 
         <TableCell align="right">
             <Tooltip title="Editer">
-                <IconButton aria-label="Editer" size="small" color="secondary" onClick={() => console.log('test')}>
+                <IconButton aria-label="Editer" size="small" color="primary" onClick={() => console.log('test')}>
                     <EditIcon fontSize="small" />
                 </IconButton>
             </Tooltip>

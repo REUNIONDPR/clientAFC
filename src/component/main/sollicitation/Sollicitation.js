@@ -39,14 +39,14 @@ export default function Sollicitation() {
 
                     {IsPermitted(user, 'sollicitation', 'update') &&
                         <Tooltip title="Editer">
-                            <IconButton aria-label="Editer" size="small" color="secondary" onClick={() => handleOpenModal(props.row)}>
+                            <IconButton aria-label="Editer" size="small" color="primary" onClick={() => handleOpenModal(props.row)}>
                                 <EditIcon fontSize="small" />
                             </IconButton>
                         </Tooltip>}
 
                     {IsPermitted(user, 'sollicitation', 'validate') &&
                         <Tooltip title="Valider">
-                            <IconButton aria-label="Editer" size="small" color="primary" onClick={() => handleClickTest('valider la formation')}>
+                            <IconButton aria-label="Editer" size="small" color="secondary" onClick={() => handleClickTest('valider la formation')}>
                                 <CheckIcon fontSize="small" />
                             </IconButton>
                         </Tooltip>}
@@ -222,7 +222,7 @@ export default function Sollicitation() {
                 handleCloseModal={handleCloseModal}
             />
             {/* <div >
-                <Button variant="contained" onClick={() => console.log('aze')} color="secondary">
+                <Button variant="contained" onClick={() => console.log('aze')} color="primary">
                     send Socket
                 </Button>
                 <form onSubmit={handleSubmit}>
@@ -241,7 +241,7 @@ export default function Sollicitation() {
                     <TextField label="Fonction" name="Fonction" type="number"
                         value={fonction}
                         onChange={e => setFonction(e.target.value)} />
-                    <Button type="submit" variant="contained" color="secondary">
+                    <Button type="submit" variant="contained" color="primary">
                         Envoyer
                     </Button>
                 </form>
@@ -251,7 +251,7 @@ export default function Sollicitation() {
                     <TextField label="IDGASI" name="search" type="text"
                         value={search}
                         onChange={e => setSearch(e.target.value)} />
-                    <Button type="submit" variant="contained" color="secondary">
+                    <Button type="submit" variant="contained" color="primary">
                         Envoyer
                     </Button>
                 </form>

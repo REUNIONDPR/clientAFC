@@ -5,7 +5,7 @@ import Backdrop from '@material-ui/core/Backdrop';
 import Fade from '@material-ui/core/Fade';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import SelectPersonnalize from '../../../global/utils/Select';
+import SelectPersonnalize from '../../../global/utils/SelectPersonnalize';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { Tooltip } from '@material-ui/core';
@@ -50,7 +50,7 @@ const useStyles = makeStyles((theme) => ({
   paper: {
     backgroundColor: theme.palette.background.paper,
     border: '2px solid',
-    borderColor: theme.palette.secondary.main,
+    borderColor: theme.palette.primary.main,
     boxShadow: theme.shadows[5],
     padding: theme.spacing(2, 4, 3),
     width: '80%',
@@ -195,12 +195,12 @@ export default function ModalCatalogue(props) {
               <div>
                 {(dataRow.id === '' || dataRow.id === 0)
                   ? <Tooltip title="Fermer" aria-label="delete">
-                    <IconButton aria-label="close" color="secondary" onClick={props.handleCloseModal}>
+                    <IconButton aria-label="close" color="primary" onClick={props.handleCloseModal}>
                       <CloseRoundedIcon />
                     </IconButton>
                   </Tooltip>
                   : <Tooltip title="Supprimer" aria-label="delete">
-                    <IconButton aria-label="delete" color="secondary" onClick={() => props.handleDeleteClick(dataRow)}>
+                    <IconButton aria-label="delete" color="primary" onClick={() => props.handleDeleteClick(dataRow)}>
                       <DeleteIcon />
                     </IconButton>
                   </Tooltip>
@@ -410,10 +410,10 @@ export default function ModalCatalogue(props) {
 
             <div className={classes.btnActionModal}>
 
-              <Button onClick={props.handleCloseModal} variant="outlined" color="secondary">
+              <Button onClick={props.handleCloseModal} variant="outlined" color="primary">
                 Annuler
               </Button>
-              <Button onClick={() => props.handleSubmitModalClick(dataRow)} variant="contained" color="secondary">
+              <Button onClick={() => props.handleSubmitModalClick(dataRow)} variant="contained" color="primary">
                 Enregistrer
               </Button>
 

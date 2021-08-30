@@ -18,16 +18,19 @@ function App() {
   const theme = createMuiTheme({
     palette: {
       primary: {
-        light: '#4dabf5',
-        main: '#2196f3',
-        dark: '#1769aa',
-        contrastText: '#fff',
-      },
-      secondary: {
         light: '#d04081',
         main: '#c51162',
         dark: '#890b44',
         contrastText: '#fff',
+      },
+      secondary: {
+        light: '#8eddae',
+        main: '#11c574',
+        dark: '#00aa50',
+        contrastText: '#fff',
+      },
+      danger: {
+        main: '#f44336',
       },
       white: {
         main: '#c51162',

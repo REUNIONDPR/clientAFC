@@ -4,6 +4,7 @@ import Table from '../../global/table/Table';
 import Cookie from 'js-cookie';
 import { UserContext } from '../../../context/user.context';
 import ModalCatalogue from './Modal/ModalCatalogue';
+import ModalAdresse from './Modal/ModalAdresse';
 import { SocketContext } from '../../../context/socket.context';
 
 import TableCell from '@material-ui/core/TableCell';
@@ -12,6 +13,8 @@ import IconButton from '@material-ui/core/IconButton';
 import CheckIcon from '@material-ui/icons/Check';
 import Tooltip from '@material-ui/core/Tooltip';
 import { IsPermitted } from '../../../utilities/Function';
+
+import Button from '@material-ui/core/Button';
 
 export default function Catalogue() {
 
@@ -50,26 +53,21 @@ export default function Catalogue() {
 
                     {IsPermitted(user, 'sollicitation', 'update') &&
                         <Tooltip title="Editer">
-                            <IconButton aria-label="Editer" size="small" color="secondary" onClick={() => handleOpenModal(props.row)}>
+                            <IconButton aria-label="Editer" color="secondary" onClick={() => handleOpenModal(props.row)}>
                                 <EditIcon fontSize="small" />
                             </IconButton>
                         </Tooltip>}
 
-                    {IsPermitted(user, 'sollicitation', 'validate') &&
+                    {/* {IsPermitted(user, 'sollicitation', 'validate') &&
                         <Tooltip title="Valider">
-                            <IconButton aria-label="Editer" size="small" color="primary" onClick={() => handleClickTest('valider la formation')}>
+                            <IconButton aria-label="Editer" size="small" color="secondary" onClick={() => handleClickTest('valider la formation')}>
                                 <CheckIcon fontSize="small" />
                             </IconButton>
-                        </Tooltip>}
+                        </Tooltip>} */}
                 </div>
             </TableCell>
         )
     }
-
-    const handleClickTest = (e) => {
-        console.log(e)
-    }
-
     //----------------------- Modal
     const handleOpenModal = (row) => {
         setupdateRow(row)
@@ -87,8 +85,7 @@ export default function Catalogue() {
     const handleShowDeleteIcon = () => {
         setDeleteClick(true)
     }
-
-    const handleCloseModal = () => {
+    const resetUpdateRow = () => {
         setupdateRow({
             id: '',
             id_lot: 'all',
@@ -105,6 +102,9 @@ export default function Catalogue() {
             prixTrancheA: 0,
             prixTrancheB: 0,
         })
+    }
+    const handleCloseModal = () => {
+        resetUpdateRow();
         setOpenModal(false)
         handleHideDeleteIcon()
     }
@@ -145,10 +145,11 @@ export default function Catalogue() {
 
     const handleChangeFilter = (key, value) => {
         setFilterSelected({ ...filterSelected, [key]: value })
-        value !== 'none' ? setNbFilter(nbFilter + 1) : nbFilter > 0 ? setNbFilter(nbFilter - 1) : setNbFilter(0)
+        // value !== 'none' ? setNbFilter(nbFilter + 1) : nbFilter > 0 ? setNbFilter(nbFilter - 1) : setNbFilter(0)
     };
 
     useEffect(() => {
+        setNbFilter(Object.entries(filterSelected).filter(([k, v]) => v !== 'none' && v !== 'all').length)
         let myFilter = Object.entries(filterSelected)[0]
         let result = [];
         if (myFilter) {
@@ -278,6 +279,16 @@ export default function Catalogue() {
         })
     }
 
+    const [openModalAdresse, setOpenModalAdresse] = useState(false)
+    const handleShowModalAdresse = (row) => {
+        setupdateRow(row)
+        setOpenModalAdresse(true)
+    }
+
+    const handleCloseModalAdresse = () => {
+        resetUpdateRow();
+        setOpenModalAdresse(false)
+    }
     return (
         <>
             <Table columns={columns} propsTableName='Catalogue'
@@ -291,6 +302,7 @@ export default function Catalogue() {
                 messageSnackBar={messageSnackBar}
                 severity={severity}
                 user={user}
+                handleOpenModalAdresse={handleShowModalAdresse}
                 handleOpenModal={() => handleOpenModal(updateRow)}
                 action={ActionTable}
             />
@@ -308,6 +320,12 @@ export default function Catalogue() {
                     deleteClick={deleteClick}
                     user={user} />
             }
+
+            <ModalAdresse
+                openModal={openModalAdresse}
+                handleCloseModal={handleCloseModalAdresse}
+                updateRow={updateRow}
+            />
             <div>
                 <div>Add / remove adresse</div>
                 <div>Supprimer une formation</div>

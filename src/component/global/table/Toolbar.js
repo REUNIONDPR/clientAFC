@@ -52,7 +52,7 @@ export default function ToolbarPersonnalize(props) {
     const filters = props.filters;
     
     return (
-        <Toolbar className='secondary-color-gradient'>
+        <Toolbar className='primary-color-gradient'>
             <div className={classes.toolbarFilter} >
                 <div className={classes.toolbarTitle}>
                     {openFilter
@@ -95,7 +95,7 @@ export default function ToolbarPersonnalize(props) {
 
                             <IconButton aria-label="filtre" color='inherit' onClick={() => setOpenFilter(!openFilter)}>
                                 {props.nbFilter > 0 
-                                    ?<Badge badgeContent={props.nbFilter} color="primary"><FilterListIcon /></Badge>
+                                    ?<Badge badgeContent={props.nbFilter} color="secondary"><FilterListIcon /></Badge>
                                     :<FilterListIcon />
                                 }
                             </IconButton>
@@ -123,7 +123,7 @@ export default function ToolbarPersonnalize(props) {
                                 <ListRoundedIcon />
                             </IconButton></Tooltip>}
                         {openListCol &&
-                            <List dense={true} className='listColumn'>
+                            <List dense={true} className={'scrollBar-personnalize listColumn'}>
                                 <ListItem key={'check_all'} dense button onClick={(props.handleCheckAll)}>
                                     <ListItemIcon>
                                         <Checkbox
@@ -134,7 +134,7 @@ export default function ToolbarPersonnalize(props) {
                                             inputProps={{ 'aria-labelledby': 'check_all' }}
                                         />
                                     </ListItemIcon>
-                                    <ListItemText id='check_all' primary={props.checkAll ? 'Tout décocher' : 'Tout cocher'} />
+                                    <ListItemText id='check_all' secondary={props.checkAll ? 'Tout décocher' : 'Tout cocher'} />
                                 </ListItem>
 
                                 {props.columns.map((value) => {
@@ -151,7 +151,7 @@ export default function ToolbarPersonnalize(props) {
                                                     inputProps={{ 'aria-labelledby': labelId }}
                                                 />
                                             </ListItemIcon>
-                                            <ListItemText id={labelId} primary={`${value.includes('display_') ? codeToName(value.split('display_')[1]) : codeToName(value)}`} />
+                                            <ListItemText id={labelId} secondary={`${value.includes('display_') ? codeToName(value.split('display_')[1]) : codeToName(value)}`} />
                                         </ListItem>
                                     );
                                 })}
