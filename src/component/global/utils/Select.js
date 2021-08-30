@@ -17,20 +17,21 @@ export default function SelectPersonnalize(props) {
             url: url,
             headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
         }).then((response) => setData(response.data));
-    }, [props.path])
-    // console.log(props)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+    
     return (
         <FormControl size="small" variant="outlined" error={props.error} disabled={props.disabled}>
             <InputLabel id="demo-simple-select-outlined-label">{props.label}</InputLabel>
             {data &&
                 <Select
                     value={props.value}
-                    onChange={props.handleChangeValue}
+                    onChange={(e) => props.handleChangeValue(e.target.name, e.target.value)}
                     fullWidth
                     name={props.rowKey}
                     label={props.label}
                 >
-                    <MenuItem value="">
+                    <MenuItem value="all">
                         <em>Choisir</em>
                     </MenuItem>
                     {data.map((v) => (

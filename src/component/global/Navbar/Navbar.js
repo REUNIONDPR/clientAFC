@@ -17,7 +17,7 @@ import './Navbar.css';
 import { SocketContext } from '../../../context/socket.context';
 import { IsPermitted } from '../../../utilities/Function';
 
-const drawerWidth = 280;
+const drawerWidth = '20%';
 
 const StyledBadgeConnected = withStyles((theme) => ({
   badge: {
@@ -55,8 +55,8 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: "blue",
     }
   }, navBar: {
-    position: 'fixed',
-    width: drawerWidth,
+    // position: 'fixed',
+    // width: drawerWidth,
     backgroundColor: '#fff',
   }
 

@@ -10,13 +10,13 @@ const useStyles = makeStyles((theme) => ({
     marginRight: 'auto',
     marginTop: '2%',
     [theme.breakpoints.up(600)]:{
-      width: '60%',
-    },
-    [theme.breakpoints.up(1200)]:{
       width: '75%',
     },
-    [theme.breakpoints.up(1600)]:{
+    [theme.breakpoints.up(1200)]:{
       width: '80%',
+    },
+    [theme.breakpoints.up(1600)]:{
+      width: '85%',
     },
   }
 }));

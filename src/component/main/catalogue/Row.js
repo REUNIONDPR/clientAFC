@@ -2,12 +2,10 @@ import React, { useState } from "react";
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
-import EditIcon from '@material-ui/icons/Edit';
 import IconButton from '@material-ui/core/IconButton';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import AddIcon from '@material-ui/icons/Add';
-import Tooltip from '@material-ui/core/Tooltip';
 import axios from "axios";
 import Chip from '@material-ui/core/Chip';
 import Cookie from "js-cookie";
@@ -55,8 +53,7 @@ export default function Row(props) {
     const [dataAdresse, setDataAdresse] = useState([]);
     const [dataAdresseReceive, setDataAdresseReceive] = useState(false)
     const classes = useStyles();
-    const handleEditClick = props.handleEditClick;
-
+    
     const handleShowAdresse = (id_catalogue) => {
         if (!showAdresse) {
             axios({

@@ -9,7 +9,6 @@ import { SocketContext } from '../../../context/socket.context';
 import TableCell from '@material-ui/core/TableCell';
 import EditIcon from '@material-ui/icons/Edit';
 import IconButton from '@material-ui/core/IconButton';
-import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 import CheckIcon from '@material-ui/icons/Check';
 import Tooltip from '@material-ui/core/Tooltip';
 import { IsPermitted } from '../../../utilities/Function';
@@ -27,19 +26,27 @@ export default function Catalogue() {
     const [messageSnackBar, setMessageSnackBar] = useState('');
     const [severity, setSeverity] = useState('success');
     const [openModal, setOpenModal] = useState(false);
-    const [updateRow, setupdateRow] = useState({});
+    const [updateRow, setupdateRow] = useState({
+        id: '',
+        id_lot: 'all',
+        n_Article: '',
+        intitule_form_marche: '',
+        intitule_form_base_article: '',
+        formacode: '',
+        niveau_form: 'all',
+        objectif_form: 'all',
+        nb_heure_socle: 0,
+        nb_heure_ent: 0,
+        nb_heure_appui: 0,
+        nb_heure_soutien: 0,
+        prixTrancheA: 0,
+        prixTrancheB: 0,
+    });
 
     const ActionTable = (props) => {
         return (
             <TableCell align="right">
                 <div className='cell-flex'>
-
-                    {IsPermitted(user, 'sollicitation', 'delete') &&
-                        <Tooltip title="Supprimer">
-                            <IconButton aria-label="Editer" size="small" color="inherit" onClick={() => handleClickTest('delete formation')}>
-                                <DeleteOutlineIcon fontSize="small" />
-                            </IconButton>
-                        </Tooltip>}
 
                     {IsPermitted(user, 'sollicitation', 'update') &&
                         <Tooltip title="Editer">
@@ -63,14 +70,46 @@ export default function Catalogue() {
         console.log(e)
     }
 
-    const handleCloseModal = () => {
-        setOpenModal(false)
-    }
+    //----------------------- Modal
     const handleOpenModal = (row) => {
         setupdateRow(row)
         setOpenModal(true)
     }
 
+    const handleChangeUpdateRow = (k, v) => {
+        setupdateRow({ ...updateRow, [k]: v })
+    }
+
+    const [deleteClick, setDeleteClick] = useState(false)
+    const handleHideDeleteIcon = () => {
+        setDeleteClick(false)
+    }
+    const handleShowDeleteIcon = () => {
+        setDeleteClick(true)
+    }
+
+    const handleCloseModal = () => {
+        setupdateRow({
+            id: '',
+            id_lot: 'all',
+            n_Article: '',
+            intitule_form_marche: '',
+            intitule_form_base_article: '',
+            formacode: '',
+            niveau_form: 'all',
+            objectif_form: 'all',
+            nb_heure_socle: 0,
+            nb_heure_ent: 0,
+            nb_heure_appui: 0,
+            nb_heure_soutien: 0,
+            prixTrancheA: 0,
+            prixTrancheB: 0,
+        })
+        setOpenModal(false)
+        handleHideDeleteIcon()
+    }
+
+    //------------------- SnackBar
     const handleCloseSnackbar = (reason) => {
         if (reason === 'clickaway') {
             return;
@@ -98,9 +137,9 @@ export default function Catalogue() {
     // const isMountedRef = useRef(true);
     useEffect(() => {
         // if (isMountedRef.current) {
-            socket.on('updateRow', (updateDataRow) => {
-                setRows(updateDataRow)
-            })
+        socket.on('updateRow', (updateDataRow) => {
+            setRows(updateDataRow)
+        })
         // }
     }, [socket])
 
@@ -151,6 +190,7 @@ export default function Catalogue() {
         setMessageSnackBar('Erreur, je n\'ai pas compris votre demande.');
         setSeverity('error');
         setOpenModal(false)
+        handleHideDeleteIcon()
     }
 
     const handleSubmitClick = (dataRow) => {
@@ -163,14 +203,15 @@ export default function Catalogue() {
             if (response.status === 200) {
                 let newDataRow = rows;
                 console.log(rows, dataRow);
-                newDataRow.push(dataRow);
-                newDataRow.id = response.data.insertId;
-                newDataRow.adresse = '';
+                dataRow.id = response.data.insertId;
+                dataRow.adresse = '';
+                newDataRow.unshift(dataRow);
                 socket.emit("updateCatalogue", newDataRow);
                 setRows(newDataRow)
                 setMessageSnackBar('Enregistrement réussi.');
                 setSeverity('success');
                 setOpenModal(false)
+                handleHideDeleteIcon()
                 // updateDataRow(displayRows, dataRow);
             } else {
                 setMessageSnackBar('Echec de l\'enregistrement.');
@@ -188,13 +229,13 @@ export default function Catalogue() {
             headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
         }).then((response) => {
             if (response.status === 200) {
-                let newDataRow = rows.map((v,i) => {
+                let newDataRow = rows.map((v, i) => {
                     if (v.id === dataRow.id) {
                         Object.keys(v).map((k) => {
                             return v[k] = dataRow[k]
                         })
-                        return v=dataRow;
-                    }else return v;
+                        return v = dataRow;
+                    } else return v;
                 })
                 setRows(newDataRow)
                 setDisplayRows(newDataRow)
@@ -202,6 +243,7 @@ export default function Catalogue() {
                 setMessageSnackBar('Modification enregistré.');
                 setSeverity('success');
                 setOpenModal(false)
+                handleHideDeleteIcon()
                 // updateDataRow(displayRows, dataRow);
             } else {
                 setMessageSnackBar('Echec de la modification.');
@@ -225,6 +267,7 @@ export default function Catalogue() {
                 setMessageSnackBar('Suppression réussi.');
                 setSeverity('success');
                 setOpenModal(false)
+                handleHideDeleteIcon()
                 // setRows(newDataRow) // Met à jour le tableau au cas ou la socket ne répond pas.
                 // setDisplayRows(newDataRow) // Met à jour le tableau au cas ou la socket ne répond pas.
             } else {
@@ -239,8 +282,8 @@ export default function Catalogue() {
         <>
             <Table columns={columns} propsTableName='Catalogue'
                 handleEditSubmitClick={handleEditSubmitClick}
-                displayRows={displayRows}
-                filter={[{ 'name': 'Lot', 'displayName': 'Tout les lots', 'handleChange': handleChangeFilter, 'data': lotList, valueSelected: filterSelected, varName: 'display_lot' }]}
+                displayRows={displayRows} // row
+                filter={[{ 'name': 'Lot', 'displayName': 'Tout les lots', 'handleChange': handleChangeFilter, 'data': lotList, valueSelected: filterSelected, varName: 'id_lot' }]}
                 nbFilter={nbFilter}
                 handleChangeFilter={handleChangeFilter}
                 handleCloseSnackbar={handleCloseSnackbar}
@@ -248,17 +291,23 @@ export default function Catalogue() {
                 messageSnackBar={messageSnackBar}
                 severity={severity}
                 user={user}
-                handleOpenModal={handleOpenModal}
+                handleOpenModal={() => handleOpenModal(updateRow)}
                 action={ActionTable}
             />
-            <ModalCatalogue openModal={openModal}
-                handleCloseModal={handleCloseModal}
-                handleErrorSubmit={handleErrorSubmit}
-                handleSubmitClickToParent={handleSubmitClick}
-                handleEditSubmitClickToParent={handleEditSubmitClick}
-                updateRow={updateRow}
-                handleDeleteClick={handleDeleteClick} />
-
+            {updateRow &&
+                <ModalCatalogue openModal={openModal}
+                    handleCloseModal={handleCloseModal}
+                    handleErrorSubmit={handleErrorSubmit}
+                    handleSubmitClickToParent={handleSubmitClick}
+                    handleChangeUpdateRow={handleChangeUpdateRow}
+                    handleEditSubmitClickToParent={handleEditSubmitClick}
+                    updateRow={updateRow}
+                    handleDeleteClick={handleDeleteClick}
+                    handleHideDeleteIcon={handleHideDeleteIcon}
+                    handleShowDeleteIcon={handleShowDeleteIcon}
+                    deleteClick={deleteClick}
+                    user={user} />
+            }
             <div>
                 <div>Add / remove adresse</div>
                 <div>Supprimer une formation</div>

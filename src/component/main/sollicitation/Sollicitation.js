@@ -145,7 +145,6 @@ export default function Sollicitation() {
             url: `/formation/findAll?s=${selectedCard}`,
             headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
         }).then((response) => {
-            console.log(response)
             if (response.data.dateEntree && response.data.dateEntree.includes('T')) {
                 console.log(response.data.dateEntree.split('T')[0])
             }

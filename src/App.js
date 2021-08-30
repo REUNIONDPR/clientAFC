@@ -42,7 +42,7 @@ function App() {
     },
   }, frFR);
 
-  const drawerWidth = 280;
+  const drawerWidth = '260px';
 
   const useStyles = makeStyles((theme) => ({
     drawer: {

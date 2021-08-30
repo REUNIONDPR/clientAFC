@@ -6,6 +6,7 @@ export function codeToName(str) {
     case 'lot': return 'Lot';
     case 'n_Article': return 'N° Article';
     case 'intitule_form_marche': return 'Intitulé';
+    case 'intitule_form_base_article': return 'Intitulé Base Article';
     case 'formacode': return 'Formacode';
     case 'formation_niveau': return 'Niveau';
     case 'formation_objectif': return 'Objectif';

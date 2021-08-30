@@ -49,3 +49,21 @@ body{
 .MuiSvgIcon-root .color-white{
   fill: white !important;
 }
+.MuiButton-containedSecondary svg{
+  color:white;
+}
+
+.scrollBar-personnalize::-webkit-scrollbar {
+  height: 8px;  
+  width: 8px;               
+}
+
+.scrollBar-personnalize::-webkit-scrollbar-track {
+background: #e0e0e0;        
+}
+
+.scrollBar-personnalize::-webkit-scrollbar-thumb {
+background-color: var(--secondary-color);   
+border-radius: 50px;      
+/* border: 1px solid orange;  */
+}

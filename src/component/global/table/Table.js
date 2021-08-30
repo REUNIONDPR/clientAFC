@@ -69,8 +69,8 @@ export default function TablePersonnalize(props) {
     }
     setCheckAll(!checkAll)
   }
-  // ----------------------------
 
+  // ----------------------------
   return (
     <Paper style={{ maxHeight: '80%', overflow: 'auto', marginBottom: 20 }} >
 
@@ -93,7 +93,7 @@ export default function TablePersonnalize(props) {
         btnAddAction={props.handleOpenModal}
       />
 
-      <TableContainer>
+      <TableContainer className={'scrollBar-personnalize'}>
         <Table aria-label="collapsible table" size="small">
           <TableHead>
             <TableRow>
@@ -119,7 +119,7 @@ export default function TablePersonnalize(props) {
           </TableBody>
         </Table>
       </TableContainer>
-      {displayRows.length > rowsPerPage &&
+    
         <TablePagination
           rowsPerPageOptions={[10, 30, 100]}
           component="div"
@@ -129,7 +129,7 @@ export default function TablePersonnalize(props) {
           onChangePage={handleChangePage}
           onChangeRowsPerPage={handleChangeRowsPerPage}
         />
-      }
+      
     </Paper>
   );
 }

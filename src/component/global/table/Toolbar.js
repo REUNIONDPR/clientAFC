@@ -32,7 +32,6 @@ const useToolbarStyles = makeStyles({
     },
     toolbarTitle: {
         maxWidth: '70%',
-        overflow: 'hidden',
     },
     toolbarIcon: {
         display: 'flex',
@@ -60,7 +59,7 @@ export default function ToolbarPersonnalize(props) {
                         ? <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
                             {
                                 Object.values(filters).map((filter, key) => (
-                                    <FormControl variant="outlined" className='toolbar-select' key={key.toString()}>
+                                    <FormControl variant="outlined" size="small" className='toolbar-select' key={key.toString()}>
                                         <InputLabel id="demo-simple-select-outlined-label">{filter.name}</InputLabel>
                                         <Select
                                             labelId="demo-simple-select-outlined-label"
