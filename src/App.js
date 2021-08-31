@@ -23,10 +23,16 @@ function App() {
         dark: '#890b44',
         contrastText: '#fff',
       },
+      // secondary: {
+      //   light: '#8eddae',
+      //   main: '#11c574',
+      //   dark: '#00aa50',
+      //   contrastText: '#fff',
+      // },
       secondary: {
-        light: '#8eddae',
-        main: '#11c574',
-        dark: '#00aa50',
+        light: '#0795da',
+        main: '#0372b2',
+        dark: '#005290',
         contrastText: '#fff',
       },
       danger: {

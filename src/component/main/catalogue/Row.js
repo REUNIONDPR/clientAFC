@@ -76,12 +76,12 @@ const useStyles = makeStyles((theme) => ({
 
 export function DivAdress(props) {
     const classes = useStyles();
-
+    
     return (
         <div className={classes.adresse} >
             {props.label}
             <Tooltip classes={{ tooltip: classes.tooltip }} title="Supprimer l'adresse">
-                <IconButton aria-label="delete" color="primary" onClick={() => props.handleDeleteAdresse(props)}>
+                <IconButton aria-label="delete" color="primary" onClick={props.handleDeleteAdresse}>
                     <DeleteIcon color='action' />
                 </IconButton>
             </Tooltip>
@@ -92,28 +92,23 @@ export function DivAdress(props) {
 export default function Row(props) {
     const ActionTable = props.action;
     const row = props.row;
-    const [dataAdresse, setDataAdresse] = useState([]);
+    // const [dataAdresse, setDataAdresse] = useState([]);
     const classes = useStyles();
 
-    useEffect(() => {
-        axios({
-            method: 'GET',
-            url: '/adresse/find?id=' + props.row.id,
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
-        }).then((response) => {
-            setDataAdresse(response.data)
-        });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    // useEffect(() => {
+    //     axios({
+    //         method: 'GET',
+    //         url: '/adresse/find?id_cata=' + props.row.id,
+    //         headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+    //     }).then((response) => {
+    //         setDataAdresse(response.data)
+    //     });
+    //     // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [])
 
     const handleDeleteAdresse = (id_catalogue, id_adresse) => {
         console.log('remove adresse :', id_catalogue, id_adresse)
     }
-    const [isOpen, setIsOpen] = useState(false)
-    const handleOpenModal = (row) => {
-        console.log(row)
-        setIsOpen(true)
-    }    
 
     return (
         <React.Fragment>
@@ -124,12 +119,12 @@ export default function Row(props) {
                             ? <TableCell className={classes.center} key={row.id.toString() + '_' + k}>
                                 <div className={classes.adresseCell}>
                                     <div className={classes.adresseBlock}>
-                                        {dataAdresse.map((a) => (
+                                        {v.map((a) => (
                                             <DivAdress
-                                                key={props.id_catalogue + '_' + a.id}
+                                                key={row.id + '_' + a.id}
                                                 label={a.adresse}
                                                 id={a.id}
-                                                handleDeleteAdresse={() => { handleDeleteAdresse(v, a.id) }} />
+                                                handleDeleteAdresse={() => { props.handleDeleteAdresse(row, {id:a.id, adresse:a.adresse}) }} />
                                         ))}
                                     </div>
                                     <Tooltip classes={{ tooltip: classes.tooltip }} title="Ajouter une adresse">

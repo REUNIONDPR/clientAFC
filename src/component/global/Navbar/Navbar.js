@@ -16,6 +16,8 @@ import { Link } from 'react-router-dom';
 import './Navbar.css';
 import { SocketContext } from '../../../context/socket.context';
 import { IsPermitted } from '../../../utilities/Function';
+import Cookies from 'js-cookie';
+import Button from '@material-ui/core/Button';
 
 const drawerWidth = '20%';
 
@@ -65,7 +67,7 @@ const useStyles = makeStyles((theme) => ({
 export default function PermanentDrawerLeft() {
 
   const classes = useStyles();
-  const { user } = useContext(UserContext);
+  const { user, deleteUser } = useContext(UserContext);
   const { socket } = useContext(SocketContext);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [connected, setConnected] = useState(false);
@@ -81,10 +83,16 @@ export default function PermanentDrawerLeft() {
     setSelectedIndex(index);
   };
 
+  const handleLogOut = () => {
+    Cookies.remove('authToken', user.token);
+    console.log(Cookies)
+    deleteUser();
+  }
+
   return (
 
     <div className={classes.navBar}>
-      <div className={classes.drawerHeader}></div>
+      <div className={classes.drawerHeader}><Button variant="contained" onClick={handleLogOut}>Déconnection</Button></div>
       <Divider />
 
       <div className='card-avatar'>
@@ -132,7 +140,7 @@ export default function PermanentDrawerLeft() {
             <ListItemIcon><CreateNewFolderIcon /></ListItemIcon>
             <ListItemText secondary='Sollicitation' />
           </ListItem>}
-          
+
         {IsPermitted(user, 'catalogue', 'view') &&
           <ListItem button className='primary-h-color' component={Link} to="catalogue" selected={selectedIndex === 2}
             onClick={(event) => handleListItemClick(event, 2)}>

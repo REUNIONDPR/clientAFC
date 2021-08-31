@@ -181,8 +181,24 @@ export default function Catalogue() {
             url: '/catalogue/findAll',
             headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
         }).then((response) => {
-            setRows(response.data)
-            Object.entries(response.data).map(([key, index]) => (key === '0') ? setColumns(Object.keys(index)) : false)
+
+            let data = response.data.map((v) => {
+                let adr = [];
+                if (v.adresse.includes('//')) {
+                    let array_adresse = v.adresse.split('//');
+                    for (let i = 0; i < array_adresse.length; i++) {
+                        adr.push({ id: array_adresse[i].split(':')[0], adresse: array_adresse[i].split(':')[1] })
+                    }
+                } else adr.push({ id: v.adresse.split(':')[0], adresse: v.adresse.split(':')[1] })
+                v.adresse = adr;
+                return v;
+            })
+
+            setRows(data)
+            // Object.entries(data).map(([key, value]) => (key === '0') ? setColumns(Object.keys(value)) : false)
+            let col = [];
+            Object.entries(data).filter(([k, i]) => k === '0').map(([k, value]) => Object.keys(value).map((v) => col.push(v)))
+            setColumns(col)
         });
 
     }, [user])
@@ -222,6 +238,17 @@ export default function Catalogue() {
         })
     }
 
+    const updateRowsTableAfterPutAxios = (newRow) => {
+        return rows.map((v, i) => {
+            if (v.id === newRow.id) {
+                Object.keys(v).map((k) => {
+                    return v[k] = newRow[k]
+                })
+                return v = newRow;
+            } else return v;
+        })
+    }
+
     const handleEditSubmitClick = (dataRow) => {
         axios({
             method: 'put',
@@ -230,14 +257,7 @@ export default function Catalogue() {
             headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
         }).then((response) => {
             if (response.status === 200) {
-                let newDataRow = rows.map((v, i) => {
-                    if (v.id === dataRow.id) {
-                        Object.keys(v).map((k) => {
-                            return v[k] = dataRow[k]
-                        })
-                        return v = dataRow;
-                    } else return v;
-                })
+                let newDataRow = updateRowsTableAfterPutAxios(dataRow)
                 setRows(newDataRow)
                 setDisplayRows(newDataRow)
                 socket.emit("updateCatalogue", newDataRow);
@@ -289,6 +309,91 @@ export default function Catalogue() {
         resetUpdateRow();
         setOpenModalAdresse(false)
     }
+
+    const handleAddAdresse = (updatedRow, adresse) => {
+        axios({
+            method: 'put',
+            url: '/catalogue/addAdresse',
+            data: { id_cata: updatedRow.id, id_adresse: adresse.id },
+            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+        }).then((response) => {
+            if (response.status === 200) {
+
+                updatedRow.adresse.push(adresse) 
+                let newDataRow = updateRowsTableAfterPutAxios(updatedRow)
+    
+                setRows(newDataRow)
+                setDisplayRows(newDataRow)
+
+                socket.emit("updateAdresse", newDataRow);
+                setMessageSnackBar('Modification enregistré.');
+                setSeverity('success');
+                // updateDataRow(displayRows, dataRow);
+            } else {
+                setMessageSnackBar('Echec de la modification.');
+                setSeverity('error');
+            }
+            setOpenSnackBar(true);
+        })
+    }
+
+    const handleDeleteAdresse = (updatedRow, adresse) => {
+        axios({
+            method: 'put',
+            url: '/adresse/delete',
+            data: { id_cata: updatedRow.id, id_adresse: adresse.id },
+            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+        }).then((response) => {
+            if (response.status === 200) {
+
+                let newAdresse = updatedRow.adresse.filter((v) => v.id !== adresse.id)
+                updatedRow.adresse = newAdresse
+                let newDataRow = updateRowsTableAfterPutAxios(updatedRow)
+
+                setRows(newDataRow)
+                setDisplayRows(newDataRow)
+
+                socket.emit("updateAdresse", newDataRow);
+                setMessageSnackBar('Supprimé avec succès.');
+                setSeverity('success');
+                // updateDataRow(displayRows, dataRow);
+            } else {
+                setMessageSnackBar('Echec de la suppréssion.');
+                setSeverity('error');
+            }
+            setOpenSnackBar(true);
+        })
+    }
+
+    const handleCreateAdresse = (updatedRow, adresse, ville) => {
+        axios({
+            method: 'put',
+            url: '/adresse/create',
+            data: { adresse: adresse.adresse, commune:ville, actif:1 },
+            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+        }).then((response) => {
+            if (response.status === 200) {
+                let objAdresse = {id: response.data.insertId, adresse: adresse.adresse}
+                handleAddAdresse(updatedRow, objAdresse)
+                // updatedRow.adresse.push(objAdresse) 
+                // let newDataRow = updateRowsTableAfterPutAxios(updatedRow)
+
+                // setRows(newDataRow)
+                // setDisplayRows(newDataRow)
+
+                // // socket.emit("updateAdresse", newDataRow);
+                // setMessageSnackBar('Supprimé avec succès.');
+                // setSeverity('success');
+                // updateDataRow(displayRows, dataRow);
+            } else {
+                setMessageSnackBar('Erreur lors de la création de l\'adresse.');
+                setSeverity('error');
+                setOpenSnackBar(true);
+            }
+        })
+
+    }
+
     return (
         <>
             <Table columns={columns} propsTableName='Catalogue'
@@ -305,6 +410,7 @@ export default function Catalogue() {
                 handleOpenModalAdresse={handleShowModalAdresse}
                 handleOpenModal={() => handleOpenModal(updateRow)}
                 action={ActionTable}
+                handleDeleteAdresse={handleDeleteAdresse}
             />
             {updateRow &&
                 <ModalCatalogue openModal={openModal}
@@ -325,6 +431,8 @@ export default function Catalogue() {
                 openModal={openModalAdresse}
                 handleCloseModal={handleCloseModalAdresse}
                 updateRow={updateRow}
+                handleAddAdresse={handleAddAdresse}
+                handleCreateAdresse={handleCreateAdresse}
             />
             <div>
                 <div>Add / remove adresse</div>

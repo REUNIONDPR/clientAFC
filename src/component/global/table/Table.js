@@ -77,7 +77,6 @@ export default function TablePersonnalize(props) {
     }
     setCheckAll(!checkAll)
   }
-
   // ----------------------------
   return (
     <Paper style={{ maxHeight: '80%', overflow: 'auto', marginBottom: 20 }} >
@@ -106,7 +105,7 @@ export default function TablePersonnalize(props) {
           <TableHead>
             <TableRow>
               {columns.map((col) => (
-                checkColumnsVisible.indexOf(col) !== -1 &&
+                checkColumnsVisible.indexOf(col) !== -1 && 
                 <TableCell align="center" className='nowrap' key={col}>{col.includes('display_') ? codeToName(col.split('display_')[1]) : codeToName(col)}</TableCell>
               ))}
               <TableCell align="center" className='nowrap' key='actionT'>Action</TableCell>
@@ -121,7 +120,7 @@ export default function TablePersonnalize(props) {
                   handleEditClick={props.handleOpenModal}
                   user={props.user}
                   action={props.action}
-                  
+                  handleDeleteAdresse={props.handleDeleteAdresse}
                   handleOpenModalAdresse={props.handleOpenModalAdresse}
                 />
               )

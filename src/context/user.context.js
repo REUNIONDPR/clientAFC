@@ -12,6 +12,7 @@ const UserContextProvider = (props) => {
         if (Cookies.get('authToken') && !user.idgasi) {
             getUser()
         }
+        
     }, [user.idgasi]);
 
     // useEffect(() => {
@@ -27,20 +28,24 @@ const UserContextProvider = (props) => {
                 Authorization: 'Bearer ' + Cookies.get('authToken')
             }
         })
-        .then((res) => {setUser(res.data);})
+        .then((res) => {console.log(res.data);})
     };
 
-    const logUser = () => {
-        setUser({ idgasi: 'IRLE5360', password: 'azerty' });
+    const deleteUser = () => {
+        setUser({})
+    };
+
+    const logUser = (user) => {
         fetch('/auth/logUser', {
             method: 'post',
             headers: new Headers({
                 'Content-Type': 'application/json'
             }),
-            body: JSON.stringify({ idgasi: 'IRLE5360', password: 'azerty' }),
+            body: JSON.stringify(user),
         })
         .then((res) => res.json())
         .then((res) => {
+            console.log(res)
             if (res.hasOwnProperty('user')) {
                 const token = res.token;
                 // const idgasi= res.user.idgasi;
@@ -63,7 +68,7 @@ const UserContextProvider = (props) => {
     }
 
     return (
-        <UserContext.Provider value={{ user, getUser, logUser }}>
+        <UserContext.Provider value={{ user, getUser, logUser, deleteUser }}>
             {props.children}
         </UserContext.Provider>
     )
