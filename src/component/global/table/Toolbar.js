@@ -14,7 +14,7 @@ import Select from '@material-ui/core/Select';
 import ListRoundedIcon from '@material-ui/icons/ListRounded';
 import { useState } from 'react';
 import { codeToName } from '../../../utilities/Function';
-
+import Badge from '@material-ui/core/Badge';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -26,12 +26,12 @@ import { IsPermitted } from '../../../utilities/Function';
 const useToolbarStyles = makeStyles({
     toolbarFilter: {
         display: 'flex',
+        width: '100%',
         justifyContent: 'space-between',
         alignItems: 'center',
     },
     toolbarTitle: {
         maxWidth: '70%',
-        overflow: 'hidden',
     },
     toolbarIcon: {
         display: 'flex',
@@ -50,20 +50,20 @@ export default function ToolbarPersonnalize(props) {
     const [openListCol, setOpenListCol] = useState(false);
     // ----------------- Filtres
     const filters = props.filters;
-
+    
     return (
-        <Toolbar className='secondary-color-gradient'>
+        <Toolbar className='primary-color-gradient'>
             <div className={classes.toolbarFilter} >
                 <div className={classes.toolbarTitle}>
                     {openFilter
                         ? <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
                             {
                                 Object.values(filters).map((filter, key) => (
-                                    <FormControl variant="outlined" className='toolbar-select' key={key.toString()}>
+                                    <FormControl variant="outlined" size="small" className='toolbar-select' key={key.toString()}>
                                         <InputLabel id="demo-simple-select-outlined-label">{filter.name}</InputLabel>
                                         <Select
                                             labelId="demo-simple-select-outlined-label"
-                                            value={filter.valueSelected}
+                                            value={filter.valueSelected[filter.varName] ? filter.valueSelected[filter.varName] : 'none'}
                                             onChange={(event) => props.handleChangeFilter(filter.varName, event.target.value)}
                                             label={filter.name}
                                         >
@@ -92,9 +92,14 @@ export default function ToolbarPersonnalize(props) {
                         </Tooltip>
                         :
                         <Tooltip title="Filtre">
+
                             <IconButton aria-label="filtre" color='inherit' onClick={() => setOpenFilter(!openFilter)}>
-                                <FilterListIcon />
+                                {props.nbFilter > 0 
+                                    ?<Badge badgeContent={props.nbFilter} color="secondary"><FilterListIcon /></Badge>
+                                    :<FilterListIcon />
+                                }
                             </IconButton>
+
                         </Tooltip>}
 
                     {
@@ -118,7 +123,7 @@ export default function ToolbarPersonnalize(props) {
                                 <ListRoundedIcon />
                             </IconButton></Tooltip>}
                         {openListCol &&
-                            <List dense={true} className='listColumn'>
+                            <List dense={true} className={'scrollBar-personnalize listColumn'}>
                                 <ListItem key={'check_all'} dense button onClick={(props.handleCheckAll)}>
                                     <ListItemIcon>
                                         <Checkbox
@@ -129,7 +134,7 @@ export default function ToolbarPersonnalize(props) {
                                             inputProps={{ 'aria-labelledby': 'check_all' }}
                                         />
                                     </ListItemIcon>
-                                    <ListItemText id='check_all' primary={props.checkAll ? 'Tout décocher' : 'Tout cocher'} />
+                                    <ListItemText id='check_all' secondary={props.checkAll ? 'Tout décocher' : 'Tout cocher'} />
                                 </ListItem>
 
                                 {props.columns.map((value) => {
@@ -146,7 +151,7 @@ export default function ToolbarPersonnalize(props) {
                                                     inputProps={{ 'aria-labelledby': labelId }}
                                                 />
                                             </ListItemIcon>
-                                            <ListItemText id={labelId} primary={`${value.includes('display_') ? codeToName(value.split('display_')[1]) : codeToName(value)}`} />
+                                            <ListItemText id={labelId} secondary={`${value.includes('display_') ? codeToName(value.split('display_')[1]) : codeToName(value)}`} />
                                         </ListItem>
                                     );
                                 })}

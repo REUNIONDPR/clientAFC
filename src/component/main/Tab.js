@@ -59,7 +59,7 @@ export default function SimpleTabs() {
     <div className={classes.root}>
       
       <AppBar position="static">
-        <Tabs value={value} onChange={handleChange} aria-label="simple tabs example" indicatorColor='secondary'>
+        <Tabs value={value} onChange={handleChange} aria-label="simple tabs example" indicatorColor='primary'>
           <Tab label="Créer une sollicitation" {...a11yProps(0)} />
           <Tab label="Formations validées par l'OF" {...a11yProps(1)} />
           <Tab label="Bon de Réservation de Session" {...a11yProps(2)} />

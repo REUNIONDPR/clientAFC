@@ -45,15 +45,15 @@ export default function CardPersonnalize(props) {
     return (
         <Card className={classes.root} >
             <div className={classes.contentCard}>
-                <Typography className={classes.title} color="textSecondary" gutterBottom>
+                <Typography className={classes.title} color="primary" gutterBottom>
                     {props.title}
                 </Typography>
-                <Typography className={classes.number} color="textSecondary">
+                <Typography className={classes.number} color="primary">
                     {props.number}
                 </Typography>
             </div>
             <Box className={classes.boxCard}>
-                <Button onClick={props.handleClick} variant={props.selected ? "contained" : 'outlined'} color="secondary">
+                <Button onClick={props.handleClick} variant={props.selected ? "contained" : 'outlined'} color="primary">
                     Voir
                 </Button>
             </Box>

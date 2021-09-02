@@ -4,8 +4,10 @@ export function codeToName(str) {
   switch (str) {
 
     case 'lot': return 'Lot';
+    case 'of': return 'Attributaire';
     case 'n_Article': return 'N° Article';
     case 'intitule_form_marche': return 'Intitulé';
+    case 'intitule_form_base_article': return 'Intitulé Base Article';
     case 'formacode': return 'Formacode';
     case 'formation_niveau': return 'Niveau';
     case 'formation_objectif': return 'Objectif';
@@ -73,6 +75,12 @@ export function codeToName(str) {
     case 'lot_15': return 'LOT 15 - METIER DU NUMERIQUE';
     case 'lot_16': return 'LOT 16 - CREATION D ENTREPRISE';
 
+    case 'formation_1': return 'DT Nord-Est';
+    case 'formation_2': return 'DT Sud-Ouest';
+    case 'formation_3': return 'DPSR';
+    case 'formation_4': return 'AMAJ';
+    case 'formation_5': return 'DDO';
+    case 'formation_6': return 'DPR';
     default: return str;
   }
 }

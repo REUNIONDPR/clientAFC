@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { makeStyles } from '@material-ui/core';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -10,11 +11,32 @@ import TablePagination from '@material-ui/core/TablePagination';
 import { codeToName } from '../../../utilities/Function';
 import SnackBar from '../SnackBar/SnackBar';
 import ToolbarPersonnalize from './Toolbar';
-import Row from './Row';
+import Row from '../../main/catalogue/Row';
 import './table.css';
 
-export default function CollapsibleTable(props) {
+const useStyles = makeStyles((theme) => ({
+  table: {
+    maxHeight: 650,
+    [theme.breakpoints.down(1550)]: {
+      maxHeight: 500,
+    },
+  },
+  PaperContainerTable: {
+    overflow: 'auto',
+    marginBottom: 20
+  },
+  cellHead: {
+    borderLeft: '1px solid rgba(224, 224, 224, 1);',
+    whiteSpace: 'nowrap',
+  },
+  mwidth: {
+    minWidth: 230,
+  },
+}))
 
+export default function TablePersonnalize(props) {
+
+  const classes = useStyles();
   const { displayRows } = props;
   const propsTableName = props.propsTableName;
 
@@ -36,33 +58,18 @@ export default function CollapsibleTable(props) {
   const severitySnackBar = props.severity;
   const handleCloseSnackBar = props.handleCloseSnackbar;
 
-  // ------------ Create Row
-  const [creatingRow, setCreatingRow] = useState(false);
-  const handleCreateRow = () => {
-    setCreatingRow(true)
-  }
-
-  const handleExitEditClick = () => {
-    setEditingRow(false);
-  }
-  // ------------ SaveEditChange
-  const [editingRow, setEditingRow] = useState(false);
-  const handleEditSubmitClick = (row) => {
-    setEditingRow(false);
-    props.handleEditSubmitClick(row)
-  }
-
   // ------------ Toggle show column
   const [columns, SetColumns] = useState(props.columns);
   const [checkColumnsVisible, SetCheckColumnsVisible] = useState([]);
   const [checkAll, setCheckAll] = useState(true);
 
   useEffect(() => {
-    let col = props.columns.filter((col) => { if (col !== 'id') { return col; } else { return false; } });
+    let col = props.columns.filter((col) => { if (!col.includes('id')) { return col; } else { return false; } });
     SetColumns(col);
     SetCheckColumnsVisible(col);
   }, [props.columns])
 
+  // Toggle toolbar
   const handleToggle = (value) => () => {
     const currentIndex = checkColumnsVisible.indexOf(value);
     const newColumn = [...checkColumnsVisible];
@@ -85,21 +92,8 @@ export default function CollapsibleTable(props) {
     setCheckAll(!checkAll)
   }
   // ----------------------------
-  const [filter, setFilter] = useState({})
-
-  useEffect(() => {
-    props.filter.map((v) => setFilter({ ...filter, [v.varName]: v.valueSelected }))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-
-  }, [props.filter])
-
-  const handleChangeFilter = (key, value) => {
-    setFilter({ ...filter, [key]: value })
-    props.handleChangeFilter(value)
-  }
-
   return (
-    <Paper style={{ maxHeight: '80%', overflow: 'auto', marginBottom: 20 }} >
+    <Paper className={classes.PaperContainerTable} >
 
       <SnackBar
         open={openSnackBar}
@@ -110,10 +104,9 @@ export default function CollapsibleTable(props) {
 
       <ToolbarPersonnalize
         filters={props.filter} propsTableName={propsTableName}
-        // handleChangeFilter={props.handleChangeFilter} 
-        handleChangeFilter={handleChangeFilter}
+        nbFilter={props.nbFilter}
+        handleChangeFilter={props.handleChangeFilter}
         user={props.user}
-        handleCreateRow={handleCreateRow}
         handleToggle={handleToggle}
         handleCheckAll={handleCheckAll} checkAll={checkAll}
         columns={columns}
@@ -121,96 +114,48 @@ export default function CollapsibleTable(props) {
         btnAddAction={props.handleOpenModal}
       />
 
-      <TableContainer>
-        <Table aria-label="collapsible table" size="small">
+      <TableContainer className={`${classes.table} scrollBar-personnalize`}>
+        <Table aria-label="collapsible table" size="small" stickyHeader>
           <TableHead>
             <TableRow>
-              {/* <TableCell style={{ position: 'relative' }}>
-              </TableCell> */}
               {columns.map((col) => (
                 checkColumnsVisible.indexOf(col) !== -1 &&
-                <TableCell align="center" className='nowrap' key={col}>{col.includes('display_') ? codeToName(col.split('display_')[1]) : codeToName(col)}</TableCell>
+                <TableCell align="center"
+                  className={`${classes.cellHead} 
+                  ${(col === 'of' || col === 'intitule_form_marche' || col === 'intitule_form_base_article') && classes.mwidth}`}
+                  key={col}>{codeToName(col)}
+                </TableCell>
               ))}
-              <TableCell align="center" className='nowrap' key='actionT'>Action</TableCell>
+              <TableCell align="center" className={classes.cellHead} key='actionT'>Action</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-
-            {creatingRow && (<Row key="newRow" row={''} handleExitEditClick={() => { setCreatingRow(false) }} />)}
-            {/* Si plusieur lignes ? */}
-            {/* {Array.isArray(displayRows)
-              ? displayRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row, index) => <Row key={row.id + '_' + index} row={row} editingRow={editingRow}
+            {displayRows
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((row, index) =>
+                <Row key={row.id + '_' + index} row={row}
                   checkColumnsVisible={checkColumnsVisible}
-                  // handleEditClick={() => { setEditingRow(row.id) }}
                   handleEditClick={props.handleOpenModal}
-                  handleExitEditClick={handleExitEditClick}
-                  handleEditSubmitClick={handleEditSubmitClick}
-                  editing={editingRow}
-                  user={props.user} />)
-              : <Row key={displayRows.id} row={displayRows} editingRow={editingRow}
-                checkColumnsVisible={checkColumnsVisible}
-                // handleEditClick={() => { setEditingRow(displayRows.id) }}
-                handleEditClick={props.handleOpenModal}
-                handleExitEditClick={handleExitEditClick}
-                handleEditSubmitClick={handleEditSubmitClick}
-                editing={editingRow}
-                user={props.user} />
-            } */}
-            {Object.entries(filter).map(([k, v]) => (
-              v !== 'none'
-                ? displayRows.filter((r) => r[k] === v)
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row, index) =>
-                    <Row key={row.id + '_' + index} row={row} editingRow={editingRow}
-                      checkColumnsVisible={checkColumnsVisible}
-                      // handleEditClick={() => { setEditingRow(row.id) }}
-                      handleEditClick={props.handleOpenModal}
-                      handleExitEditClick={handleExitEditClick}
-                      handleEditSubmitClick={handleEditSubmitClick}
-                      editing={editingRow}
-                      user={props.user} />
-                  )
-                : displayRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row, index) =>
-                    <Row key={row.id + '_' + index} row={row} editingRow={editingRow}
-                      checkColumnsVisible={checkColumnsVisible}
-                      // handleEditClick={() => { setEditingRow(row.id) }}
-                      handleEditClick={props.handleOpenModal}
-                      handleExitEditClick={handleExitEditClick}
-                      handleEditSubmitClick={handleEditSubmitClick}
-                      editing={editingRow}
-                      user={props.user} />
-                  )
-            ))}
-
-
+                  adresseHabilited={props.adresseHabilited}
+                  action={props.action}
+                  handleDeleteAdresse={props.handleDeleteAdresse}
+                  handleOpenModalAdresse={props.handleOpenModalAdresse}
+                />
+              )
+            }
           </TableBody>
         </Table>
       </TableContainer>
-      {Object.entries(filter).map(([k, v]) => (
-        v !== 'none'
-          ? displayRows.filter((r) => r[k] === v).length > rowsPerPage &&
-            <TablePagination
-              rowsPerPageOptions={[10, 30, 100]}
-              component="div"
-              count={displayRows.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onChangePage={handleChangePage}
-              onChangeRowsPerPage={handleChangeRowsPerPage}
-            />
-          : displayRows.length > rowsPerPage &&
-            <TablePagination
-              rowsPerPageOptions={[10, 30, 100]}
-              component="div"
-              count={displayRows.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onChangePage={handleChangePage}
-              onChangeRowsPerPage={handleChangeRowsPerPage}
-            />
-      ))}
+
+      <TablePagination
+        rowsPerPageOptions={[10, 30, 100]}
+        component="div"
+        count={displayRows.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onChangePage={handleChangePage}
+        onChangeRowsPerPage={handleChangeRowsPerPage}
+      />
 
     </Paper>
   );

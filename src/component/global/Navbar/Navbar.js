@@ -16,8 +16,11 @@ import { Link } from 'react-router-dom';
 import './Navbar.css';
 import { SocketContext } from '../../../context/socket.context';
 import { IsPermitted } from '../../../utilities/Function';
+import Cookies from 'js-cookie';
+import Button from '@material-ui/core/Button';
+import { codeToName } from '../../../utilities/Function';
 
-const drawerWidth = 280;
+const drawerWidth = '20%';
 
 const StyledBadgeConnected = withStyles((theme) => ({
   badge: {
@@ -55,8 +58,8 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: "blue",
     }
   }, navBar: {
-    position: 'fixed',
-    width: drawerWidth,
+    // position: 'fixed',
+    // width: drawerWidth,
     backgroundColor: '#fff',
   }
 
@@ -65,7 +68,7 @@ const useStyles = makeStyles((theme) => ({
 export default function PermanentDrawerLeft() {
 
   const classes = useStyles();
-  const { user } = useContext(UserContext);
+  const { user, deleteUser } = useContext(UserContext);
   const { socket } = useContext(SocketContext);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [connected, setConnected] = useState(false);
@@ -81,10 +84,16 @@ export default function PermanentDrawerLeft() {
     setSelectedIndex(index);
   };
 
+  const handleLogOut = () => {
+    Cookies.remove('authToken', user.token);
+    console.log(Cookies.get())
+    deleteUser();
+  }
+  
   return (
 
     <div className={classes.navBar}>
-      <div className={classes.drawerHeader}></div>
+      <div className={classes.drawerHeader}><Button variant="contained" onClick={handleLogOut}>Déconnection</Button></div>
       <Divider />
 
       <div className='card-avatar'>
@@ -98,7 +107,7 @@ export default function PermanentDrawerLeft() {
               }}
               variant="dot"
             >
-              <svg height="100px" viewBox="0 0 22 22" width="100px" fill="secondary"><path d="M0 0h24v24H0z" fill="none"></path>
+              <svg height="100px" viewBox="0 0 22 22" width="100px" fill="primary"><path d="M0 0h24v24H0z" fill="none"></path>
                 <path fill="#c51162" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"></path></svg>
 
             </StyledBadgeConnected>
@@ -111,7 +120,7 @@ export default function PermanentDrawerLeft() {
               }}
               variant="dot"
             >
-              <svg height="100px" viewBox="0 0 22 22" width="100px" fill="secondary"><path d="M0 0h24v24H0z" fill="none"></path>
+              <svg height="100px" viewBox="0 0 22 22" width="100px" fill="primary"><path d="M0 0h24v24H0z" fill="none"></path>
                 <path fill="#c51162" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"></path></svg>
 
             </StyledBadgeDisconnected>
@@ -119,7 +128,7 @@ export default function PermanentDrawerLeft() {
 
           <div className={classes.infoAvatar}>
             <p className='titre'>{user.nom}</p>
-            <p>{user.fonction}</p>
+            <p>{codeToName('formation_'+user.fonction)}</p>
           </div>
         </div>
       </div>
@@ -127,31 +136,31 @@ export default function PermanentDrawerLeft() {
       <Divider />
       <List>
         {IsPermitted(user, 'sollicitation', 'view') &&
-          <ListItem button className='secondary-h-color' component={Link} to="/home" selected={selectedIndex === 1}
+          <ListItem button className='primary-h-color' component={Link} to="/home" selected={selectedIndex === 1}
             onClick={(event) => handleListItemClick(event, 1)}>
             <ListItemIcon><CreateNewFolderIcon /></ListItemIcon>
-            <ListItemText primary='Sollicitation' />
+            <ListItemText secondary='Sollicitation' />
           </ListItem>}
-          
+
         {IsPermitted(user, 'catalogue', 'view') &&
-          <ListItem button className='secondary-h-color' component={Link} to="catalogue" selected={selectedIndex === 2}
+          <ListItem button className='primary-h-color' component={Link} to="catalogue" selected={selectedIndex === 2}
             onClick={(event) => handleListItemClick(event, 2)}>
             <ListItemIcon><DvrIcon /></ListItemIcon>
-            <ListItemText primary='Catalogue' />
+            <ListItemText secondary='Catalogue' />
           </ListItem>}
 
         {IsPermitted(user, 'brs', 'view') &&
-          <ListItem button className='secondary-h-color' component={Link} href="#" selected={selectedIndex === 3}
+          <ListItem button className='primary-h-color' component={Link} href="#" selected={selectedIndex === 3}
             onClick={(event) => handleListItemClick(event, 3)}>
             <ListItemIcon><FileCopyIcon /></ListItemIcon>
-            <ListItemText primary='BRS' />
+            <ListItemText secondary='BRS' />
           </ListItem>}
 
         {IsPermitted(user, 'dashboard', 'view') &&
-          <ListItem button className='secondary-h-color' component={Link} href="#" selected={selectedIndex === 4}
+          <ListItem button className='primary-h-color' component={Link} href="#" selected={selectedIndex === 4}
             onClick={(event) => handleListItemClick(event, 4)}>
             <ListItemIcon><DashboardIcon /></ListItemIcon>
-            <ListItemText primary='Tableau de bord' />
+            <ListItemText secondary='Tableau de bord' />
           </ListItem>}
 
       </List>

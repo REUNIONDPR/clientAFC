@@ -8,33 +8,34 @@ import axios from 'axios';
 
 export default function SelectPersonnalize(props) {
     const [data, setData] = useState();
-    const [isMounted, setIsMounted] = useState(false)
-    useEffect(() => {
-        if (!isMounted) {
-            axios({
-                method: 'GET',
-                url: `global/findAll?table=${props.table}`,
-                headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
-            }).then((response) => setData(response.data));
-            setIsMounted(true)
-        }
-    }, [props.label])
 
+    useEffect(() => {
+        let url = props.path;
+        
+        axios({
+            method: 'GET',
+            url: url,
+            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+        }).then((response) => setData(response.data));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+    
     return (
-        <FormControl size="small" variant="outlined" error={props.error}>
+        <FormControl size="small" variant="outlined" error={props.error} disabled={props.disabled}>
             <InputLabel id="demo-simple-select-outlined-label">{props.label}</InputLabel>
             {data &&
                 <Select
                     value={props.value}
-                    onChange={(e) => props.handleChangeValue(props.rowKey, e.target.value)}
+                    onChange={(e) => props.handleChangeValue(e.target.name, e.target.value)}
                     fullWidth
+                    name={props.rowKey}
                     label={props.label}
                 >
-                    <MenuItem value="">
-                        <em>None</em>
+                    <MenuItem value="all">
+                        <em>Choisir</em>
                     </MenuItem>
                     {data.map((v) => (
-                        <MenuItem key={v.id + '_' + v.libelle} value={v.id}>{v.libelle}</MenuItem>
+                        <MenuItem key={v.id + '_' + v.libelle} value={v.id}>{v[props.displayvalue]}</MenuItem>
                     ))}
                 </Select>
             }
