@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core';
 import './App.css';
 import Main from './component/main/Main';
@@ -63,11 +63,23 @@ function App() {
 
   const { user, logUser } = useContext(UserContext);
   const classes = useStyles();
+  const [isUser, setIsUser] = useState(false)
 
   useEffect(() => {
     if (!Cookie.get('authToken') && !user.hasOwnProperty('idgasi')) {
-      logUser(Cookie.get('xtidc'))
-    }
+      console.log('zer')
+      if (Cookie.get('xtidc') !== undefined) {
+        setIsUser(true)
+        logUser(Cookie.get('xtidc'))
+      } else {
+        console.log('cookie existe pas')
+        
+        Cookie.set("xtidc", 'IRLE5360');
+        setIsUser(true)
+        logUser(Cookie.get('xtidc'))
+
+      }
+    } else setIsUser(true)
   }, [user, logUser]);
 
   return (
@@ -76,20 +88,24 @@ function App() {
 
       {/* <TestConnectSocket /> */}
       <ThemeProvider theme={theme}>
+        {isUser ?
+          <>
+            <div className={classes.drawer}>
+              <NavbarV />
+            </div>
 
-        <div className={classes.drawer}>
-          <NavbarV />
-        </div>
-
-        <Switch>
-          <Main>
-            <Route exact path="/" component={home} />
-            <Route exact path='/:route' render={() => (<>
-              <PrivateRoute path='/catalogue' component={Catalogue} />
-              <PrivateRoute path='/home' component={home} /> </>
-            )} />
-          </Main>
-        </Switch>
+            <Switch>
+              <Main>
+                <Route exact path="/" component={home} />
+                <Route exact path='/:route' render={() => (<>
+                  <PrivateRoute path='/catalogue' component={Catalogue} />
+                  <PrivateRoute path='/home' component={home} /> </>
+                )} />
+              </Main>
+            </Switch>
+          </>
+          : <p>Non reconnu : <a href="http://accueil.pole-emploi.intra:8501/portail/index.jspz?id=237#" target="_blank" rel="noreferrer">Redirection</a></p>
+        }
       </ThemeProvider>
 
     </div>

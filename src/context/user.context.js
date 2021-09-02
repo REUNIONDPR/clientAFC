@@ -43,6 +43,7 @@ const UserContextProvider = (props) => {
     };
 
     const logUser = (idgasi) => {
+        console.log(idgasi)
         fetch('/auth/logUser', {
             method: 'post',
             headers: new Headers({
