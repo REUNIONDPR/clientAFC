@@ -111,7 +111,7 @@ export default function Row(props) {
     //     });
     //     // eslint-disable-next-line react-hooks/exhaustive-deps
     // }, [])
-
+    
     return (
         <React.Fragment>
             <StyledTableRow >
@@ -125,9 +125,9 @@ export default function Row(props) {
                                             <DivAdress
                                                 adresseHabilited={props.adresseHabilited}
                                                 key={row.id + '_' + a.id}
-                                                label={a.adresse}
+                                                label={a.adresse + ' - ' + a.commune}
                                                 id={a.id}
-                                                handleDeleteAdresse={() => { props.handleDeleteAdresse(row, { id: a.id, adresse: a.adresse }) }} />
+                                                handleDeleteAdresse={() => { props.handleDeleteAdresse(row, { id: a.id, adresse: a.adresse, commune:a.commune }) }} />
                                         ))}
                                     </div>
                                     {props.adresseHabilited && 

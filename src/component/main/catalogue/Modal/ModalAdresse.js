@@ -87,28 +87,15 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ModalAdresse(props) {
     const classes = useStyles();
-    const [isSubmit, setIsSubmit] = useState(false) // Gestion des erreurs (champs vide)
     const dataRow = props.updateRow;
     const [textAdresse, setTextAdresse] = useState('');
-    const [clickHandleSubmit, setClickHandleSubmit] = useState(false);
-
-    const handleSubmit = (row) => {
-
-        // setIsSubmit(true)
-        // let submitting = true;
-        // let action = dataRow.id === '' || dataRow.id === 0 ? 'create' : 'update';
-        // // eslint-disable-next-line array-callback-return
-        // // Object.entries(dataRow).map(([k, v]) => { if (v === '' && k !== 'id') { return submitting = false; } })
-        // if (submitting) {
-        //   switch (action) {
-        //     case 'create': props.handleSubmitClickToParent(row, action); break;
-        //     case 'update': props.handleEditSubmitClickToParent(row, action); break;
-        //     default: props.handleErrorSubmit();
-        //   }
-        // }
-    }
 
     const [adresse, setAdresse] = useState({ ville: 'all', adresse: 'all' })
+
+    // Comment faire autrement ?
+    useEffect(() => {
+        setAdresse({ ville: 'all', adresse: 'all' })
+    }, [props.openModal])
 
     const handleChange = (key, value) => {
         if (key === 'ville') {
@@ -119,9 +106,10 @@ export default function ModalAdresse(props) {
 
     const [listAdresse, setListAdresse] = useState([]);
     useEffect(() => {
+        console.log(dataRow)
         axios({
             method: 'GET',
-            url: 'adresse/findOuter?commune=' + adresse.ville + '&id_cata=' + dataRow.id,
+            url: 'adresse/findOuter?commune=' + adresse.ville + '&id_catalogue_attributaire=' + dataRow.id_of_cata,
             headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
         }).then((response) => setListAdresse(response.data));
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -239,8 +227,8 @@ export default function ModalAdresse(props) {
                                             onClick={() => { 
                                                 props.handleCreateAdresse(dataRow, {
                                                     id:'', 
-                                                    adresse:textAdresse + ' - ' + listVille.filter((v) => v.id === adresse.ville)[0].libelle
-                                                }, adresse.ville)
+                                                    adresse:textAdresse,
+                                                }, {id:adresse.ville, commune:listVille.filter((v) => v.id === adresse.ville)[0].libelle})
                                                 if (checkClose) { props.handleCloseModal(dataRow) } else setTextAdresse('')
                                             }}
                                             variant="contained" color="primary" >

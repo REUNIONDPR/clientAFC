@@ -37,6 +37,8 @@ export default function Catalogue() {
     const [updateRow, setupdateRow] = useState({
         id: '',
         id_lot: 'all',
+        id_of_cata: '',
+        adresse: [],
         n_Article: '',
         intitule_form_marche: '',
         intitule_form_base_article: '',
@@ -94,6 +96,8 @@ export default function Catalogue() {
         setupdateRow({
             id: '',
             id_lot: 'all',
+            id_of_cata: '',
+            adresse: [],
             n_Article: '',
             intitule_form_marche: '',
             intitule_form_base_article: '',
@@ -193,11 +197,16 @@ export default function Catalogue() {
                     if (v.adresse.includes('|')) {
                         let array_adresse = v.adresse.split('|');
                         for (let i = 0; i < array_adresse.length; i++) {
-                            adr.push({ id: array_adresse[i].split(':')[0], adresse: array_adresse[i].split(':')[1] })
+                            let addr_ville = array_adresse[i].split(':')[1].split(' - ')
+                            adr.push({ id: array_adresse[i].split(':')[0], adresse: addr_ville[0], commune: addr_ville[1] })
                         }
-                    } else adr.push({ id: v.adresse.split(':')[0], adresse: v.adresse.split(':')[1] })
-                    v.adresse = adr;
-                } else adr.push({ id: '', adresse: 'null' })
+                    } else {
+                        let addr_ville = v.adresse.split(':')[1].split(' - ')
+                        adr.push({ id: v.adresse.split(':')[0], adresse: addr_ville[0], commune: addr_ville[1] })
+                    }
+                } 
+                // else adr.push({ id: '', adresse: 'null' })
+                v.adresse = adr;
                 return v;
             })
 
@@ -357,12 +366,9 @@ export default function Catalogue() {
             data: { id_catalogue_attributaire: updatedRow.id_of_cata, id_adresse: adresse.id },
             headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
         }).then((response) => {
-            console.log(response)
-
             if (response.status === 200) {
 
                 let newAdresse = updatedRow.adresse.filter((v) => v.id !== adresse.id)
-                console.log(newAdresse)
                 updatedRow.adresse = newAdresse
                 let newDataRow = updateRowsTableAfterPutAxios(updatedRow, 'adresse')
 
@@ -385,22 +391,12 @@ export default function Catalogue() {
         axios({
             method: 'put',
             url: '/adresse/create',
-            data: { adresse: adresse.adresse, commune: ville, actif: 1 },
+            data: { adresse: adresse.adresse, commune: ville.id, actif: 1 },
             headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
         }).then((response) => {
             if (response.status === 200) {
-                let objAdresse = { id: response.data.insertId, adresse: adresse.adresse }
+                let objAdresse = { id: response.data.insertId, adresse: adresse.adresse, commune: ville.commune }
                 handleAddAdresse(updatedRow, objAdresse)
-                // updatedRow.adresse.push(objAdresse) 
-                // let newDataRow = updateRowsTableAfterPutAxios(updatedRow)
-
-                // setRows(newDataRow)
-                // setDisplayRows(newDataRow)
-
-                // // socket.emit("updateAdresse", newDataRow);
-                // setMessageSnackBar('Supprimé avec succès.');
-                // setSeverity('success');
-                // updateDataRow(displayRows, dataRow);
             } else {
                 setMessageSnackBar('Erreur lors de la création de l\'adresse.');
                 setSeverity('error');
