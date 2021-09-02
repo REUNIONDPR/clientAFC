@@ -4,6 +4,7 @@ export function codeToName(str) {
   switch (str) {
 
     case 'lot': return 'Lot';
+    case 'of': return 'Attributaire';
     case 'n_Article': return 'N° Article';
     case 'intitule_form_marche': return 'Intitulé';
     case 'intitule_form_base_article': return 'Intitulé Base Article';

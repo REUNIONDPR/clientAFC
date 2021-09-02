@@ -17,14 +17,21 @@ import './table.css';
 const useStyles = makeStyles((theme) => ({
   table: {
     maxHeight: 650,
-    [theme.breakpoints.down(1550)]:{
+    [theme.breakpoints.down(1550)]: {
       maxHeight: 500,
     },
   },
-  PaperContainerTable:{
-    overflow: 'auto', 
+  PaperContainerTable: {
+    overflow: 'auto',
     marginBottom: 20
-  }
+  },
+  cellHead: {
+    borderLeft: '1px solid rgba(224, 224, 224, 1);',
+    whiteSpace: 'nowrap',
+  },
+  mwidth: {
+    minWidth: 230,
+  },
 }))
 
 export default function TablePersonnalize(props) {
@@ -112,10 +119,14 @@ export default function TablePersonnalize(props) {
           <TableHead>
             <TableRow>
               {columns.map((col) => (
-                checkColumnsVisible.indexOf(col) !== -1 && 
-                <TableCell align="center" className='nowrap' key={col}>{col.includes('display_') ? codeToName(col.split('display_')[1]) : codeToName(col)}</TableCell>
+                checkColumnsVisible.indexOf(col) !== -1 &&
+                <TableCell align="center"
+                  className={`${classes.cellHead} 
+                  ${(col === 'of' || col === 'intitule_form_marche' || col === 'intitule_form_base_article') && classes.mwidth}`}
+                  key={col}>{codeToName(col)}
+                </TableCell>
               ))}
-              <TableCell align="center" className='nowrap' key='actionT'>Action</TableCell>
+              <TableCell align="center" className={classes.cellHead} key='actionT'>Action</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

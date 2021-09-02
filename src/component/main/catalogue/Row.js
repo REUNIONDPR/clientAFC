@@ -73,6 +73,10 @@ const useStyles = makeStyles((theme) => ({
         fontSize: '12px',
         maxWidth: 'none'
     },
+    stickyCell:{
+        position: 'absolute',
+        height:80,
+    }
 }));
 
 export function DivAdress(props) {
@@ -108,10 +112,6 @@ export default function Row(props) {
     //     // eslint-disable-next-line react-hooks/exhaustive-deps
     // }, [])
 
-    const handleDeleteAdresse = (id_catalogue, id_adresse) => {
-        console.log('remove adresse :', id_catalogue, id_adresse)
-    }
-
     return (
         <React.Fragment>
             <StyledTableRow >
@@ -121,7 +121,7 @@ export default function Row(props) {
                             ? <TableCell className={classes.center} key={row.id.toString() + '_' + k}>
                                 <div className={classes.adresseCell}>
                                     <div className={classes.adresseBlock}>
-                                        {v.map((a) => (
+                                        {v && v.map((a) => (
                                             <DivAdress
                                                 adresseHabilited={props.adresseHabilited}
                                                 key={row.id + '_' + a.id}

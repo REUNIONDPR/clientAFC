@@ -189,265 +189,268 @@ export default function Catalogue() {
 
             let data = response.data.map((v) => {
                 let adr = [];
-                if (v.adresse.includes('//')) {
-                    let array_adresse = v.adresse.split('//');
-                    for (let i = 0; i < array_adresse.length; i++) {
-                        adr.push({ id: array_adresse[i].split(':')[0], adresse: array_adresse[i].split(':')[1] })
-                    }
-                } else adr.push({ id: v.adresse.split(':')[0], adresse: v.adresse.split(':')[1] })
-                v.adresse = adr;
+                if (v.adresse) {
+                    if (v.adresse.includes('|')) {
+                        let array_adresse = v.adresse.split('|');
+                        for (let i = 0; i < array_adresse.length; i++) {
+                            adr.push({ id: array_adresse[i].split(':')[0], adresse: array_adresse[i].split(':')[1] })
+                        }
+                    } else adr.push({ id: v.adresse.split(':')[0], adresse: v.adresse.split(':')[1] })
+                    v.adresse = adr;
+                } else adr.push({id: '', adresse: 'null'})
                 return v;
+                })
+
+                setRows(data)
+                // Object.entries(data).map(([key, value]) => (key === '0') ? setColumns(Object.keys(value)) : false)
+                let col = [];
+                Object.entries(data).filter(([k, i]) => k === '0').map(([k, value]) => Object.keys(value).map((v) => col.push(v)))
+                setColumns(col)
+            });
+
+        }, [user])
+
+        const handleErrorSubmit = () => {
+            setMessageSnackBar('Erreur, je n\'ai pas compris votre demande.');
+            setSeverity('error');
+            setOpenModal(false)
+            handleHideDeleteIcon()
+        }
+
+        const handleSubmitClick = (dataRow) => {
+            axios({
+                method: 'put',
+                url: '/catalogue/create',
+                data: dataRow,
+                headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+            }).then((response) => {
+                if (response.status === 200) {
+                    let newDataRow = rows;
+                    console.log(rows, dataRow);
+                    dataRow.id = response.data.insertId;
+                    dataRow.adresse = '';
+                    newDataRow.unshift(dataRow);
+                    socket.emit("updateCatalogue", newDataRow);
+                    setRows(newDataRow)
+                    setMessageSnackBar('Enregistrement réussi.');
+                    setSeverity('success');
+                    setOpenModal(false)
+                    handleHideDeleteIcon()
+                    // updateDataRow(displayRows, dataRow);
+                } else {
+                    setMessageSnackBar('Echec de l\'enregistrement.');
+                    setSeverity('error');
+                }
+                setOpenSnackBar(true);
+            })
+        }
+
+        const updateRowsTableAfterPutAxios = (newRow) => {
+            return rows.map((v, i) => {
+                if (v.id === newRow.id && v.id_of_cata === newRow.id_of_cata) {
+                    Object.keys(v).map((k) => v[k] = newRow[k] )
+                    return v = newRow;
+                } else return v;
+            })
+        }
+
+        const handleEditSubmitClick = (dataRow) => {
+            axios({
+                method: 'put',
+                url: '/catalogue/update',
+                data: dataRow,
+                headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+            }).then((response) => {
+                if (response.status === 200) {
+                    let newDataRow = updateRowsTableAfterPutAxios(dataRow)
+                    setRows(newDataRow)
+                    setDisplayRows(newDataRow)
+                    socket.emit("updateCatalogue", newDataRow);
+                    setMessageSnackBar('Modification enregistré.');
+                    setSeverity('success');
+                    setOpenModal(false)
+                    handleHideDeleteIcon()
+                    // updateDataRow(displayRows, dataRow);
+                } else {
+                    setMessageSnackBar('Echec de la modification.');
+                    setSeverity('error');
+                }
+                setOpenSnackBar(true);
+            })
+        }
+
+        const handleDeleteClick = (dataRow) => {
+            axios({
+                method: 'put',
+                url: '/catalogue/delete',
+                data: dataRow,
+                headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+            }).then((response) => {
+                if (response.status === 200) {
+                    let newDataRow = rows.filter((v) => v.id !== dataRow.id)
+                    socket.emit("updateCatalogue", newDataRow);
+                    setRows(newDataRow)
+                    setMessageSnackBar('Suppression réussi.');
+                    setSeverity('success');
+                    setOpenModal(false)
+                    handleHideDeleteIcon()
+                    // setRows(newDataRow) // Met à jour le tableau au cas ou la socket ne répond pas.
+                    // setDisplayRows(newDataRow) // Met à jour le tableau au cas ou la socket ne répond pas.
+                } else {
+                    setMessageSnackBar('Echec de la suppréssion.');
+                    setSeverity('error');
+                }
+                setOpenSnackBar(true);
+            })
+        }
+
+        const [openModalAdresse, setOpenModalAdresse] = useState(false)
+        const handleShowModalAdresse = (row) => {
+            setupdateRow(row)
+            setOpenModalAdresse(true)
+        }
+
+        const handleCloseModalAdresse = () => {
+            resetUpdateRow();
+            setOpenModalAdresse(false)
+        }
+
+        const handleAddAdresse = (updatedRow, adresse) => {
+            axios({
+                method: 'put',
+                url: '/catalogue/addAdresse',
+                data: { id_cata: updatedRow.id, id_adresse: adresse.id },
+                headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+            }).then((response) => {
+                if (response.status === 200) {
+
+                    updatedRow.adresse.push(adresse)
+                    let newDataRow = updateRowsTableAfterPutAxios(updatedRow)
+
+                    setRows(newDataRow)
+                    setDisplayRows(newDataRow)
+
+                    socket.emit("updateAdresse", newDataRow);
+                    setMessageSnackBar('Modification enregistré.');
+                    setSeverity('success');
+                    // updateDataRow(displayRows, dataRow);
+                } else {
+                    setMessageSnackBar('Echec de la modification.');
+                    setSeverity('error');
+                }
+                setOpenSnackBar(true);
+            })
+        }
+
+        const handleDeleteAdresse = (updatedRow, adresse) => {
+            axios({
+                method: 'put',
+                url: '/attributaire/deleteAdresse',
+                data: { id_catalogue_attributaire:updatedRow.id_of_cata, id_adresse: adresse.id },
+                headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+            }).then((response) => {
+                console.log(response)
+
+                if (response.status === 200) {
+
+                    let newAdresse = updatedRow.adresse.filter((v) => v.id !== adresse.id)
+                    console.log(newAdresse)
+                    updatedRow.adresse = newAdresse
+                    let newDataRow = updateRowsTableAfterPutAxios(updatedRow)
+
+                    setRows(newDataRow)
+                    setDisplayRows(newDataRow)
+
+                    socket.emit("updateAdresse", newDataRow);
+                    setMessageSnackBar('Supprimé avec succès.');
+                    setSeverity('success');
+                    // updateDataRow(displayRows, dataRow);
+                } else {
+                    setMessageSnackBar('Echec de la suppréssion.');
+                    setSeverity('error');
+                }
+                setOpenSnackBar(true);
+            })
+        }
+
+        const handleCreateAdresse = (updatedRow, adresse, ville) => {
+            axios({
+                method: 'put',
+                url: '/adresse/create',
+                data: { adresse: adresse.adresse, commune: ville, actif: 1 },
+                headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+            }).then((response) => {
+                if (response.status === 200) {
+                    let objAdresse = { id: response.data.insertId, adresse: adresse.adresse }
+                    handleAddAdresse(updatedRow, objAdresse)
+                    // updatedRow.adresse.push(objAdresse) 
+                    // let newDataRow = updateRowsTableAfterPutAxios(updatedRow)
+
+                    // setRows(newDataRow)
+                    // setDisplayRows(newDataRow)
+
+                    // // socket.emit("updateAdresse", newDataRow);
+                    // setMessageSnackBar('Supprimé avec succès.');
+                    // setSeverity('success');
+                    // updateDataRow(displayRows, dataRow);
+                } else {
+                    setMessageSnackBar('Erreur lors de la création de l\'adresse.');
+                    setSeverity('error');
+                    setOpenSnackBar(true);
+                }
             })
 
-            setRows(data)
-            // Object.entries(data).map(([key, value]) => (key === '0') ? setColumns(Object.keys(value)) : false)
-            let col = [];
-            Object.entries(data).filter(([k, i]) => k === '0').map(([k, value]) => Object.keys(value).map((v) => col.push(v)))
-            setColumns(col)
-        });
+        }
 
-    }, [user])
+        return (
+            <>
+                <Table columns={columns} propsTableName='Catalogue'
+                    handleEditSubmitClick={handleEditSubmitClick}
+                    displayRows={displayRows} // row
+                    filter={[{ 'name': 'Lot', 'displayName': 'Tout les lots', 'handleChange': handleChangeFilter, 'data': lotList, valueSelected: filterSelected, varName: 'id_lot' }]}
+                    nbFilter={nbFilter}
+                    handleChangeFilter={handleChangeFilter}
+                    handleCloseSnackbar={handleCloseSnackbar}
+                    openSnackBar={openSnackBar}
+                    messageSnackBar={messageSnackBar}
+                    severity={severity}
+                    user={user}
+                    adresseHabilited={adresseHabilited}
+                    handleOpenModalAdresse={handleShowModalAdresse}
+                    handleOpenModal={() => handleOpenModal(updateRow)}
+                    action={ActionTable}
+                    handleDeleteAdresse={handleDeleteAdresse}
+                />
+                {updateRow &&
+                    <ModalCatalogue openModal={openModal}
+                        handleCloseModal={handleCloseModal}
+                        handleErrorSubmit={handleErrorSubmit}
+                        handleSubmitClickToParent={handleSubmitClick}
+                        handleChangeUpdateRow={handleChangeUpdateRow}
+                        handleEditSubmitClickToParent={handleEditSubmitClick}
+                        updateRow={updateRow}
+                        handleDeleteClick={handleDeleteClick}
+                        handleHideDeleteIcon={handleHideDeleteIcon}
+                        handleShowDeleteIcon={handleShowDeleteIcon}
+                        deleteClick={deleteClick}
+                        user={user} />
+                }
 
-    const handleErrorSubmit = () => {
-        setMessageSnackBar('Erreur, je n\'ai pas compris votre demande.');
-        setSeverity('error');
-        setOpenModal(false)
-        handleHideDeleteIcon()
-    }
-
-    const handleSubmitClick = (dataRow) => {
-        axios({
-            method: 'put',
-            url: '/catalogue/create',
-            data: dataRow,
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
-        }).then((response) => {
-            if (response.status === 200) {
-                let newDataRow = rows;
-                console.log(rows, dataRow);
-                dataRow.id = response.data.insertId;
-                dataRow.adresse = '';
-                newDataRow.unshift(dataRow);
-                socket.emit("updateCatalogue", newDataRow);
-                setRows(newDataRow)
-                setMessageSnackBar('Enregistrement réussi.');
-                setSeverity('success');
-                setOpenModal(false)
-                handleHideDeleteIcon()
-                // updateDataRow(displayRows, dataRow);
-            } else {
-                setMessageSnackBar('Echec de l\'enregistrement.');
-                setSeverity('error');
-            }
-            setOpenSnackBar(true);
-        })
-    }
-
-    const updateRowsTableAfterPutAxios = (newRow) => {
-        return rows.map((v, i) => {
-            if (v.id === newRow.id) {
-                Object.keys(v).map((k) => {
-                    return v[k] = newRow[k]
-                })
-                return v = newRow;
-            } else return v;
-        })
-    }
-
-    const handleEditSubmitClick = (dataRow) => {
-        axios({
-            method: 'put',
-            url: '/catalogue/update',
-            data: dataRow,
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
-        }).then((response) => {
-            if (response.status === 200) {
-                let newDataRow = updateRowsTableAfterPutAxios(dataRow)
-                setRows(newDataRow)
-                setDisplayRows(newDataRow)
-                socket.emit("updateCatalogue", newDataRow);
-                setMessageSnackBar('Modification enregistré.');
-                setSeverity('success');
-                setOpenModal(false)
-                handleHideDeleteIcon()
-                // updateDataRow(displayRows, dataRow);
-            } else {
-                setMessageSnackBar('Echec de la modification.');
-                setSeverity('error');
-            }
-            setOpenSnackBar(true);
-        })
-    }
-
-    const handleDeleteClick = (dataRow) => {
-        axios({
-            method: 'put',
-            url: '/catalogue/delete',
-            data: dataRow,
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
-        }).then((response) => {
-            if (response.status === 200) {
-                let newDataRow = rows.filter((v) => v.id !== dataRow.id)
-                socket.emit("updateCatalogue", newDataRow);
-                setRows(newDataRow)
-                setMessageSnackBar('Suppression réussi.');
-                setSeverity('success');
-                setOpenModal(false)
-                handleHideDeleteIcon()
-                // setRows(newDataRow) // Met à jour le tableau au cas ou la socket ne répond pas.
-                // setDisplayRows(newDataRow) // Met à jour le tableau au cas ou la socket ne répond pas.
-            } else {
-                setMessageSnackBar('Echec de la suppréssion.');
-                setSeverity('error');
-            }
-            setOpenSnackBar(true);
-        })
-    }
-
-    const [openModalAdresse, setOpenModalAdresse] = useState(false)
-    const handleShowModalAdresse = (row) => {
-        setupdateRow(row)
-        setOpenModalAdresse(true)
-    }
-
-    const handleCloseModalAdresse = () => {
-        resetUpdateRow();
-        setOpenModalAdresse(false)
-    }
-
-    const handleAddAdresse = (updatedRow, adresse) => {
-        axios({
-            method: 'put',
-            url: '/catalogue/addAdresse',
-            data: { id_cata: updatedRow.id, id_adresse: adresse.id },
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
-        }).then((response) => {
-            if (response.status === 200) {
-
-                updatedRow.adresse.push(adresse) 
-                let newDataRow = updateRowsTableAfterPutAxios(updatedRow)
-    
-                setRows(newDataRow)
-                setDisplayRows(newDataRow)
-
-                socket.emit("updateAdresse", newDataRow);
-                setMessageSnackBar('Modification enregistré.');
-                setSeverity('success');
-                // updateDataRow(displayRows, dataRow);
-            } else {
-                setMessageSnackBar('Echec de la modification.');
-                setSeverity('error');
-            }
-            setOpenSnackBar(true);
-        })
-    }
-
-    const handleDeleteAdresse = (updatedRow, adresse) => {
-        axios({
-            method: 'put',
-            url: '/adresse/delete',
-            data: { id_cata: updatedRow.id, id_adresse: adresse.id },
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
-        }).then((response) => {
-            if (response.status === 200) {
-
-                let newAdresse = updatedRow.adresse.filter((v) => v.id !== adresse.id)
-                updatedRow.adresse = newAdresse
-                let newDataRow = updateRowsTableAfterPutAxios(updatedRow)
-
-                setRows(newDataRow)
-                setDisplayRows(newDataRow)
-
-                socket.emit("updateAdresse", newDataRow);
-                setMessageSnackBar('Supprimé avec succès.');
-                setSeverity('success');
-                // updateDataRow(displayRows, dataRow);
-            } else {
-                setMessageSnackBar('Echec de la suppréssion.');
-                setSeverity('error');
-            }
-            setOpenSnackBar(true);
-        })
-    }
-
-    const handleCreateAdresse = (updatedRow, adresse, ville) => {
-        axios({
-            method: 'put',
-            url: '/adresse/create',
-            data: { adresse: adresse.adresse, commune:ville, actif:1 },
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
-        }).then((response) => {
-            if (response.status === 200) {
-                let objAdresse = {id: response.data.insertId, adresse: adresse.adresse}
-                handleAddAdresse(updatedRow, objAdresse)
-                // updatedRow.adresse.push(objAdresse) 
-                // let newDataRow = updateRowsTableAfterPutAxios(updatedRow)
-
-                // setRows(newDataRow)
-                // setDisplayRows(newDataRow)
-
-                // // socket.emit("updateAdresse", newDataRow);
-                // setMessageSnackBar('Supprimé avec succès.');
-                // setSeverity('success');
-                // updateDataRow(displayRows, dataRow);
-            } else {
-                setMessageSnackBar('Erreur lors de la création de l\'adresse.');
-                setSeverity('error');
-                setOpenSnackBar(true);
-            }
-        })
-
-    }
-
-    return (
-        <>
-            <Table columns={columns} propsTableName='Catalogue'
-                handleEditSubmitClick={handleEditSubmitClick}
-                displayRows={displayRows} // row
-                filter={[{ 'name': 'Lot', 'displayName': 'Tout les lots', 'handleChange': handleChangeFilter, 'data': lotList, valueSelected: filterSelected, varName: 'id_lot' }]}
-                nbFilter={nbFilter}
-                handleChangeFilter={handleChangeFilter}
-                handleCloseSnackbar={handleCloseSnackbar}
-                openSnackBar={openSnackBar}
-                messageSnackBar={messageSnackBar}
-                severity={severity}
-                user={user}
-                adresseHabilited={adresseHabilited}
-                handleOpenModalAdresse={handleShowModalAdresse}
-                handleOpenModal={() => handleOpenModal(updateRow)}
-                action={ActionTable}
-                handleDeleteAdresse={handleDeleteAdresse}
-            />
-            {updateRow &&
-                <ModalCatalogue openModal={openModal}
-                    handleCloseModal={handleCloseModal}
-                    handleErrorSubmit={handleErrorSubmit}
-                    handleSubmitClickToParent={handleSubmitClick}
-                    handleChangeUpdateRow={handleChangeUpdateRow}
-                    handleEditSubmitClickToParent={handleEditSubmitClick}
+                <ModalAdresse
+                    openModal={openModalAdresse}
+                    handleCloseModal={handleCloseModalAdresse}
                     updateRow={updateRow}
-                    handleDeleteClick={handleDeleteClick}
-                    handleHideDeleteIcon={handleHideDeleteIcon}
-                    handleShowDeleteIcon={handleShowDeleteIcon}
-                    deleteClick={deleteClick}
-                    user={user} />
-            }
+                    handleAddAdresse={handleAddAdresse}
+                    handleCreateAdresse={handleCreateAdresse}
+                />
+                <div>
+                    <div>Add / remove adresse</div>
+                    <div>Supprimer une formation</div>
+                </div>
+            </>
 
-            <ModalAdresse
-                openModal={openModalAdresse}
-                handleCloseModal={handleCloseModalAdresse}
-                updateRow={updateRow}
-                handleAddAdresse={handleAddAdresse}
-                handleCreateAdresse={handleCreateAdresse}
-            />
-            <div>
-                <div>Add / remove adresse</div>
-                <div>Supprimer une formation</div>
-            </div>
-        </>
-
-    )
-}
+        )
+    }
 
 // https://agent.pole-emploi.intra/ihm-synthesemap/synthesesre/v2/
 // login?authn=agent&
