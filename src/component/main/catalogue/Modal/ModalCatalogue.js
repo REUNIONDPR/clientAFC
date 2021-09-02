@@ -69,19 +69,19 @@ export default function ModalCatalogue(props) {
   const [clickHandleSubmit, setClickHandleSubmit] = useState(false)
   
   const handleSubmit = (row) => {
-
-    // setIsSubmit(true)
-    // let submitting = true;
-    // let action = dataRow.id === '' || dataRow.id === 0 ? 'create' : 'update';
-    // // eslint-disable-next-line array-callback-return
-    // // Object.entries(dataRow).map(([k, v]) => { if (v === '' && k !== 'id') { return submitting = false; } })
-    // if (submitting) {
-    //   switch (action) {
-    //     case 'create': props.handleSubmitClickToParent(row, action); break;
-    //     case 'update': props.handleEditSubmitClickToParent(row, action); break;
-    //     default: props.handleErrorSubmit();
-    //   }
-    // }
+    setIsSubmit(true)
+    let submitting = true;
+    let action = dataRow.id === '' || dataRow.id === 0 ? 'create' : 'update';
+    // eslint-disable-next-line array-callback-return
+    // Object.entries(dataRow).map(([k, v]) => { if (v === '' && k !== 'id') { return submitting = false; } })
+    if (submitting) {
+      switch (action) {
+        case 'create': props.handleSubmitClickToParent(row, action); break;
+        case 'update': props.handleEditSubmitClickToParent(row, action); break;
+        default: props.handleErrorSubmit();
+      }
+      setClickHandleSubmit(false);
+    }
   }
 
   return (
@@ -91,7 +91,7 @@ export default function ModalCatalogue(props) {
         aria-describedby="transition-modal-description"
         className={classes.modal}
         open={props.openModal}
-        onClose={() => { props.handleHideDeleteIcon(); props.handleCloseModal() }}
+        onClose={() => { props.handleHideDeleteIcon(); setClickHandleSubmit(false); props.handleCloseModal() }}
         closeAfterTransition
         BackdropComponent={Backdrop}
         BackdropProps={{
