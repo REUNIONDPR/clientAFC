@@ -45,10 +45,10 @@ export default function CardPersonnalize(props) {
     return (
         <Card className={classes.root} >
             <div className={classes.contentCard}>
-                <Typography className={classes.title} color="textprimary" gutterBottom>
+                <Typography className={classes.title} color="primary" gutterBottom>
                     {props.title}
                 </Typography>
-                <Typography className={classes.number} color="textprimary">
+                <Typography className={classes.number} color="primary">
                     {props.number}
                 </Typography>
             </div>

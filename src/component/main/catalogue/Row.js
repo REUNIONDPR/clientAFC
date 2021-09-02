@@ -16,6 +16,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import CloseIcon from '@material-ui/icons/Close';
 import TextField from '@material-ui/core/TextField';
 import ModalAdresse from './Modal/ModalAdresse';
+import { IsPermitted } from '../../../utilities/Function';
 
 const StyledTableRow = withStyles((theme) => ({
     root: {
@@ -76,15 +77,16 @@ const useStyles = makeStyles((theme) => ({
 
 export function DivAdress(props) {
     const classes = useStyles();
-    
+
     return (
         <div className={classes.adresse} >
-            {props.label}
-            <Tooltip classes={{ tooltip: classes.tooltip }} title="Supprimer l'adresse">
-                <IconButton aria-label="delete" color="primary" onClick={props.handleDeleteAdresse}>
-                    <DeleteIcon color='action' />
-                </IconButton>
-            </Tooltip>
+            <span>{props.label}</span>
+            {props.adresseHabilited &&
+                <Tooltip classes={{ tooltip: classes.tooltip }} title="Supprimer l'adresse">
+                    <IconButton aria-label="delete" color="primary" onClick={props.handleDeleteAdresse}>
+                        <DeleteIcon color='action' />
+                    </IconButton>
+                </Tooltip>}
         </div>
     )
 }
@@ -121,17 +123,19 @@ export default function Row(props) {
                                     <div className={classes.adresseBlock}>
                                         {v.map((a) => (
                                             <DivAdress
+                                                adresseHabilited={props.adresseHabilited}
                                                 key={row.id + '_' + a.id}
                                                 label={a.adresse}
                                                 id={a.id}
-                                                handleDeleteAdresse={() => { props.handleDeleteAdresse(row, {id:a.id, adresse:a.adresse}) }} />
+                                                handleDeleteAdresse={() => { props.handleDeleteAdresse(row, { id: a.id, adresse: a.adresse }) }} />
                                         ))}
                                     </div>
+                                    {props.adresseHabilited && 
                                     <Tooltip classes={{ tooltip: classes.tooltip }} title="Ajouter une adresse">
                                         <IconButton aria-label="Ajouter" color="primary" onClick={() => props.handleOpenModalAdresse(row)}>
                                             <AddIcon />
                                         </IconButton>
-                                    </Tooltip>
+                                    </Tooltip> }
                                 </div>
                             </TableCell>
                             : <TableCell key={row.id.toString() + '_' + k} className='nowrap'>{k.includes('display_') ? codeToName(k.split('display_')[1] + '_' + v) : v}</TableCell>

@@ -5,19 +5,15 @@ import Grid from '@material-ui/core/Grid';
 const useStyles = makeStyles((theme) => ({
   main: {
     overflow: 'hidden',
-    width: '90%',
+    width: '80%',
     marginLeft: 'auto',
     marginRight: 'auto',
-    marginTop: '2%',
-    [theme.breakpoints.up(600)]:{
+    [theme.breakpoints.down(1400)]:{
       width: '75%',
     },
-    [theme.breakpoints.up(1200)]:{
-      width: '80%',
-    },
-    [theme.breakpoints.up(1600)]:{
-      width: '85%',
-    },
+  },
+  grid:{
+    marginTop: 20,
   }
 }));
 
@@ -28,7 +24,7 @@ export default function Main(props) {
 
   return (
     <div className={classes.main}>
-      <Grid>
+      <Grid className={classes.grid}>
         {props.children}
       </Grid>
     </div>

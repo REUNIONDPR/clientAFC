@@ -74,6 +74,12 @@ export function codeToName(str) {
     case 'lot_15': return 'LOT 15 - METIER DU NUMERIQUE';
     case 'lot_16': return 'LOT 16 - CREATION D ENTREPRISE';
 
+    case 'formation_1': return 'DT Nord-Est';
+    case 'formation_2': return 'DT Sud-Ouest';
+    case 'formation_3': return 'DPSR';
+    case 'formation_4': return 'AMAJ';
+    case 'formation_5': return 'DDO';
+    case 'formation_6': return 'DPR';
     default: return str;
   }
 }

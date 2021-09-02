@@ -66,7 +66,7 @@ function App() {
 
   useEffect(() => {
     if (!Cookie.get('authToken') && !user.hasOwnProperty('idgasi')) {
-      logUser()
+      logUser(Cookie.get('xtidc'))
     }
   }, [user, logUser]);
 

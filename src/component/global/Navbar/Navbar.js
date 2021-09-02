@@ -18,6 +18,7 @@ import { SocketContext } from '../../../context/socket.context';
 import { IsPermitted } from '../../../utilities/Function';
 import Cookies from 'js-cookie';
 import Button from '@material-ui/core/Button';
+import { codeToName } from '../../../utilities/Function';
 
 const drawerWidth = '20%';
 
@@ -85,10 +86,10 @@ export default function PermanentDrawerLeft() {
 
   const handleLogOut = () => {
     Cookies.remove('authToken', user.token);
-    console.log(Cookies)
+    console.log(Cookies.get())
     deleteUser();
   }
-
+  
   return (
 
     <div className={classes.navBar}>
@@ -127,7 +128,7 @@ export default function PermanentDrawerLeft() {
 
           <div className={classes.infoAvatar}>
             <p className='titre'>{user.nom}</p>
-            <p>{user.fonction}</p>
+            <p>{codeToName('formation_'+user.fonction)}</p>
           </div>
         </div>
       </div>

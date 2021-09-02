@@ -290,7 +290,7 @@ export default function ModalCatalogue(props) {
                     displayvalue='libelle'
                     label='OF Dispensateur *'
                   />
-                  <SelectPersonnalize
+                  {/* <SelectPersonnalize
                     error={isSubmit && dataRow.adresse === '' ? true : false}
                     handleChangeValue={handleChangeValue}
                     path={`global/find?table=adresse&condition=${JSON.stringify({ id_cata: dataRow.id_cata })}&join=${JSON.stringify(
@@ -303,7 +303,7 @@ export default function ModalCatalogue(props) {
                     value={dataRow.adresse}
                     displayvalue='adresse'
                     label='Adresse *'
-                  />
+                  /> */}
 
                   <TextField
                     id="dateEntree"

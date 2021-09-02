@@ -17,7 +17,14 @@ import './table.css';
 const useStyles = makeStyles((theme) => ({
   table: {
     maxHeight: 650,
+    [theme.breakpoints.down(1550)]:{
+      maxHeight: 500,
+    },
   },
+  PaperContainerTable:{
+    overflow: 'auto', 
+    marginBottom: 20
+  }
 }))
 
 export default function TablePersonnalize(props) {
@@ -79,7 +86,7 @@ export default function TablePersonnalize(props) {
   }
   // ----------------------------
   return (
-    <Paper style={{ maxHeight: '80%', overflow: 'auto', marginBottom: 20 }} >
+    <Paper className={classes.PaperContainerTable} >
 
       <SnackBar
         open={openSnackBar}
@@ -118,7 +125,7 @@ export default function TablePersonnalize(props) {
                 <Row key={row.id + '_' + index} row={row}
                   checkColumnsVisible={checkColumnsVisible}
                   handleEditClick={props.handleOpenModal}
-                  user={props.user}
+                  adresseHabilited={props.adresseHabilited}
                   action={props.action}
                   handleDeleteAdresse={props.handleDeleteAdresse}
                   handleOpenModalAdresse={props.handleOpenModalAdresse}

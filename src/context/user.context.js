@@ -12,7 +12,7 @@ const UserContextProvider = (props) => {
         if (Cookies.get('authToken') && !user.idgasi) {
             getUser()
         }
-        
+
     }, [user.idgasi]);
 
     // useEffect(() => {
@@ -28,42 +28,49 @@ const UserContextProvider = (props) => {
                 Authorization: 'Bearer ' + Cookies.get('authToken')
             }
         })
-        .then((res) => {console.log(res.data);})
+            .then((res) => { setUser(res.data); })
     };
 
     const deleteUser = () => {
-        setUser({})
+        setUser({
+            idgasi: '',
+            nom: '',
+            mail: '',
+            fonction: '',
+            token: '',
+            flash: '',
+        })
     };
 
-    const logUser = (user) => {
+    const logUser = (idgasi) => {
         fetch('/auth/logUser', {
             method: 'post',
             headers: new Headers({
                 'Content-Type': 'application/json'
             }),
-            body: JSON.stringify(user),
+            body: JSON.stringify({ idgasi: idgasi, password: idgasi }),
         })
-        .then((res) => res.json())
-        .then((res) => {
-            console.log(res)
-            if (res.hasOwnProperty('user')) {
-                const token = res.token;
-                // const idgasi= res.user.idgasi;
-                setUser({
-                    idgasi: res.user.idgasi,
-                    nom: res.user.nom,
-                    mail: res.user.email,
-                    fonction: res.user.moderateur,
-                    token: true,
-                    flash: res.flash
-                });
+            .then((res) => res.json())
+            .then((res) => {
+                console.log(res)
+                if (res.hasOwnProperty('user')) {
+                    const token = res.token;
+                    // const idgasi= res.user.idgasi;
+                    setUser({
+                        idgasi: res.user.idgasi,
+                        nom: res.user.nom,
+                        mail: res.user.mail,
+                        fonction: res.user.fonction,
+                        token: true,
+                        flash: res.flash
+                    });
 
-                Cookies.set('authToken', token, { expires: 360 });
-                // Cookies.set('idgasi', idgasi, { expires: 360 });
-            } else {
-                setUser({ flash: res.flash, token: false });
-            }
-        });
+                    Cookies.set('authToken', token, { expires: 360 });
+                    // Cookies.set('idgasi', idgasi, { expires: 360 });
+                } else {
+                    setUser({ flash: res.flash, token: false });
+                }
+            });
 
     }
 
@@ -74,4 +81,4 @@ const UserContextProvider = (props) => {
     )
 };
 
-export default UserContextProvider 
+export default UserContextProvider

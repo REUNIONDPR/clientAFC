@@ -23,6 +23,11 @@ export default function Catalogue() {
     const [columns, setColumns] = useState([]);
     const [rows, setRows] = useState([]) // Resultat de la requete
     const [displayRows, setDisplayRows] = useState([]) // Copie de rows pour immutabilité
+    const [adresseHabilited, setAdresseHabilited] = useState(false)
+
+    useEffect(() => {
+        setAdresseHabilited(IsPermitted(user, 'adresse', 'delete'))
+    }, [user])
 
     // --------------- SnackBar
     const [openSnackBar, setOpenSnackBar] = useState(false);
@@ -51,7 +56,7 @@ export default function Catalogue() {
             <TableCell align="right">
                 <div className='cell-flex'>
 
-                    {IsPermitted(user, 'sollicitation', 'update') &&
+                    {IsPermitted(user, 'catalogue', 'update') &&
                         <Tooltip title="Editer">
                             <IconButton aria-label="Editer" color="secondary" onClick={() => handleOpenModal(props.row)}>
                                 <EditIcon fontSize="small" />
@@ -407,6 +412,7 @@ export default function Catalogue() {
                 messageSnackBar={messageSnackBar}
                 severity={severity}
                 user={user}
+                adresseHabilited={adresseHabilited}
                 handleOpenModalAdresse={handleShowModalAdresse}
                 handleOpenModal={() => handleOpenModal(updateRow)}
                 action={ActionTable}
