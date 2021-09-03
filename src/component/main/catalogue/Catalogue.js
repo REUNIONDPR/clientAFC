@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React, { useContext, useEffect, useState } from 'react';
-import Table from '../../global/table/Table';
+import Table from './Table/Table';
 import Cookie from 'js-cookie';
 import { UserContext } from '../../../context/user.context';
 import ModalCatalogue from './Modal/ModalCatalogue';
@@ -20,38 +20,27 @@ export default function Catalogue() {
 
     const { user } = useContext(UserContext);
     const { socket } = useContext(SocketContext);
+    const [isComponnentReady, setIsComponnentReady] = useState({
+        columns: false,
+        rows: false,
+    });
+
     const [columns, setColumns] = useState([]);
     const [rows, setRows] = useState([]) // Resultat de la requete
     const [displayRows, setDisplayRows] = useState([]) // Copie de rows pour immutabilité
     const [adresseHabilited, setAdresseHabilited] = useState(false)
 
+    // Faire une habilitation globale
     useEffect(() => {
-        setAdresseHabilited(IsPermitted(user, 'adresse', 'delete'))
-    }, [user])
+        if (user.fonction) {
+            setAdresseHabilited(IsPermitted(user, 'adresse', 'delete'))
+        }
+    }, [user]);
 
     // --------------- SnackBar
     const [openSnackBar, setOpenSnackBar] = useState(false);
     const [messageSnackBar, setMessageSnackBar] = useState('');
     const [severity, setSeverity] = useState('success');
-    const [openModal, setOpenModal] = useState(false);
-    const [updateRow, setupdateRow] = useState({
-        id: '',
-        id_lot: 'all',
-        id_of_cata: '',
-        adresse: [],
-        n_Article: '',
-        intitule_form_marche: '',
-        intitule_form_base_article: '',
-        formacode: '',
-        niveau_form: 'all',
-        objectif_form: 'all',
-        nb_heure_socle: 0,
-        nb_heure_ent: 0,
-        nb_heure_appui: 0,
-        nb_heure_soutien: 0,
-        prixTrancheA: 0,
-        prixTrancheB: 0,
-    });
 
     const ActionTable = (props) => {
         return (
@@ -60,7 +49,7 @@ export default function Catalogue() {
 
                     {IsPermitted(user, 'catalogue', 'update') &&
                         <Tooltip title="Editer">
-                            <IconButton aria-label="Editer" color="secondary" onClick={() => handleOpenModal(props.row)}>
+                            <IconButton aria-label="Editer" color="secondary" onClick={() => handleOpenModalCatalogue(props.row)}>
                                 <EditIcon fontSize="small" />
                             </IconButton>
                         </Tooltip>}
@@ -75,49 +64,6 @@ export default function Catalogue() {
             </TableCell>
         )
     }
-    //----------------------- Modal
-    const handleOpenModal = (row) => {
-        setupdateRow(row)
-        setOpenModal(true)
-    }
-
-    const handleChangeUpdateRow = (k, v) => {
-        setupdateRow({ ...updateRow, [k]: v })
-    }
-
-    const [deleteClick, setDeleteClick] = useState(false)
-    const handleHideDeleteIcon = () => {
-        setDeleteClick(false)
-    }
-    const handleShowDeleteIcon = () => {
-        setDeleteClick(true)
-    }
-    const resetUpdateRow = () => {
-        setupdateRow({
-            id: '',
-            id_lot: 'all',
-            id_of_cata: '',
-            adresse: [],
-            n_Article: '',
-            intitule_form_marche: '',
-            intitule_form_base_article: '',
-            formacode: '',
-            niveau_form: 'all',
-            objectif_form: 'all',
-            nb_heure_socle: 0,
-            nb_heure_ent: 0,
-            nb_heure_appui: 0,
-            nb_heure_soutien: 0,
-            prixTrancheA: 0,
-            prixTrancheB: 0,
-        })
-    }
-    const handleCloseModal = () => {
-        resetUpdateRow();
-        setOpenModal(false)
-        handleHideDeleteIcon()
-    }
-
     //------------------- SnackBar
     const handleCloseSnackbar = (reason) => {
         if (reason === 'clickaway') {
@@ -126,22 +72,7 @@ export default function Catalogue() {
         setOpenSnackBar(false);
         setMessageSnackBar('');
     };
-    // ----------------------------
-    // useEffect(() => {
-    //     console.log(displayRows)
-    // }, [displayRows])
 
-    const [filterSelected, setFilterSelected] = useState({})
-    const [nbFilter, setNbFilter] = useState(0);
-    const [lotList, setLotList] = useState([]);
-
-    useEffect(() => {
-        axios({
-            method: 'GET',
-            url: '/global/getLot',
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
-        }).then((response) => { setLotList(response.data) })
-    }, [])
 
     // const isMountedRef = useRef(true);
     useEffect(() => {
@@ -152,9 +83,12 @@ export default function Catalogue() {
         // }
     }, [socket])
 
+    // ---------------------------------- Action sur les filtres
+    const [nbFilter, setNbFilter] = useState(0);
+    const [filterSelected, setFilterSelected] = useState({})
+
     const handleChangeFilter = (key, value) => {
         setFilterSelected({ ...filterSelected, [key]: value })
-        // value !== 'none' ? setNbFilter(nbFilter + 1) : nbFilter > 0 ? setNbFilter(nbFilter - 1) : setNbFilter(0)
     };
 
     useEffect(() => {
@@ -183,8 +117,20 @@ export default function Catalogue() {
         setDisplayRows(result)
     }, [filterSelected, rows])
 
-    // ---------------------------------- CRUD
+    const [lotList, setLotList] = useState([]);
+
     useEffect(() => {
+
+        // ---------------------------------- GET LOT POUR LES SELECTS (Filtres)
+        axios({
+            method: 'GET',
+            url: '/global/getLot',
+            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+        }).then((response) => {
+            setLotList(response.data)
+        })
+
+        // ---------------------------------- GET CATALOGUE POUR LE TABLEAU
         axios({
             method: 'GET',
             url: '/catalogue/findAll',
@@ -204,7 +150,7 @@ export default function Catalogue() {
                         let addr_ville = v.adresse.split(':')[1].split(' - ')
                         adr.push({ id: v.adresse.split(':')[0], adresse: addr_ville[0], commune: addr_ville[1] })
                     }
-                } 
+                }
                 // else adr.push({ id: '', adresse: 'null' })
                 v.adresse = adr;
                 return v;
@@ -215,45 +161,99 @@ export default function Catalogue() {
             let col = [];
             Object.entries(data).filter(([k, i]) => k === '0').map(([k, value]) => Object.keys(value).map((v) => col.push(v)))
             setColumns(col)
+            setIsComponnentReady({ ...isComponnentReady, columns: true, rows: true })
         });
 
-    }, [user])
+    }, [])
 
-    const handleErrorSubmit = () => {
-        setMessageSnackBar('Erreur, je n\'ai pas compris votre demande.');
-        setSeverity('error');
-        setOpenModal(false)
+
+    // ---------------------------------- MODAL CATALOGUE
+    const [openModalCatalogue, setOpenModalCatalogue] = useState(false);
+    const [updateRowCatalogue, setUpdateRowCatalogue] = useState({})
+    // const [OfList, setOfList] = useState([]);
+    const handleOpenModalCatalogue = (row) => {
+        
+        if (row.id && row.id !== '') {
+            axios({
+                method: 'GET',
+                url: 'catalogue/of?id_cata=' + row.id,
+                headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+            }).then((response) => {
+                row.list_of = response.data;
+                // setOfList(response.data)
+                setUpdateRowCatalogue(row)
+            });
+        }else{
+            setUpdateRowCatalogue({
+                id: '',
+                id_lot: 'all',
+                id_of_cata: '',
+                adresse: [],
+                list_of: [],
+                n_Article: '',
+                intitule_form_marche: '',
+                intitule_form_base_article: '',
+                formacode: '',
+                niveau_form: 'all',
+                objectif_form: 'all',
+                nb_heure_socle: 0,
+                nb_heure_ent: 0,
+                nb_heure_appui: 0,
+                nb_heure_soutien: 0,
+                prixTrancheA: 0,
+                prixTrancheB: 0,
+            })
+        }
+        setOpenModalCatalogue(true)
+    }
+
+    const handleChangeUpdateRow = (k, v) => {
+        setUpdateRowCatalogue({ ...updateRowCatalogue, [k]: v })
+    }
+
+    const [deleteClick, setDeleteClick] = useState(false)
+    const handleHideDeleteIcon = () => {
+        setDeleteClick(false)
+    }
+
+    const handleShowDeleteIcon = () => {
+        setDeleteClick(true)
+    }
+
+    const handleCloseModalCatalogue = () => {
+        setUpdateRowCatalogue({
+            id: '',
+            id_lot: 'all',
+            id_of_cata: '',
+            adresse: [],
+            list_of: [],
+            n_Article: '',
+            intitule_form_marche: '',
+            intitule_form_base_article: '',
+            formacode: '',
+            niveau_form: 'all',
+            objectif_form: 'all',
+            nb_heure_socle: 0,
+            nb_heure_ent: 0,
+            nb_heure_appui: 0,
+            nb_heure_soutien: 0,
+            prixTrancheA: 0,
+            prixTrancheB: 0,
+        })
+
+        setOpenModalCatalogue(false)
         handleHideDeleteIcon()
     }
 
-    const handleSubmitClick = (dataRow) => {
-        axios({
-            method: 'put',
-            url: '/catalogue/create',
-            data: dataRow,
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
-        }).then((response) => {
-            if (response.status === 200) {
-                let newDataRow = rows;
-                console.log(rows, dataRow);
-                dataRow.id = response.data.insertId;
-                dataRow.adresse = '';
-                newDataRow.unshift(dataRow);
-                socket.emit("updateCatalogue", newDataRow);
-                setRows(newDataRow)
-                setMessageSnackBar('Enregistrement réussi.');
-                setSeverity('success');
-                setOpenModal(false)
-                handleHideDeleteIcon()
-                // updateDataRow(displayRows, dataRow);
-            } else {
-                setMessageSnackBar('Echec de l\'enregistrement.');
-                setSeverity('error');
-            }
-            setOpenSnackBar(true);
-        })
+    // ---------------------------------- Erreur validation modal
+    const handleErrorSubmit = () => {
+        setMessageSnackBar('Erreur, je n\'ai pas compris votre demande.');
+        setSeverity('error');
+        setOpenModalCatalogue(false)
+        handleHideDeleteIcon()
     }
 
+    // ---------------------------------- Quand changement sur la ligne, met à jour le tableau avec la nouvelle ligne
     const updateRowsTableAfterPutAxios = (newRow, field = 'none') => {
         if (field === 'adresse') {
             return rows.map((v, i) => {
@@ -271,7 +271,43 @@ export default function Catalogue() {
             })
     }
 
-    const handleEditSubmitClick = (updatedRow) => {
+    // ---------------------------------- Créer une formation du Catalogue
+    const handleSubmitClickCatalogue = (dataRow) => {
+        axios({
+            method: 'put',
+            url: '/catalogue/create',
+            data: dataRow,
+            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+        }).then((response) => {
+            if (response.status === 200) {
+                let newDataRow = rows;
+
+                dataRow.id = response.data.insertId;
+                dataRow.adresse = '';
+                dataRow.priorite = '';
+                dataRow.list_of = [];
+                dataRow.of = '';
+                dataRow.lot = dataRow.id_lot;
+                console.log(dataRow, rows);
+
+                newDataRow.unshift(dataRow);
+                socket.emit("updateCatalogue", newDataRow);
+                setRows(newDataRow)
+                setMessageSnackBar('Enregistrement réussi.');
+                setSeverity('success');
+                setOpenModalCatalogue(false)
+                handleHideDeleteIcon()
+                // updateDataRow(displayRows, dataRow);
+            } else {
+                setMessageSnackBar('Echec de l\'enregistrement.');
+                setSeverity('error');
+            }
+            setOpenSnackBar(true);
+        })
+    }
+
+    // ---------------------------------- Edit une formation du Catalogue
+    const handleEditSubmitClickCatalogue = (updatedRow) => {
         axios({
             method: 'put',
             url: '/catalogue/update',
@@ -285,7 +321,7 @@ export default function Catalogue() {
                 socket.emit("updateCatalogue", newDataRow);
                 setMessageSnackBar('Modification enregistré.');
                 setSeverity('success');
-                setOpenModal(false)
+                setOpenModalCatalogue(false)
                 handleHideDeleteIcon()
                 // updateDataRow(displayRows, updatedRow);
             } else {
@@ -296,7 +332,8 @@ export default function Catalogue() {
         })
     }
 
-    const handleDeleteClick = (dataRow) => {
+    // ---------------------------------- Delete une formation du Catalogue
+    const handleDeleteClickCatalogue = (dataRow) => {
         axios({
             method: 'put',
             url: '/catalogue/delete',
@@ -309,7 +346,7 @@ export default function Catalogue() {
                 setRows(newDataRow)
                 setMessageSnackBar('Suppression réussi.');
                 setSeverity('success');
-                setOpenModal(false)
+                setOpenModalCatalogue(false)
                 handleHideDeleteIcon()
                 // setRows(newDataRow) // Met à jour le tableau au cas ou la socket ne répond pas.
                 // setDisplayRows(newDataRow) // Met à jour le tableau au cas ou la socket ne répond pas.
@@ -321,17 +358,38 @@ export default function Catalogue() {
         })
     }
 
+    // ---------------------------------- MODAL ADRESSE
     const [openModalAdresse, setOpenModalAdresse] = useState(false)
+    const [updateRowAdresse, setUpdateRowAdresse] = useState({})
     const handleShowModalAdresse = (row) => {
-        setupdateRow(row)
+        setUpdateRowAdresse(row)
         setOpenModalAdresse(true)
     }
 
     const handleCloseModalAdresse = () => {
-        resetUpdateRow();
+        setUpdateRowAdresse({
+            id: '',
+            id_lot: 'all',
+            id_of_cata: '',
+            adresse: [],
+            list_of: [],
+            n_Article: '',
+            intitule_form_marche: '',
+            intitule_form_base_article: '',
+            formacode: '',
+            niveau_form: 'all',
+            objectif_form: 'all',
+            nb_heure_socle: 0,
+            nb_heure_ent: 0,
+            nb_heure_appui: 0,
+            nb_heure_soutien: 0,
+            prixTrancheA: 0,
+            prixTrancheB: 0,
+        });
         setOpenModalAdresse(false)
     }
 
+    // ---------------------------------- Ajouter une adresse
     const handleAddAdresse = (updatedRow, adresse) => {
         axios({
             method: 'put',
@@ -359,6 +417,7 @@ export default function Catalogue() {
         })
     }
 
+    // ---------------------------------- Supprimer une adresse
     const handleDeleteAdresse = (updatedRow, adresse) => {
         axios({
             method: 'put',
@@ -387,6 +446,7 @@ export default function Catalogue() {
         })
     }
 
+    // ---------------------------------- Créer une adresse
     const handleCreateAdresse = (updatedRow, adresse, ville) => {
         axios({
             method: 'put',
@@ -405,11 +465,11 @@ export default function Catalogue() {
         })
 
     }
-
+    
     return (
         <>
             <Table columns={columns} propsTableName='Catalogue'
-                handleEditSubmitClick={handleEditSubmitClick}
+                handleEditSubmitClick={handleEditSubmitClickCatalogue}
                 displayRows={displayRows} // row
                 filter={[{ 'name': 'Lot', 'displayName': 'Tout les lots', 'handleChange': handleChangeFilter, 'data': lotList, valueSelected: filterSelected, varName: 'id_lot' }]}
                 nbFilter={nbFilter}
@@ -421,32 +481,38 @@ export default function Catalogue() {
                 user={user}
                 adresseHabilited={adresseHabilited}
                 handleOpenModalAdresse={handleShowModalAdresse}
-                handleOpenModal={() => handleOpenModal(updateRow)}
+                handleOpenModal={() => handleOpenModalCatalogue(updateRowCatalogue)}
                 action={ActionTable}
                 handleDeleteAdresse={handleDeleteAdresse}
             />
-            {updateRow &&
-                <ModalCatalogue openModal={openModal}
-                    handleCloseModal={handleCloseModal}
+            {openModalCatalogue &&
+                updateRowCatalogue.id !== undefined &&
+                Object.values(isComponnentReady).filter((v) => v === false).length === 0 &&
+                <ModalCatalogue openModal={openModalCatalogue}
+                    handleCloseModal={handleCloseModalCatalogue}
                     handleErrorSubmit={handleErrorSubmit}
-                    handleSubmitClickToParent={handleSubmitClick}
+                    handleSubmitClickToParent={handleSubmitClickCatalogue}
                     handleChangeUpdateRow={handleChangeUpdateRow}
-                    handleEditSubmitClickToParent={handleEditSubmitClick}
-                    updateRow={updateRow}
-                    handleDeleteClick={handleDeleteClick}
+                    handleEditSubmitClickToParent={handleEditSubmitClickCatalogue}
+                    updateRow={updateRowCatalogue}
+                    handleDeleteClick={handleDeleteClickCatalogue}
                     handleHideDeleteIcon={handleHideDeleteIcon}
                     handleShowDeleteIcon={handleShowDeleteIcon}
                     deleteClick={deleteClick}
-                    user={user} />
+                    user={user}
+                    // listOF={OfList} 
+                    />
             }
-
-            <ModalAdresse
-                openModal={openModalAdresse}
-                handleCloseModal={handleCloseModalAdresse}
-                updateRow={updateRow}
-                handleAddAdresse={handleAddAdresse}
-                handleCreateAdresse={handleCreateAdresse}
-            />
+            {updateRowAdresse.id !== undefined  &&
+                Object.values(isComponnentReady).filter((v) => v === false).length === 0 &&
+                <ModalAdresse
+                    openModal={openModalAdresse}
+                    handleCloseModal={handleCloseModalAdresse}
+                    updateRow={updateRowAdresse}
+                    handleAddAdresse={handleAddAdresse}
+                    handleCreateAdresse={handleCreateAdresse}
+                />
+            }
         </>
 
     )

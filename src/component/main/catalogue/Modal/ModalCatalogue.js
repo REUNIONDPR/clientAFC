@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
 import Backdrop from '@material-ui/core/Backdrop';
@@ -8,10 +8,15 @@ import Button from '@material-ui/core/Button';
 import SelectPersonnalize from '../../../global/utils/SelectPersonnalize';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import CancelOutlinedIcon from '@material-ui/icons/CancelOutlined';
+import Divider from '@material-ui/core/Divider';
 import CloseIcon from '@material-ui/icons/Close';
 import { IsPermitted } from '../../../../utilities/Function';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { Tooltip } from '@material-ui/core';
+import axios from 'axios';
+import Cookie from 'js-cookie';
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -59,7 +64,22 @@ const useStyles = makeStyles((theme) => ({
   msgAlert: {
     color: 'red',
     fontStyle: 'italic',
-  }
+  },
+  blockOF: {
+    display: 'flex',
+    alignItems: 'center',
+    '& > *': {
+      marginRight: theme.spacing(1),
+    },
+  },
+  inputNumber: { width: 100, },
+  spinnerBtn: { color: theme.palette.spinnerBtnContained.main, },
+  blockOfForm: {
+    maxHeight: 222,
+    overflowY: 'scroll',
+    paddingTop: 1,
+  },
+  divider: { margin: 20 },
 }));
 
 export default function ModalCatalogue(props) {
@@ -67,21 +87,51 @@ export default function ModalCatalogue(props) {
   const [isSubmit, setIsSubmit] = useState(false) // Gestion des erreurs (champs vide)
   const dataRow = props.updateRow;
   const [clickHandleSubmit, setClickHandleSubmit] = useState(false)
-  
+  const [createOF, setCreateOF] = useState(false);
+
   const handleSubmit = (row) => {
     setIsSubmit(true)
+
     let submitting = true;
     let action = dataRow.id === '' || dataRow.id === 0 ? 'create' : 'update';
-    // eslint-disable-next-line array-callback-return
-    // Object.entries(dataRow).map(([k, v]) => { if (v === '' && k !== 'id') { return submitting = false; } })
+    // Vérifie que les champs sont renseigné.
+    Object.entries(dataRow)
+      .filter(([k, v]) => k !== 'id' && k !== 'id_of_cata' && k !== 'adresse' && !k.includes('of'))
+      // eslint-disable-next-line array-callback-return
+      .map(([k, v]) => {
+        if (v === '') { return submitting = false; }
+      })
+
     if (submitting) {
+      row.list_of = listOf
       switch (action) {
-        case 'create': props.handleSubmitClickToParent(row, action); break;
-        case 'update': props.handleEditSubmitClickToParent(row, action); break;
+        case 'create': props.handleSubmitClickToParent(row, listOf); break;
+        case 'update': props.handleEditSubmitClickToParent(row, listOf); break;
         default: props.handleErrorSubmit();
       }
-      setClickHandleSubmit(false);
     }
+    setClickHandleSubmit(false);
+  }
+
+  const [listOf, setListOf] = useState([]);
+
+  useEffect(() => {
+    setListOf(dataRow.list_of);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataRow.id])
+
+  const handleChangePriorite = (value, id) => {
+    // gerer les erreur de priorite si déja pris ?
+    setListOf(listOf.map((v) => v.id === id ? { ...v, priorite: value } : v));
+  }
+
+  const [show, setShow] = useState(false)
+  const handleCreateNewOF = () => {
+    const arrayOf = listOf;
+    arrayOf.push({ id: 'new_' + listOf.length, priorite: '', libelle: '' });
+    setListOf(arrayOf);
+    setShow(!show);
+    console.log(listOf)
   }
 
   return (
@@ -138,7 +188,7 @@ export default function ModalCatalogue(props) {
             <form className={classes.root} noValidate autoComplete="off">
               <div className={classes.blocFormFullWidth}>
                 <SelectPersonnalize
-                  error={isSubmit && dataRow.id_lot === '' ? true : false}
+                  error={isSubmit && dataRow.id_lot === 'all' ? true : false}
                   handleChangeValue={props.handleChangeUpdateRow}
                   path={'global/findAll?table=lot'}
                   rowKey='id_lot'
@@ -169,8 +219,7 @@ export default function ModalCatalogue(props) {
                   onChange={(e) => props.handleChangeUpdateRow('formacode', e.target.value)} />
 
                 <SelectPersonnalize
-
-                  error={isSubmit && dataRow.niveau_form === '' ? true : false}
+                  error={isSubmit && dataRow.niveau_form === 'all' ? true : false}
                   handleChangeValue={props.handleChangeUpdateRow}
                   path={'global/findAll?table=formation_niveau'}
                   rowKey='niveau_form'
@@ -179,7 +228,7 @@ export default function ModalCatalogue(props) {
                   label='Niveau'
                 />
                 <SelectPersonnalize
-                  error={isSubmit && dataRow.objectif_form === '' ? true : false}
+                  error={isSubmit && dataRow.objectif_form === 'all' ? true : false}
                   handleChangeValue={props.handleChangeUpdateRow}
                   path={'global/findAll?table=formation_objectif'}
                   rowKey='objectif_form'
@@ -222,7 +271,31 @@ export default function ModalCatalogue(props) {
               </div>
 
             </form>
+            <Divider className={classes.divider} />
+            <div className={`${classes.blockOfForm} scrollBar-personnalize`}>
+              {listOf && listOf.map((v) =>
+                <div key={'OF_' + v.id} className={classes.blockOF}>
+                  <Tooltip title="Supprimer l'OF" aria-label="delete">
+                    <IconButton aria-label="delete" color="primary" onClick={() => console.log('delete of')}>
+                      {v.id.toString().includes('new') ? <CancelOutlinedIcon /> : <DeleteIcon />}
+                    </IconButton>
+                  </Tooltip>
+                  <TextField error={v.error}
+                    label="Priorité" type="number" size="small" className={classes.inputNumber}
+                    value={v.priorite} variant="outlined" onChange={(e) => handleChangePriorite(e.target.value, v.id)}
+                  />
+                  {v.libelle}
+                </div>
+              )}
 
+              <div key={'OF_add'} className={classes.blockOF}>
+                <Tooltip title="Ajouter un OF" aria-label="add">
+                  <IconButton aria-label="add" color="primary" onClick={handleCreateNewOF}>
+                    <AddCircleOutlineIcon />
+                  </IconButton>
+                </Tooltip>
+              </div>
+            </div>
             <div className={classes.btnActionModal}>
 
               <Button onClick={props.handleCloseModal} variant="outlined" color="primary">
@@ -230,12 +303,13 @@ export default function ModalCatalogue(props) {
               </Button>
               {clickHandleSubmit
                 ? <Button variant="contained" color="primary"
-                  endIcon={<CircularProgress size={20} />}>
+                  endIcon={<CircularProgress size={20} className={classes.spinnerBtn} />}>
                   Enregistrer
                 </Button> :
-                <Button onClick={() => {setClickHandleSubmit(true); handleSubmit(dataRow)}} variant="contained" color="primary" >
+                <Button onClick={() => { setClickHandleSubmit(true); handleSubmit(dataRow) }}
+                  variant="contained" color="primary" >
                   Enregistrer
-                </Button> }
+                </Button>}
 
 
             </div>

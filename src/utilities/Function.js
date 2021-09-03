@@ -48,17 +48,17 @@ export function codeToName(str) {
     case 's_formation_2': return 'En attente de conventionnement';
 
     case 'niveau_form': return 'Niveau';
-    case 'niveau_1': return 'Indéterminé';
-    case 'niveau_2': return 'Niveau I et II Bac+3 ou 4';
-    case 'niveau_3': return 'Niveau III Bac+2';
-    case 'niveau_4': return 'Niveau IV Bac, BTN, BT, BP';
-    case 'niveau_5': return 'Niveau V BEPC, BEP, CAP';
-    case 'niveau_6': return 'Attestation de formation';
+    case 'niveau_form_1': return 'Indéterminé';
+    case 'niveau_form_2': return 'Niveau I et II Bac+3 ou 4';
+    case 'niveau_form_3': return 'Niveau III Bac+2';
+    case 'niveau_form_4': return 'Niveau IV Bac, BTN, BT, BP';
+    case 'niveau_form_5': return 'Niveau V BEPC, BEP, CAP';
+    case 'niveau_form_6': return 'Attestation de formation';
 
     case 'objectif_form': return 'Objectif';
-    case 'objectif_1': return 'Certification';
-    case 'objectif_2': return 'Professionnalisation';
-    case 'objectif_3': return 'Préparation à la qualification';
+    case 'objectif_form_1': return 'Certification';
+    case 'objectif_form_2': return 'Professionnalisation';
+    case 'objectif_form_3': return 'Préparation à la qualification';
 
     case 'lot_1': return 'LOT 1 TRANSPORT';
     case 'lot_2': return 'LOT 2 - LOGISTIQUE';

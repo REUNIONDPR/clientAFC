@@ -1,22 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import IconButton from '@material-ui/core/IconButton';
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import AddIcon from '@material-ui/icons/Add';
-import axios from "axios";
-import Chip from '@material-ui/core/Chip';
-import Cookie from "js-cookie";
-import { codeToName } from '../../../utilities/Function';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import { codeToName } from '../../../../utilities/Function';
 import Tooltip from '@material-ui/core/Tooltip';
 import DeleteIcon from '@material-ui/icons/Delete';
-import CloseIcon from '@material-ui/icons/Close';
-import TextField from '@material-ui/core/TextField';
-import ModalAdresse from './Modal/ModalAdresse';
-import { IsPermitted } from '../../../utilities/Function';
 
 const StyledTableRow = withStyles((theme) => ({
     root: {
@@ -73,9 +63,9 @@ const useStyles = makeStyles((theme) => ({
         fontSize: '12px',
         maxWidth: 'none'
     },
-    stickyCell:{
+    stickyCell: {
         position: 'absolute',
-        height:80,
+        height: 80,
     }
 }));
 
@@ -111,37 +101,68 @@ export default function Row(props) {
     //     });
     //     // eslint-disable-next-line react-hooks/exhaustive-deps
     // }, [])
-    
+
     return (
         <React.Fragment>
             <StyledTableRow >
-                {Object.entries(row).filter(([k, v]) => k !== 'id').map(([k, v]) => (
-                    props.checkColumnsVisible && (props.checkColumnsVisible.indexOf(k) !== -1 && (
-                        k === 'adresse'
-                            ? <TableCell className={classes.center} key={row.id.toString() + '_' + k}>
+
+                {props.columns && props.columns.map((col) => (
+                    props.checkColumnsVisible && (props.checkColumnsVisible.indexOf(col) !== -1 && (
+                        col === 'adresse'
+                            ? <TableCell className={classes.center} key={row.id.toString() + '_' + col}>
                                 <div className={classes.adresseCell}>
                                     <div className={classes.adresseBlock}>
-                                        {v && v.map((a) => (
+                                        {row[col] && row[col].map((a) => (
                                             <DivAdress
                                                 adresseHabilited={props.adresseHabilited}
                                                 key={row.id + '_' + a.id}
                                                 label={a.adresse + ' - ' + a.commune}
                                                 id={a.id}
-                                                handleDeleteAdresse={() => { props.handleDeleteAdresse(row, { id: a.id, adresse: a.adresse, commune:a.commune }) }} />
+                                                handleDeleteAdresse={() => { props.handleDeleteAdresse(row, { id: a.id, adresse: a.adresse, commune: a.commune }) }} />
                                         ))}
                                     </div>
-                                    {props.adresseHabilited && 
+                                    {props.adresseHabilited &&
+                                        <Tooltip classes={{ tooltip: classes.tooltip }} title="Ajouter une adresse">
+                                            <IconButton aria-label="Ajouter" color="primary" onClick={() => props.handleOpenModalAdresse(row)}>
+                                                <AddIcon />
+                                            </IconButton>
+                                        </Tooltip>}
+                                </div>
+                            </TableCell>
+                            : col === 'lot' ||  col === 'objectif_form' ||  col === 'niveau_form'
+                                ? <TableCell key={row.id.toString() + '_' + col} className='nowrap'>{codeToName(col + '_' + row[col])}</TableCell>
+                                : <TableCell key={row.id.toString() + '_' + col} className='nowrap'>{row[col]}</TableCell>
+                    ))
+              ))}
+
+            {/* {Object.entries(row).filter(([k, v]) => k !== 'id').map(([k, v]) => (
+                props.checkColumnsVisible && (props.checkColumnsVisible.indexOf(k) !== -1 && (
+                    k === 'adresse'
+                        ? <TableCell className={classes.center} key={row.id.toString() + '_' + k}>
+                            <div className={classes.adresseCell}>
+                                <div className={classes.adresseBlock}>
+                                    {v && v.map((a) => (
+                                        <DivAdress
+                                            adresseHabilited={props.adresseHabilited}
+                                            key={row.id + '_' + a.id}
+                                            label={a.adresse + ' - ' + a.commune}
+                                            id={a.id}
+                                            handleDeleteAdresse={() => { props.handleDeleteAdresse(row, { id: a.id, adresse: a.adresse, commune: a.commune }) }} />
+                                    ))}
+                                </div>
+                                {props.adresseHabilited &&
                                     <Tooltip classes={{ tooltip: classes.tooltip }} title="Ajouter une adresse">
                                         <IconButton aria-label="Ajouter" color="primary" onClick={() => props.handleOpenModalAdresse(row)}>
                                             <AddIcon />
                                         </IconButton>
-                                    </Tooltip> }
-                                </div>
-                            </TableCell>
-                            : <TableCell key={row.id.toString() + '_' + k} className='nowrap'>{k.includes('display_') ? codeToName(k.split('display_')[1] + '_' + v) : v}</TableCell>
-                    ))
-                ))}
-                <ActionTable row={row} />
+                                    </Tooltip>}
+                            </div>
+                        </TableCell>
+                        : <TableCell key={row.id.toString() + '_' + k} className='nowrap'>{k.includes('display_') ? codeToName(k.split('display_')[1] + '_' + v) : v}</TableCell>
+                ))
+            ))} */}
+            {/* {(row.priorite === 1 || !row.priorite) && <ActionTable row={row} /> } */}
+            <ActionTable row={row} /> 
             </StyledTableRow>
         </React.Fragment >
     );

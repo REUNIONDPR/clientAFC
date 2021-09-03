@@ -13,7 +13,7 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import ListRoundedIcon from '@material-ui/icons/ListRounded';
 import { useState } from 'react';
-import { codeToName } from '../../../utilities/Function';
+import { codeToName } from '../../../../utilities/Function';
 import Badge from '@material-ui/core/Badge';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -21,7 +21,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Checkbox from '@material-ui/core/Checkbox';
 
-import { IsPermitted } from '../../../utilities/Function';
+import { IsPermitted } from '../../../../utilities/Function';
 
 const useToolbarStyles = makeStyles({
     toolbarFilter: {

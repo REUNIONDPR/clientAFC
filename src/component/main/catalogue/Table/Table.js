@@ -8,10 +8,10 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import TablePagination from '@material-ui/core/TablePagination';
-import { codeToName } from '../../../utilities/Function';
-import SnackBar from '../SnackBar/SnackBar';
+import { codeToName } from '../../../../utilities/Function';
+import SnackBar from '../../../global/SnackBar/SnackBar';
 import ToolbarPersonnalize from './Toolbar';
-import Row from '../../main/catalogue/Row';
+import Row from './Row';
 import './table.css';
 
 const useStyles = makeStyles((theme) => ({
@@ -133,7 +133,7 @@ export default function TablePersonnalize(props) {
             {displayRows
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((row, index) =>
-                <Row key={row.id + '_' + index} row={row}
+                <Row key={row.id + '_' + index} row={row} columns={columns}
                   checkColumnsVisible={checkColumnsVisible}
                   handleEditClick={props.handleOpenModal}
                   adresseHabilited={props.adresseHabilited}

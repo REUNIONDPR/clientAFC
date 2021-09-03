@@ -38,8 +38,8 @@ function App() {
       danger: {
         main: '#f44336',
       },
-      white: {
-        main: '#c51162',
+      spinnerBtnContained: {
+        main: '#fff',
       },
     },
     overrides: {

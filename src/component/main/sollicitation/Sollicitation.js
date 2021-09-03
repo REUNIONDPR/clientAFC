@@ -4,7 +4,7 @@ import axios from 'axios';
 import Cards from './Card/Cards';
 import { UserContext } from '../../../context/user.context';
 import Cookie from 'js-cookie';
-import Table from '../../global/table/Table';
+// import Table from '../catalogue/Table/Table';
 import ModalSollicitation from './Modal/modalSollicitation';
 import { dateFormat } from '../../../utilities/Function';
 import './sollicitation.css';
@@ -198,7 +198,7 @@ export default function Sollicitation() {
     return (
         <>
             <Cards selectedCard={selectedCard} handleSelectedCard={handleSelectedCard} />
-            <Table columns={columns} rows={rows} propsTableName='Formation'
+            {/* <Table columns={columns} rows={rows} propsTableName='Formation'
                 handleEditSubmitClick={handleEditSubmitClick}
                 displayRows={displayRows}
                 filter={[
@@ -220,7 +220,7 @@ export default function Sollicitation() {
                 user={user}
                 handleSubmitModalClick={handleSubmitModalClick}
                 handleCloseModal={handleCloseModal}
-            />
+            /> */}
             {/* <div >
                 <Button variant="contained" onClick={() => console.log('aze')} color="primary">
                     send Socket
