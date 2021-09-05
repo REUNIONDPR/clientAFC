@@ -14,8 +14,6 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
 import Stepper from './Stepper';
-import Cookie from 'js-cookie';
-import axios from 'axios';
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -73,8 +71,6 @@ export default function ModalCatalogue(props) {
   const classes = useStyles();
   const [isSubmit, setIsSubmit] = useState(); // Gestion des erreurs (champs vide)
   const [dataRow, setDataRow] = useState({});
-  const [showBlock_1, setShowBlock_1] = useState(true);
-  const [lot, setLot] = useState('');
 
   useEffect(() => {
     if (props.openModal && props.updateRow) {
@@ -109,7 +105,6 @@ export default function ModalCatalogue(props) {
       })
     }
     setIsSubmit(false)
-    setShowBlock_1(false)
   }, [props])
 
   // const handleChangeValue = (k, v) => {
@@ -160,18 +155,18 @@ export default function ModalCatalogue(props) {
 
   }
 
-  const handleSubmit = (row) => {
+  // const handleSubmit = (row) => {
 
-    setIsSubmit(true)
-    let action = dataRow.id === '' || dataRow.id === 0 ? 'create' : 'update';
+  //   setIsSubmit(true)
+  //   let action = dataRow.id === '' || dataRow.id === 0 ? 'create' : 'update';
 
-    switch (action) {
-      case 'create': props.handleSubmitClickToParent(row, action); break;
-      case 'update': props.handleSubmitModalClick(row, action); break;
-      default: props.handleErrorSubmit();
-    }
+  //   switch (action) {
+  //     case 'create': props.handleSubmitClickToParent(row, action); break;
+  //     case 'update': props.handleSubmitModalClick(row, action); break;
+  //     default: props.handleErrorSubmit();
+  //   }
 
-  }
+  // }
 
   return (
     <div>

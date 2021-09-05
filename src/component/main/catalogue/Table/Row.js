@@ -88,19 +88,7 @@ export function DivAdress(props) {
 export default function Row(props) {
     const ActionTable = props.action;
     const row = props.row;
-    // const [dataAdresse, setDataAdresse] = useState([]);
     const classes = useStyles();
-
-    // useEffect(() => {
-    //     axios({
-    //         method: 'GET',
-    //         url: '/adresse/find?id_cata=' + props.row.id,
-    //         headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
-    //     }).then((response) => {
-    //         setDataAdresse(response.data)
-    //     });
-    //     // eslint-disable-next-line react-hooks/exhaustive-deps
-    // }, [])
 
     return (
         <React.Fragment>

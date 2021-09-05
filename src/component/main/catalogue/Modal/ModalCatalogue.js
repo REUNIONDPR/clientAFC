@@ -13,8 +13,13 @@ import CancelOutlinedIcon from '@material-ui/icons/CancelOutlined';
 import Divider from '@material-ui/core/Divider';
 import CloseIcon from '@material-ui/icons/Close';
 import { IsPermitted } from '../../../../utilities/Function';
+import Select from '@material-ui/core/Select';
+import SaveIcon from '@material-ui/icons/Save';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import { Tooltip } from '@material-ui/core';
+import MenuItem from '@material-ui/core/MenuItem';
+import InputLabel from '@material-ui/core/InputLabel';
+import FormControl from '@material-ui/core/FormControl';
+import { Tooltip, Typography } from '@material-ui/core';
 import axios from 'axios';
 import Cookie from 'js-cookie';
 
@@ -72,14 +77,17 @@ const useStyles = makeStyles((theme) => ({
       marginRight: theme.spacing(1),
     },
   },
-  inputNumber: { width: 100, },
+  inputNumber: { width: 100, minWidth: 100 },
+  selectOf: { maxWidth: '80%' },
   spinnerBtn: { color: theme.palette.spinnerBtnContained.main, },
   blockOfForm: {
     maxHeight: 222,
     overflowY: 'scroll',
     paddingTop: 1,
   },
-  divider: { margin: 20 },
+  dividerTop: { margin: '20px 20px 0 20px' },
+  dividerDown: { margin: '0 20px 20px 20px' },
+  OFTitle: { textAlign: 'center', margin: 10 },
 }));
 
 export default function ModalCatalogue(props) {
@@ -87,51 +95,76 @@ export default function ModalCatalogue(props) {
   const [isSubmit, setIsSubmit] = useState(false) // Gestion des erreurs (champs vide)
   const dataRow = props.updateRow;
   const [clickHandleSubmit, setClickHandleSubmit] = useState(false)
-  const [createOF, setCreateOF] = useState(false);
+  const [listOf, setListOf] = useState([]);
+  const [listOfSelect, setListOfSelect] = useState([]);
 
-  const handleSubmit = (row) => {
+  const handleSubmit = () => {
     setIsSubmit(true)
 
-    let submitting = true;
     let action = dataRow.id === '' || dataRow.id === 0 ? 'create' : 'update';
-    // Vérifie que les champs sont renseigné.
-    Object.entries(dataRow)
-      .filter(([k, v]) => k !== 'id' && k !== 'id_of_cata' && k !== 'adresse' && !k.includes('of'))
-      // eslint-disable-next-line array-callback-return
-      .map(([k, v]) => {
-        if (v === '') { return submitting = false; }
-      })
 
-    if (submitting) {
-      row.list_of = listOf
+    // Vérifie que les champs sont renseignés - formation.
+    let error_field = Object.entries(dataRow)
+      .filter(([k, v]) => k !== 'id' && k !== 'id_of_cata' && k !== 'adresse' && !k.includes('of') && v === '').length > 0;
+
+    // Vérifie que les champs sont renseignés - OF.
+    let error_of = listOf.filter((v) => v.priorite === '' || v.libelle === '' || v.error).length > 0;
+
+    if (!error_of && !error_field) {
       switch (action) {
-        case 'create': props.handleSubmitClickToParent(row, listOf); break;
-        case 'update': props.handleEditSubmitClickToParent(row, listOf); break;
+        // case 'create': props.handleSubmitClickToParent(dataRow, listOf); break;
+        case 'create': console.log('create ? '); break;
+        case 'update': props.handleEditSubmitClickToParent(dataRow, listOf); break;
         default: props.handleErrorSubmit();
       }
     }
     setClickHandleSubmit(false);
   }
 
-  const [listOf, setListOf] = useState([]);
-
   useEffect(() => {
-    setListOf(dataRow.list_of);
+    setListOf([...dataRow.list_of]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataRow.id])
+  }, [dataRow.list_of])
 
   const handleChangePriorite = (value, id) => {
-    // gerer les erreur de priorite si déja pris ?
-    setListOf(listOf.map((v) => v.id === id ? { ...v, priorite: value } : v));
+    value = parseInt(value) < 1 ? 1 : parseInt(value)
+    // Verifie la disponibilité de la priorité
+    let error = false;
+    let newListOf = listOf.map((v) => {
+      if (v.priorite === value && v.id !== id) {
+        error = true;
+        return { ...v, error: true }
+      } else if (v.id === id) return { ...v, priorite: value }
+      else return { ...v, error: false }
+    })
+    if (error) newListOf.find((v) => v.id === id)['error'] = true
+    setListOf(newListOf);
   }
 
-  const [show, setShow] = useState(false)
   const handleCreateNewOF = () => {
-    const arrayOf = listOf;
+    axios({
+      method: 'GET',
+      url: 'attributaire/findOuter?id_cata=' + dataRow.id,
+      headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+    }).then((response) => setListOfSelect(response.data));
+
+    const arrayOf = listOf.map((v) => v);
     arrayOf.push({ id: 'new_' + listOf.length, priorite: '', libelle: '' });
     setListOf(arrayOf);
-    setShow(!show);
-    console.log(listOf)
+  }
+
+  const handleDeleteNewOf = (id) => {
+    setListOf(listOf.filter((v) => v.id !== id))
+  }
+  const handleDeleteOf = (id) => {
+    props.handleDeleteOf(id, dataRow.id);
+  }
+
+  const handleChangeValueSelect = (id, value) => {
+    let OfSelected = listOfSelect.filter((v) => v.id === value);
+    let libelle = OfSelected.length > 0 ? OfSelected[0].libelle : '';
+    console.log(libelle)
+    setListOf(listOf.map((v) => v.id === id ? { ...v, id_attr: value, libelle: libelle } : v))
   }
 
   return (
@@ -271,31 +304,82 @@ export default function ModalCatalogue(props) {
               </div>
 
             </form>
-            <Divider className={classes.divider} />
-            <div className={`${classes.blockOfForm} scrollBar-personnalize`}>
-              {listOf && listOf.map((v) =>
-                <div key={'OF_' + v.id} className={classes.blockOF}>
-                  <Tooltip title="Supprimer l'OF" aria-label="delete">
-                    <IconButton aria-label="delete" color="primary" onClick={() => console.log('delete of')}>
-                      {v.id.toString().includes('new') ? <CancelOutlinedIcon /> : <DeleteIcon />}
+            <Divider className={classes.dividerTop} />
+            <Typography className={classes.OFTitle}>OF Dispensateur</Typography>
+            <Divider className={classes.dividerDown} />
+            {dataRow.id &&
+              <div className={`${classes.blockOfForm} scrollBar-personnalize`}>
+                {listOf && listOf.map((v) =>
+                  <div key={'OF_' + v.id} className={classes.blockOF}>
+                    {v.id.toString().includes('new')
+                      ? <>
+                        <Tooltip title="Annuler" aria-label="cancel">
+                          <IconButton aria-label="cancel" color="primary" onClick={() => handleDeleteNewOf(v.id)}>
+                            <CancelOutlinedIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <TextField error={v.priorite === '' || v.error}
+                          label="Priorité" type="number" size="small" className={classes.inputNumber}
+                          value={v.priorite} variant="outlined" onChange={(e) => handleChangePriorite(e.target.value, v.id)}
+                        />
+                        <FormControl size="small" variant="outlined" className={classes.selectOf} error={!v.id_attr || v.id_attr === 'all'}>
+                          <InputLabel id="demo-simple-select-outlined-label">Attributaire</InputLabel>
+                          {listOfSelect.length > 0 &&
+                            <Select
+                              value={v.id_attr ? v.id_attr : 'all'}
+                              onChange={(e) => handleChangeValueSelect(e.target.name, e.target.value)}
+                              name={v.id}
+                              label='Attributaire'
+                            >
+                              <MenuItem value="all">
+                                <em>Choisir</em>
+                              </MenuItem>
+                              {listOfSelect.map((v) => (
+                                <MenuItem key={v.id + '_' + v.libelle} value={v.id}>{v.libelle}</MenuItem>
+                              ))}
+                            </Select>
+                          }
+                        </FormControl>
+                        {v.priorite && v.id_attr && !v.error
+                          ? <Tooltip title="Enregistrer" aria-label="save">
+                            <IconButton aria-label="save" color="primary" onClick={() => props.handleSaveNewOf(dataRow, v)}>
+                              <SaveIcon />
+                            </IconButton>
+                          </Tooltip>
+                          : <IconButton disabled aria-label="save" color="primary">
+                            <SaveIcon />
+                          </IconButton>
+                        }
+                      </>
+
+
+                      : <>
+                        <Tooltip title="Supprimer l'OF" aria-label="delete">
+                          <IconButton aria-label="delete" color="primary" onClick={() => handleDeleteOf(v.id)}>
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <TextField error={v.error}
+                          label="Priorité" type="number" size="small" className={classes.inputNumber}
+                          value={v.priorite} variant="outlined" onChange={(e) => handleChangePriorite(e.target.value, v.id)}
+                        />
+                        {v.libelle}
+                      </>}
+
+
+                  </div>
+                )}
+
+                <div key={'OF_add'} className={classes.blockOF}>
+                  <Tooltip title="Ajouter un OF" aria-label="add">
+                    <IconButton aria-label="add" color="primary" onClick={handleCreateNewOF}>
+                      <AddCircleOutlineIcon />
                     </IconButton>
                   </Tooltip>
-                  <TextField error={v.error}
-                    label="Priorité" type="number" size="small" className={classes.inputNumber}
-                    value={v.priorite} variant="outlined" onChange={(e) => handleChangePriorite(e.target.value, v.id)}
-                  />
-                  {v.libelle}
                 </div>
-              )}
+              </div>}
 
-              <div key={'OF_add'} className={classes.blockOF}>
-                <Tooltip title="Ajouter un OF" aria-label="add">
-                  <IconButton aria-label="add" color="primary" onClick={handleCreateNewOF}>
-                    <AddCircleOutlineIcon />
-                  </IconButton>
-                </Tooltip>
-              </div>
-            </div>
+            <Divider className={classes.dividerDown} />
             <div className={classes.btnActionModal}>
 
               <Button onClick={props.handleCloseModal} variant="outlined" color="primary">
@@ -306,7 +390,7 @@ export default function ModalCatalogue(props) {
                   endIcon={<CircularProgress size={20} className={classes.spinnerBtn} />}>
                   Enregistrer
                 </Button> :
-                <Button onClick={() => { setClickHandleSubmit(true); handleSubmit(dataRow) }}
+                <Button onClick={() => { setClickHandleSubmit(true); handleSubmit() }}
                   variant="contained" color="primary" >
                   Enregistrer
                 </Button>}

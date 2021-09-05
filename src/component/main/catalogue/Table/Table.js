@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -39,7 +39,6 @@ export default function TablePersonnalize(props) {
   const classes = useStyles();
   const { displayRows } = props;
   const propsTableName = props.propsTableName;
-
   // ------------ Pagination
   const [page, setPage] = useState(0);
   const handleChangePage = (event, newPage) => {
@@ -59,15 +58,9 @@ export default function TablePersonnalize(props) {
   const handleCloseSnackBar = props.handleCloseSnackbar;
 
   // ------------ Toggle show column
-  const [columns, SetColumns] = useState(props.columns);
-  const [checkColumnsVisible, SetCheckColumnsVisible] = useState([]);
+  
+  const [checkColumnsVisible, SetCheckColumnsVisible] = useState(props.columns);
   const [checkAll, setCheckAll] = useState(true);
-
-  useEffect(() => {
-    let col = props.columns.filter((col) => { if (!col.includes('id')) { return col; } else { return false; } });
-    SetColumns(col);
-    SetCheckColumnsVisible(col);
-  }, [props.columns])
 
   // Toggle toolbar
   const handleToggle = (value) => () => {
@@ -87,7 +80,7 @@ export default function TablePersonnalize(props) {
     if (checkAll) {
       SetCheckColumnsVisible([])
     } else {
-      SetCheckColumnsVisible(columns)
+      SetCheckColumnsVisible(props.columns)
     }
     setCheckAll(!checkAll)
   }
@@ -109,7 +102,7 @@ export default function TablePersonnalize(props) {
         user={props.user}
         handleToggle={handleToggle}
         handleCheckAll={handleCheckAll} checkAll={checkAll}
-        columns={columns}
+        columns={props.columns}
         checkColumnsVisible={checkColumnsVisible}
         btnAddAction={props.handleOpenModal}
       />
@@ -118,7 +111,7 @@ export default function TablePersonnalize(props) {
         <Table aria-label="collapsible table" size="small" stickyHeader>
           <TableHead>
             <TableRow>
-              {columns.map((col) => (
+              {props.columns.map((col) => (
                 checkColumnsVisible.indexOf(col) !== -1 &&
                 <TableCell align="center"
                   className={`${classes.cellHead} 
@@ -133,7 +126,7 @@ export default function TablePersonnalize(props) {
             {displayRows
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((row, index) =>
-                <Row key={row.id + '_' + index} row={row} columns={columns}
+                <Row key={row.id + '_' + index} row={row} columns={props.columns}
                   checkColumnsVisible={checkColumnsVisible}
                   handleEditClick={props.handleOpenModal}
                   adresseHabilited={props.adresseHabilited}

@@ -20,7 +20,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Checkbox from '@material-ui/core/Checkbox';
-
+import Grow from '@material-ui/core/Grow';
 import { IsPermitted } from '../../../../utilities/Function';
 
 const useToolbarStyles = makeStyles({
@@ -50,7 +50,7 @@ export default function ToolbarPersonnalize(props) {
     const [openListCol, setOpenListCol] = useState(false);
     // ----------------- Filtres
     const filters = props.filters;
-    
+
     return (
         <Toolbar className='primary-color-gradient'>
             <div className={classes.toolbarFilter} >
@@ -94,9 +94,9 @@ export default function ToolbarPersonnalize(props) {
                         <Tooltip title="Filtre">
 
                             <IconButton aria-label="filtre" color='inherit' onClick={() => setOpenFilter(!openFilter)}>
-                                {props.nbFilter > 0 
-                                    ?<Badge badgeContent={props.nbFilter} color="secondary"><FilterListIcon /></Badge>
-                                    :<FilterListIcon />
+                                {props.nbFilter > 0
+                                    ? <Badge badgeContent={props.nbFilter} color="secondary"><FilterListIcon /></Badge>
+                                    : <FilterListIcon />
                                 }
                             </IconButton>
 
@@ -122,7 +122,7 @@ export default function ToolbarPersonnalize(props) {
                             : <Tooltip title="Colonnes"><IconButton aria-label="delete" color="inherit" onClick={() => setOpenListCol(!openListCol)}>
                                 <ListRoundedIcon />
                             </IconButton></Tooltip>}
-                        {openListCol &&
+                        <Grow in={openListCol}>
                             <List dense={true} className={'scrollBar-personnalize listColumn'}>
                                 <ListItem key={'check_all'} dense button onClick={(props.handleCheckAll)}>
                                     <ListItemIcon>
@@ -156,7 +156,7 @@ export default function ToolbarPersonnalize(props) {
                                     );
                                 })}
                             </List>
-                        }
+                        </Grow>
                     </div>
 
                 </div>
