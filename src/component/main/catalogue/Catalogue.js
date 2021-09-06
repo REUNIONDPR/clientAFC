@@ -26,13 +26,14 @@ export default function Catalogue() {
         'of',
         'formacode',
         'niveau_form',
-        'ojectif_form',
+        'objectif_form',
         'nb_heure_socle',
         'nb_heure_ent',
         'nb_heure_appui',
         'nb_heure_soutien',
         'prixTrancheA',
         'prixTrancheB',
+        'commune',
         'adresse',
         'action',
     ]
@@ -197,6 +198,7 @@ export default function Catalogue() {
                 url: 'catalogue/of?id_cata=' + row.id,
                 headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
             }).then((response) => {
+                console.log(response.data)
                 setUpdateRowCatalogue({ ...row, list_of: response.data })
             });
         } else {
@@ -234,20 +236,36 @@ export default function Catalogue() {
 
     // ---------------------------------- Quand changement sur la ligne, met à jour le tableau avec la nouvelle ligne
     const updateRowsTableAfterPutAxios = (newRow, field = 'none') => {
-        if (field === 'adresse') {
-            return rows.map((v, i) => {
-                if (v.id === newRow.id && v.id_of_cata === newRow.id_of_cata) {
-                    Object.keys(v).map((k) => v[k] = newRow[k])
-                    return v = newRow;
-                } else return v;
-            })
-        } else
-            return rows.map((v, i) => {
-                if (v.id === newRow.id) {
-                    Object.keys(v).map((k) => (k === 'adresse' || k === 'id_of_cata') ? v[k] : v[k] = newRow[k])
-                    return v;
-                } else return v;
-            })
+        let returnValue = [];
+        switch (field) {
+            case 'adresse':
+                returnValue = rows.map((v, i) => {
+                    if (v.id === newRow.id && v.id_of_cata === newRow.id_of_cata) {
+                        Object.keys(v).map((k) => v[k] = newRow[k])
+                        return v = newRow;
+                    } else return v;
+                })
+                break
+            case 'of':
+                returnValue = rows.map((v, i) => {
+                    if (v.id === newRow.id) {
+                        let obj = {}
+                        Object.keys(v).map((k) => { if (k === 'adresse') { return obj[k] = v[k] } else return obj[k] = newRow[k] });
+                        setUpdateRowCatalogue({ ...obj, list_of: [newRow.list_of] })
+                        return obj;
+                    } else return v;
+                })
+                break;
+            default:
+                returnValue = rows.map((v, i) => {
+                    if (v.id === newRow.id) {
+                        Object.keys(v).map((k) => (k === 'adresse' || k === 'id_of_cata') ? v[k] : v[k] = newRow[k])
+                        return v;
+                    } else return v;
+                })
+                break
+        }
+        return returnValue;
     }
 
     // ---------------------------------- Créer une formation du Catalogue
@@ -286,61 +304,74 @@ export default function Catalogue() {
 
     // ---------------------------------- Edit une formation du Catalogue
     const handleEditSubmitClickCatalogue = (updatedRow, listOf) => {
+        console.log(updatedRow)
+        // let updatedRowFromCata = { ...updatedRow }
+        // updateOf(updatedRowFromCata, listOf);
 
-        let updatedRowFromCata = { ...updatedRow }
-        updateOf(updatedRowFromCata, listOf);
-
-        axios({
-            method: 'put',
-            url: '/catalogue/update',
-            data: updatedRowFromCata,
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
-        }).then((response) => {
-            if (response.status === 200) {
-                let newDataRow = updateRowsTableAfterPutAxios(updatedRowFromCata)
-                setRows(newDataRow)
-                setDisplayRows(newDataRow)
-                socket.emit("updateCatalogue", newDataRow);
-                setMessageSnackBar('Modification enregistré.');
-                setSeverity('success');
-                handleHideDeleteIcon()
-                // updateDataRow(displayRows, updatedRowFromCata);
-            } else {
-                setMessageSnackBar('Echec de la modification.');
-                setSeverity('error');
-            }
-            setOpenSnackBar(true);
-        })
-        setOpenModalCatalogue(false)
+        // axios({
+        //     method: 'put',
+        //     url: '/catalogue/update',
+        //     data: updatedRowFromCata,
+        //     headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+        // }).then((response) => {
+        //     if (response.status === 200) {
+        //         let newDataRow = updateRowsTableAfterPutAxios(updatedRowFromCata)
+        //         setRows(newDataRow)
+        //         setDisplayRows(newDataRow)
+        //         socket.emit("updateCatalogue", newDataRow);
+        //         setMessageSnackBar('Modification enregistré.');
+        //         setSeverity('success');
+        //         handleHideDeleteIcon()
+        //         // updateDataRow(displayRows, updatedRowFromCata);
+        //     } else {
+        //         setMessageSnackBar('Echec de la modification.');
+        //         setSeverity('error');
+        //     }
+        //     setOpenSnackBar(true);
+        // })
+        // setOpenModalCatalogue(false)
     }
 
     const handleSaveNewOf = (updatedRowFromCata, rowOF) => {
-        // Ajouter un ligne au tableau avec attribut of / priorite
+        // // Ajouter un ligne au tableau avec attribut of / priorite
 
-        console.log(updatedRowFromCata, rowOF)
-        // Ajoute un OF à la formation si il y a un 'new' comme id
         axios({
             method: 'put',
             url: '/catalogue/add_of',
             data: { priorite: rowOF.priorite, id_attr: rowOF.id_attr, id_cata: updatedRowFromCata.id },
             headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
         }).then((response) => {
-            console.log(response)
-            if (response.status !== 200) {
+            if (response.status === 200) {
+                let newDataRow = [];
+                if (rows.filter((v) => v.id === updatedRowFromCata.id && v.of === null).length === 1) { // Si un seul OF - modifie la ligne existante
+                    let obj = { ...rows.find((v) => v.id === updatedRowFromCata.id) }
+                    let newRowOf = { ...rowOF, id: response.data.insertId }
+                    obj.of = rowOF.libelle;
+                    obj.id_of_cata = response.data.insertId;
+                    obj.priorite = rowOF.priorite;
+                    obj.list_of = newRowOf;
 
-                // Ajoute nouvelle ligne au tableau catalogue
-                let indexToAddNewRow = rows.findIndex((v) => v.id === updatedRowFromCata.id) + 1
-                updatedRowFromCata.list_of.push({ ...rowOF, id: response.data.insertId })
-                let newDataRow = [...rows];
-                newDataRow.splice((indexToAddNewRow > rows.length) ? rows.length : indexToAddNewRow, 0, {
-                    ...updatedRowFromCata,
-                    of: rowOF.libelle,
-                    list_of: newDataRow.listOf.map((x) => x.id === rowOF.id ? { ...x, [x.id]: response.data.insertId } : x),
-                    id_of_cata: response.data.insertId,
-                    priorite: rowOF.priorite,
-                })
+                    newDataRow = updateRowsTableAfterPutAxios(obj, 'of')
+                } else { // Si plusieurs OF - ajoute une ligne au tableau Catalogue
+
+                    newDataRow = [...rows];
+                    // Classer les lignes par orders de priorite ?
+                    let indexToAddNewRow = rows.lastIndexOf((v) => v.id === updatedRowFromCata.id) + 1
+                    let newListOF = [...updatedRowFromCata.list_of]
+                    newListOF.push({ ...rowOF, id: response.data.insertId })
+
+                    updatedRowFromCata.list_of.push({ ...rowOF, id: response.data.insertId })
+                    let rowToAdd = {
+                        ...updatedRowFromCata,
+                        of: rowOF.libelle,
+                        list_of: newListOF,
+                        id_of_cata: response.data.insertId,
+                        priorite: rowOF.priorite,
+                    }
+                    newDataRow.splice((indexToAddNewRow > rows.length) ? rows.length : indexToAddNewRow, 0, rowToAdd)
+                    setUpdateRowCatalogue({ ...updatedRowFromCata, list_of: newListOF })
+                }
                 setRows(newDataRow)
-                setDisplayRows(newDataRow)
             }
         })
     }
@@ -411,7 +442,8 @@ export default function Catalogue() {
                 for (let i = 0; i < rows.length; i++) {
                     if (rows[i].id === id_cata) {
                         if (rows.filter((v) => v.id === id_cata).length === 1) {
-                            let newRow = [...rows[i]];
+                            //         console.log('delete error ?')
+                            let newRow = { ...rows[i] };
                             newRow.of = '';
                             newRow.priorite = '';
                             newRow.list_of = [];

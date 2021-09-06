@@ -18,6 +18,7 @@ export function codeToName(str) {
     case 'prixTrancheA': return 'Prix < 6 personnes';
     case 'prixTrancheB': return 'Prix > 6 personnes';
     case 'adresse': return 'Adresse';
+    case 'commune': return 'Commune';
 
     case 'user': return 'Utilisateur';
     case 'agent_referent': return 'Agent référant';
@@ -97,12 +98,12 @@ export function IsPermitted(user, target, action) {
 }
 
 export function dateFormat(date) {
-  if(!date){return false;}
+  if (!date) { return false; }
   let newDate = date;
   if (date.includes('T')) {
     newDate = date.split('T')[0];
     let newDate_tmp = newDate.split('-');
-    newDate = newDate_tmp[2]+'/'+newDate_tmp[1]+'/'+newDate_tmp[0]
+    newDate = newDate_tmp[2] + '/' + newDate_tmp[1] + '/' + newDate_tmp[0]
   }
   return newDate;
 }

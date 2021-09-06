@@ -15,11 +15,21 @@ import CloseIcon from '@material-ui/icons/Close';
 import { IsPermitted } from '../../../../utilities/Function';
 import Select from '@material-ui/core/Select';
 import SaveIcon from '@material-ui/icons/Save';
+import Paper from '@material-ui/core/Paper';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import MenuItem from '@material-ui/core/MenuItem';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
 import { Tooltip, Typography } from '@material-ui/core';
+
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableContainer from '@material-ui/core/TableContainer';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
+
+import Chip from '@material-ui/core/Chip';
 import axios from 'axios';
 import Cookie from 'js-cookie';
 
@@ -78,7 +88,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   inputNumber: { width: 100, minWidth: 100 },
-  selectOf: { maxWidth: '80%' },
+  selectOf: { maxWidth: '50%' },
   spinnerBtn: { color: theme.palette.spinnerBtnContained.main, },
   blockOfForm: {
     maxHeight: 222,
@@ -88,6 +98,13 @@ const useStyles = makeStyles((theme) => ({
   dividerTop: { margin: '20px 20px 0 20px' },
   dividerDown: { margin: '0 20px 20px 20px' },
   OFTitle: { textAlign: 'center', margin: 10 },
+  lastRow: {
+    textAlign: 'center',
+    '&:hover': {
+      background: 'pink',
+      cursor: 'pointer'
+    }
+  }
 }));
 
 export default function ModalCatalogue(props) {
@@ -97,6 +114,7 @@ export default function ModalCatalogue(props) {
   const [clickHandleSubmit, setClickHandleSubmit] = useState(false)
   const [listOf, setListOf] = useState([]);
   const [listOfSelect, setListOfSelect] = useState([]);
+  const [listCommuneSelect, setListCommuneSelect] = useState([]);
 
   const handleSubmit = () => {
     setIsSubmit(true)
@@ -127,30 +145,47 @@ export default function ModalCatalogue(props) {
   }, [dataRow.list_of])
 
   const handleChangePriorite = (value, id) => {
-    value = parseInt(value) < 1 ? 1 : parseInt(value)
-    // Verifie la disponibilité de la priorité
-    let error = false;
-    let newListOf = listOf.map((v) => {
-      if (v.priorite === value && v.id !== id) {
-        error = true;
-        return { ...v, error: true }
-      } else if (v.id === id) return { ...v, priorite: value }
-      else return { ...v, error: false }
-    })
-    if (error) newListOf.find((v) => v.id === id)['error'] = true
+    let newListOf = [];
+    if (value !== '') {
+      value = parseInt(value) < 1 ? 1 : parseInt(value)
+      // Verifie la disponibilité de la priorité
+      let error = false;
+      newListOf = listOf.map((v) => {
+        if (v.priorite === value && v.id !== id) {
+          error = true;
+          return { ...v, error: true }
+        } else if (v.id === id) return { ...v, priorite: value }
+        else return { ...v, error: false }
+      })
+      error
+        ? newListOf.find((v) => v.id === id)['error'] = true
+        : newListOf.find((v) => v.id === id)['error'] = false
+    } else {
+      newListOf = listOf.map((v) => v.id === id ? { ...v, priorite: '' } : v)
+    }
     setListOf(newListOf);
   }
-
+  const [creatingPossible, setCreatingPossible] = useState(true)
   const handleCreateNewOF = () => {
-    axios({
-      method: 'GET',
-      url: 'attributaire/findOuter?id_cata=' + dataRow.id,
-      headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
-    }).then((response) => setListOfSelect(response.data));
+    const arrayOf = [...listOf];
+    if (creatingPossible) {
 
-    const arrayOf = listOf.map((v) => v);
-    arrayOf.push({ id: 'new_' + listOf.length, priorite: '', libelle: '' });
-    setListOf(arrayOf);
+      axios({
+        method: 'GET',
+        url: 'attributaire/findOuter?id_cata=' + dataRow.id,
+        headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+      }).then((response) => setListOfSelect(response.data));
+
+      axios({
+        method: 'GET',
+        url: 'adresse/findOuterCommune?id_cata_attr=' + dataRow.id_of_cata,
+        headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+      }).then((response) => setListCommuneSelect(response.data));
+
+      arrayOf.push({ id: 'new_' + listOf.length, priorite: '', libelle: '' });
+      setListOf(arrayOf);
+      setCreatingPossible(false)
+    }
   }
 
   const handleDeleteNewOf = (id) => {
@@ -160,11 +195,15 @@ export default function ModalCatalogue(props) {
     props.handleDeleteOf(id, dataRow.id);
   }
 
-  const handleChangeValueSelect = (id, value) => {
+  const handleChangeValueSelectOF = (id, value) => {
     let OfSelected = listOfSelect.filter((v) => v.id === value);
     let libelle = OfSelected.length > 0 ? OfSelected[0].libelle : '';
-    console.log(libelle)
     setListOf(listOf.map((v) => v.id === id ? { ...v, id_attr: value, libelle: libelle } : v))
+  }
+  const handleChangeValueSelectCommune = (id, value) => {
+    let communeSelected = listCommuneSelect.filter((v) => v.id === value);
+    let libelle = communeSelected.length > 0 ? communeSelected[0].libelle : '';
+    setListOf(listOf.map((v) => v.id === id ? { ...v, id_commune: value, commune: libelle } : v))
   }
 
   return (
@@ -306,6 +345,59 @@ export default function ModalCatalogue(props) {
             </form>
             <Divider className={classes.dividerTop} />
             <Typography className={classes.OFTitle}>OF Dispensateur</Typography>
+            <TableContainer className={`${classes.table} scrollBar-personnalize`}>
+              <Table aria-label="collapsible table" size="small" stickyHeader>
+                <TableHead>
+                  <TableRow>
+                    <TableCell></TableCell>
+                    <TableCell>Priorité</TableCell>
+                    <TableCell>Attributaires</TableCell>
+                    <TableCell>Communes</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {listOf && listOf.map((v) => (
+                    <TableRow key={'OF_' + v.id} >
+                      <TableCell>
+                        <Tooltip title="Supprimer l'OF" aria-label="delete">
+                          <IconButton aria-label="delete" color="primary" onClick={() => handleDeleteOf(v.id)}>
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell>
+                        <TextField error={v.error}
+                          label="Priorité" type="number" size="small" className={classes.inputNumber}
+                          value={v.priorite} variant="outlined" onChange={(e) => handleChangePriorite(e.target.value, v.id)}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {v.libelle}
+                      </TableCell>
+                      <TableCell>
+                        {v.commune && v.commune.includes(':')
+                          ? v.commune.split(':').map((x) => <Chip
+                            label={x}
+                            onDelete={() => console.log('delete COMMUNE FROM ATR')}
+                            color="secondary"
+                            variant="outlined"
+                          />)
+                          : <Chip
+                            label={v.commune}
+                            onDelete={() => console.log('delete COMMUNE FROM ATR')}
+                            color="secondary"
+                            variant="outlined"
+                          />}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+                <TableBody><TableCell colspan={4} className={classes.lastRow}>Ajouter une ligne</TableCell></TableBody>
+              </Table>
+            </TableContainer>
+
+
+
             <Divider className={classes.dividerDown} />
             {dataRow.id &&
               <div className={`${classes.blockOfForm} scrollBar-personnalize`}>
@@ -314,7 +406,10 @@ export default function ModalCatalogue(props) {
                     {v.id.toString().includes('new')
                       ? <>
                         <Tooltip title="Annuler" aria-label="cancel">
-                          <IconButton aria-label="cancel" color="primary" onClick={() => handleDeleteNewOf(v.id)}>
+                          <IconButton aria-label="cancel" color="primary" onClick={() => {
+                            setCreatingPossible(true);
+                            handleDeleteNewOf(v.id)
+                          }}>
                             <CancelOutlinedIcon />
                           </IconButton>
                         </Tooltip>
@@ -327,7 +422,7 @@ export default function ModalCatalogue(props) {
                           {listOfSelect.length > 0 &&
                             <Select
                               value={v.id_attr ? v.id_attr : 'all'}
-                              onChange={(e) => handleChangeValueSelect(e.target.name, e.target.value)}
+                              onChange={(e) => handleChangeValueSelectOF(e.target.name, e.target.value)}
                               name={v.id}
                               label='Attributaire'
                             >
@@ -340,9 +435,32 @@ export default function ModalCatalogue(props) {
                             </Select>
                           }
                         </FormControl>
+
+                        <FormControl size="small" variant="outlined" className={classes.selectCommune} error={!v.id_commune || v.id_commune === 'all'}>
+                          <InputLabel id="demo-simple-select-outlined-label">Commune</InputLabel>
+                          {listCommuneSelect.length > 0 &&
+                            <Select
+                              value={v.id_commune ? v.id_commune : 'all'}
+                              onChange={(e) => handleChangeValueSelectCommune(e.target.name, e.target.value)}
+                              name={v.id}
+                              label='Commune'
+                            >
+                              <MenuItem value="all">
+                                <em>Choisir</em>
+                              </MenuItem>
+                              {listCommuneSelect.map((v) => (
+                                <MenuItem key={v.id + '_' + v.libelle} value={v.id}>{v.libelle}</MenuItem>
+                              ))}
+                            </Select>
+                          }
+                        </FormControl>
+
                         {v.priorite && v.id_attr && !v.error
                           ? <Tooltip title="Enregistrer" aria-label="save">
-                            <IconButton aria-label="save" color="primary" onClick={() => props.handleSaveNewOf(dataRow, v)}>
+                            <IconButton aria-label="save" color="primary" onClick={() => {
+                              setCreatingPossible(true);
+                              props.handleSaveNewOf(dataRow, v)
+                            }}>
                               <SaveIcon />
                             </IconButton>
                           </Tooltip>
@@ -363,7 +481,13 @@ export default function ModalCatalogue(props) {
                           label="Priorité" type="number" size="small" className={classes.inputNumber}
                           value={v.priorite} variant="outlined" onChange={(e) => handleChangePriorite(e.target.value, v.id)}
                         />
-                        {v.libelle}
+                        {v.libelle} -
+                        <Chip
+                          label={v.commune}
+                          onDelete={() => console.log('delete COMMUNE FROM ATR')}
+                          color="secondary"
+                          variant="outlined"
+                        />
                       </>}
 
 
@@ -371,11 +495,16 @@ export default function ModalCatalogue(props) {
                 )}
 
                 <div key={'OF_add'} className={classes.blockOF}>
-                  <Tooltip title="Ajouter un OF" aria-label="add">
-                    <IconButton aria-label="add" color="primary" onClick={handleCreateNewOF}>
+                  {creatingPossible
+                    ? <Tooltip title="Ajouter un OF" aria-label="add">
+                      <IconButton aria-label="add" color="primary" onClick={handleCreateNewOF}>
+                        <AddCircleOutlineIcon />
+                      </IconButton>
+                    </Tooltip>
+                    : <IconButton disabled aria-label="add" color="primary">
                       <AddCircleOutlineIcon />
                     </IconButton>
-                  </Tooltip>
+                  }
                 </div>
               </div>}
 
