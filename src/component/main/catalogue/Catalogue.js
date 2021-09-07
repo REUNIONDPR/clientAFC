@@ -35,7 +35,7 @@ export default function Catalogue() {
         'prixTrancheB',
         'commune',
         'adresse',
-        'action',
+        // 'action',
     ]
 
     const [rows, setRows] = useState([]) // Resultat de la requete
@@ -52,7 +52,7 @@ export default function Catalogue() {
     // --------------- SnackBar
     const [openSnackBar, setOpenSnackBar] = useState(false);
     const [messageSnackBar, setMessageSnackBar] = useState('');
-    const [severity, setSeverity] = useState('success');
+    const [severity, setSeverity] = useState();
 
     const ActionTable = (props) => {
         return (
@@ -198,7 +198,6 @@ export default function Catalogue() {
                 url: 'catalogue/of?id_cata=' + row.id,
                 headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
             }).then((response) => {
-                console.log(response.data)
                 setUpdateRowCatalogue({ ...row, list_of: response.data })
             });
         } else {
@@ -334,11 +333,14 @@ export default function Catalogue() {
 
     const handleSaveNewOf = (updatedRowFromCata, rowOF) => {
         // // Ajouter un ligne au tableau avec attribut of / priorite
-
         axios({
             method: 'put',
             url: '/catalogue/add_of',
-            data: { priorite: rowOF.priorite, id_attr: rowOF.id_attr, id_cata: updatedRowFromCata.id },
+            data: {
+                priorite: rowOF.priorite,
+                id_attr: rowOF.id_attr,
+                id_cata: updatedRowFromCata.id,
+            },
             headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
         }).then((response) => {
             if (response.status === 200) {
@@ -358,7 +360,7 @@ export default function Catalogue() {
                     // Classer les lignes par orders de priorite ?
                     let indexToAddNewRow = rows.lastIndexOf((v) => v.id === updatedRowFromCata.id) + 1
                     let newListOF = [...updatedRowFromCata.list_of]
-                    newListOF.push({ ...rowOF, id: response.data.insertId })
+                    newListOF.push({ ...rowOF, id: response.data.insertId})
 
                     updatedRowFromCata.list_of.push({ ...rowOF, id: response.data.insertId })
                     let rowToAdd = {
@@ -375,55 +377,20 @@ export default function Catalogue() {
             }
         })
     }
-    const updateOf = (updatedRowFromCata, listOf) => {
-        // Update OF à la formation
-        let updating = false;
-        updatedRowFromCata.list_of.map((v) => {
-            let of = listOf.find((x) => x.id === v.id)
-            if (!updating) updating = parseInt(of.priorite) !== parseInt(v.priorite)
-            return updating;
-        })
-        if (updating) {
-            let arrayOFUpdate = listOf.filter((v) => !v.id.toString().includes('new_'))
-                .map((v) => v = { ...v, id_cata: updatedRowFromCata.id });
-            arrayOFUpdate.map((v) =>
-                axios({
-                    method: 'put',
-                    url: '/catalogue/update_of',
-                    data: v,
-                    headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
-                }).then((response) => {
-                    if (response.status !== 200) {
-                        console.log(response)
-                    }
-                })
-            )
-        }
-    }
 
-    // ---------------------------------- Delete une formation du Catalogue
-    const handleDeleteClickCatalogue = (dataRow) => {
+    // ---------------------------------- UPDATE l'OF
+    const handleUpdateOf = (id, id_cata, priorite) => {
+
         axios({
             method: 'put',
-            url: '/catalogue/delete',
-            data: dataRow,
+            url: '/catalogue/update_of',
+            data: { priorite: priorite, id: id },
             headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
         }).then((response) => {
             if (response.status === 200) {
-                let newDataRow = rows.filter((v) => v.id !== dataRow.id)
-                socket.emit("updateCatalogue", newDataRow);
-                setRows(newDataRow)
-                setMessageSnackBar('Suppression réussi.');
-                setSeverity('success');
-                setOpenModalCatalogue(false)
-                handleHideDeleteIcon()
-                // setRows(newDataRow) // Met à jour le tableau au cas ou la socket ne répond pas.
-                // setDisplayRows(newDataRow) // Met à jour le tableau au cas ou la socket ne répond pas.
-            } else {
-                setMessageSnackBar('Echec de la suppréssion.');
-                setSeverity('error');
+                let newRows = rows.map((v) => v.id === id_cata && v.id_of_cata === id ? { ...v, priorite: priorite } : v)
+                setRows(newRows);
             }
-            setOpenSnackBar(true);
         })
     }
 
@@ -467,6 +434,111 @@ export default function Catalogue() {
             setOpenSnackBar(true);
         })
     }
+
+    // ---------------------------------- Delete une formation du Catalogue
+    const handleDeleteClickCatalogue = (dataRow) => {
+        axios({
+            method: 'put',
+            url: '/catalogue/delete',
+            data: dataRow,
+            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+        }).then((response) => {
+            if (response.status === 200) {
+                let newDataRow = rows.filter((v) => v.id !== dataRow.id)
+                socket.emit("updateCatalogue", newDataRow);
+                setRows(newDataRow)
+                setMessageSnackBar('Suppression réussi.');
+                setSeverity('success');
+                setOpenModalCatalogue(false)
+                handleHideDeleteIcon()
+                // setRows(newDataRow) // Met à jour le tableau au cas ou la socket ne répond pas.
+                // setDisplayRows(newDataRow) // Met à jour le tableau au cas ou la socket ne répond pas.
+            } else {
+                setMessageSnackBar('Echec de la suppréssion.');
+                setSeverity('error');
+            }
+            setOpenSnackBar(true);
+        })
+    }
+
+
+
+    const handleSaveAddNewCommune = (updateRowCatalogue, commune) => {
+        axios({
+            method: 'put',
+            url: '/catalogue/add_commune_of',
+            data: commune,
+            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+        }).then((response) => {
+            if (response.status === 200) {
+
+                // MaJ Le modal Catalogue
+                let newListOf = updateRowCatalogue.list_of.map((v) => v.id === commune.id_of_cata
+                    ? v.commune
+                        ? { ...v, commune: v.commune + ' | ' + commune.id_commune + ':' + commune.commune }
+                        : { ...v, commune: commune.id_commune + ':' + commune.commune }
+                    : v)
+                let newRow = {
+                    ...updateRowCatalogue,
+                    commune: updateRowCatalogue.commune
+                        ? updateRowCatalogue.commune + ' | ' + commune.id_commune + ':' + commune.commune
+                        : commune.id_commune + ':' + commune.commune,
+                    list_of: newListOf,
+                }
+
+                // MaJ le tableau Catalogue
+                let newRows = rows.map((v) => (v.id === newRow.id && v.id_of_cata === commune.id_of_cata) ? newRow : v)
+
+                setUpdateRowCatalogue(newRow)
+                setRows(newRows)
+
+                setMessageSnackBar('Ajout de la commune réussi.');
+                setSeverity('success');
+
+            } else {
+                setMessageSnackBar('Echec de de l\'ajout de la commune.');
+                setSeverity('error');
+            }
+            setOpenSnackBar(true);
+        })
+    }
+    const handleDeleteCommune = (updateRowCatalogue, id_of_attr, id_commune) => {
+        axios({
+            method: 'put',
+            url: '/catalogue/delete_commune_of',
+            data: { id_of_cata: id_of_attr, id_commune: id_commune },
+            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+        }).then((response) => {
+            if (response.status === 200) {
+
+                let arrayNewCommune = updateRowCatalogue.list_of.find((v) => v.id === id_of_attr).commune
+                let newCommune = arrayNewCommune.split('|').filter((v) => v.split(':')[0] !== id_commune).join('|')
+                let newListOf = updateRowCatalogue.list_of.map((v) => v.id === id_of_attr ? { ...v, commune: newCommune } : v)
+
+                let newRow = {
+                    ...updateRowCatalogue,
+                    commune: newCommune,
+                    list_of: newListOf,
+                }
+
+                // // MaJ le tableau Catalogue
+                let newRows = rows.map((v) => v.id === newRow.id && v.id_of_cata === id_of_attr ? newRow : v)
+
+                setUpdateRowCatalogue(newRow)
+                setRows(newRows)
+
+                setMessageSnackBar('Suppression de la commune réussi.');
+                setSeverity('success');
+
+            } else {
+                setMessageSnackBar('Echec de de suppression de la commune.');
+                setSeverity('error');
+            }
+            setOpenSnackBar(true);
+        })
+
+    }
+
     // ---------------------------------- MODAL ADRESSE
     const [openModalAdresse, setOpenModalAdresse] = useState(false)
     const [updateRowAdresse, setUpdateRowAdresse] = useState({})
@@ -598,16 +670,24 @@ export default function Catalogue() {
                 updateRowCatalogue.id !== undefined &&
                 <ModalCatalogue openModal={openModalCatalogue}
                     handleCloseModal={handleCloseModalCatalogue}
-                    handleErrorSubmit={handleErrorSubmit}
-                    handleSubmitClickToParent={handleSubmitClickCatalogue}
+
                     handleChangeUpdateRow={handleChangeUpdateRow}
-                    handleEditSubmitClickToParent={handleEditSubmitClickCatalogue}
                     updateRow={updateRowCatalogue}
-                    handleDeleteClick={handleDeleteClickCatalogue}
+
                     handleHideDeleteIcon={handleHideDeleteIcon}
                     handleShowDeleteIcon={handleShowDeleteIcon}
-                    handleSaveNewOf={handleSaveNewOf}
                     deleteClick={deleteClick}
+
+                    handleErrorSubmit={handleErrorSubmit}
+                    handleSubmitClickToParent={handleSubmitClickCatalogue}
+                    handleEditSubmitClickToParent={handleEditSubmitClickCatalogue}
+                    handleDeleteClick={handleDeleteClickCatalogue}
+
+                    handleSaveAddNewCommune={handleSaveAddNewCommune}
+                    handleDeleteCommune={handleDeleteCommune}
+
+                    handleSaveNewOf={handleSaveNewOf}
+                    handleUpdateOf={handleUpdateOf}
                     handleDeleteOf={handleDeleteOf}
                     user={user}
                 />

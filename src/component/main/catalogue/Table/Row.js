@@ -7,6 +7,7 @@ import AddIcon from '@material-ui/icons/Add';
 import { codeToName } from '../../../../utilities/Function';
 import Tooltip from '@material-ui/core/Tooltip';
 import DeleteIcon from '@material-ui/icons/Delete';
+import Chip from '@material-ui/core/Chip';
 
 const StyledTableRow = withStyles((theme) => ({
     root: {
@@ -117,40 +118,25 @@ export default function Row(props) {
                                         </Tooltip>}
                                 </div>
                             </TableCell>
-                            : col === 'lot' ||  col === 'objectif_form' ||  col === 'niveau_form'
-                                ? <TableCell key={row.id.toString() + '_' + col} className='nowrap'>{codeToName(col + '_' + row[col])}</TableCell>
-                                : <TableCell key={row.id.toString() + '_' + col} className='nowrap'>{row[col]}</TableCell>
+                            :
+                            col === 'commune'
+                                ? <TableCell className={classes.center} key={row.id.toString() + '_' + col}>
+                                    {row[col] && row[col] !== '' && row[col].split('|') &&
+                                        row[col].split('|').map((c) => (
+                                            <Chip
+                                                key={'chip_row_' + row.id_of_cata + c.split(':')[0]}
+                                                label={c.split(':')[1]}
+                                                color="secondary"
+                                                variant="outlined"
+                                            />))
+                                    }
+                                </TableCell>
+                                : col === 'lot' || col === 'objectif_form' || col === 'niveau_form'
+                                    ? <TableCell key={row.id.toString() + '_' + col} className='nowrap'>{codeToName(col + '_' + row[col])}</TableCell>
+                                    : <TableCell key={row.id.toString() + '_' + col} className='nowrap'>{row[col]}</TableCell>
                     ))
-              ))}
-
-            {/* {Object.entries(row).filter(([k, v]) => k !== 'id').map(([k, v]) => (
-                props.checkColumnsVisible && (props.checkColumnsVisible.indexOf(k) !== -1 && (
-                    k === 'adresse'
-                        ? <TableCell className={classes.center} key={row.id.toString() + '_' + k}>
-                            <div className={classes.adresseCell}>
-                                <div className={classes.adresseBlock}>
-                                    {v && v.map((a) => (
-                                        <DivAdress
-                                            adresseHabilited={props.adresseHabilited}
-                                            key={row.id + '_' + a.id}
-                                            label={a.adresse + ' - ' + a.commune}
-                                            id={a.id}
-                                            handleDeleteAdresse={() => { props.handleDeleteAdresse(row, { id: a.id, adresse: a.adresse, commune: a.commune }) }} />
-                                    ))}
-                                </div>
-                                {props.adresseHabilited &&
-                                    <Tooltip classes={{ tooltip: classes.tooltip }} title="Ajouter une adresse">
-                                        <IconButton aria-label="Ajouter" color="primary" onClick={() => props.handleOpenModalAdresse(row)}>
-                                            <AddIcon />
-                                        </IconButton>
-                                    </Tooltip>}
-                            </div>
-                        </TableCell>
-                        : <TableCell key={row.id.toString() + '_' + k} className='nowrap'>{k.includes('display_') ? codeToName(k.split('display_')[1] + '_' + v) : v}</TableCell>
-                ))
-            ))} */}
-            {/* {(row.priorite === 1 || !row.priorite) && <ActionTable row={row} /> } */}
-            <ActionTable row={row} /> 
+                ))}
+                <ActionTable row={row} />
             </StyledTableRow>
         </React.Fragment >
     );
