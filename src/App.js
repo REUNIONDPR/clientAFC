@@ -22,6 +22,7 @@ function App() {
         main: '#c51162',
         dark: '#890b44',
         contrastText: '#fff',
+        hover: '#1ee92e',
       },
       // secondary: {
       //   light: '#8eddae',
@@ -38,8 +39,8 @@ function App() {
       danger: {
         main: '#f44336',
       },
-      white: {
-        main: '#c51162',
+      spinnerBtnContained: {
+        main: '#fff',
       },
     },
     overrides: {
@@ -50,7 +51,7 @@ function App() {
       },
     },
   }, frFR);
-
+  
   const drawerWidth = '260px';
 
   const useStyles = makeStyles((theme) => ({
@@ -73,7 +74,7 @@ function App() {
         logUser(Cookie.get('xtidc'))
       } else {
         console.log('cookie existe pas')
-        
+
         Cookie.set("xtidc", 'IRLE5360');
         setIsUser(true)
         logUser(Cookie.get('xtidc'))

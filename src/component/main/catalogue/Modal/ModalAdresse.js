@@ -90,7 +90,7 @@ export default function ModalAdresse(props) {
     const dataRow = props.updateRow;
     const [textAdresse, setTextAdresse] = useState('');
 
-    const [adresse, setAdresse] = useState({ ville: 'all', adresse: 'all' })
+    const [adresse, setAdresse] = useState({})
 
     // Comment faire autrement ?
     useEffect(() => {
