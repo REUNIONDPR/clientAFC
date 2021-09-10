@@ -1,3 +1,4 @@
+import { exit } from 'process';
 import HAB from './permissions';
 
 export function codeToName(str) {
@@ -43,6 +44,7 @@ export function codeToName(str) {
     case 'dispositif_1': return 'Sans';
     case 'dispositif_2': return 'Mission Locale';
     case 'dispositif_3': return 'PEC Excellence';
+    case 'dispositif_4': return '1J1S';
 
     case 's_formation': return 'Statut';
     case 's_formation_1': return 'En attente de validation';
@@ -76,12 +78,12 @@ export function codeToName(str) {
     case 'lot_15': return 'LOT 15 - METIER DU NUMERIQUE';
     case 'lot_16': return 'LOT 16 - CREATION D ENTREPRISE';
 
-    case 'formation_1': return 'DT Nord-Est';
-    case 'formation_2': return 'DT Sud-Ouest';
-    case 'formation_3': return 'DPSR';
-    case 'formation_4': return 'AMAJ';
-    case 'formation_5': return 'DDO';
-    case 'formation_6': return 'DPR';
+    case 'fonction_1': return 'DT Nord-Est';
+    case 'fonction_2': return 'DT Sud-Ouest';
+    case 'fonction_3': return 'DPSR';
+    case 'fonction_4': return 'AMAJ';
+    case 'fonction_5': return 'DDO';
+    case 'fonction_6': return 'DPR';
     default: return str;
   }
 }
@@ -97,13 +99,183 @@ export function IsPermitted(user, target, action) {
 
 }
 
-export function dateFormat(date) {
-  if (!date) { return false; }
+export function dateFormat(date, format = 'FR') {
+  if (!date) { return ''; }
   let newDate = date;
-  if (date.includes('T')) {
+  if (date.includes('T')) { // DateFormat yyyy-mm-ddThh:mm:ss.ssssZ de la bdd
     newDate = date.split('T')[0];
-    let newDate_tmp = newDate.split('-');
-    newDate = newDate_tmp[2] + '/' + newDate_tmp[1] + '/' + newDate_tmp[0]
+    if (format === 'FR') {
+      let newDate_tmp = newDate.split('-');
+      newDate = newDate_tmp[2] + '/' + newDate_tmp[1] + '/' + newDate_tmp[0]
+    }
+  } else if (date.includes('-')) {
+    if (format === 'FR') {
+      let newDate_tmp = date.split('-');
+      newDate = newDate_tmp[2] + '/' + newDate_tmp[1] + '/' + newDate_tmp[0]
+    } else if (format === 'ANG') newDate = date
   }
   return newDate;
+}
+
+// ---------------------- CALCUL DATE FIN FORMATION 
+export function calculDateFin(formation) {
+
+  // Calcul des heures se fait dans l'objet formation directement
+
+  let interruption_1 = 0;
+  let interruption_2 = 0;
+  if (formation.date_DDINT1 !== '' && formation.date_DFINT1 !== '') {
+    interruption_1 = dateCount(new Date(formation.date_DDINT1), new Date(formation.date_DFINT1))
+    if (formation.date_DDINT2 !== '' && formation.date_DFINT2 !== '') {
+      interruption_2 = dateCount(new Date(formation.date_DDINT2), new Date(formation.date_DFINT2))
+    }
+  }
+
+  let nb_jour_formation = Math.ceil(formation.heure_max_session / 7) + interruption_1 + interruption_2;
+  let date_fin_calcule = calculDate(formation.date_entree, nb_jour_formation);
+  let regexDate = /^\d{4}\-\d{2}\-\d{2}$/;
+  let date_fin = regexDate.test(date_fin_calcule) ? date_fin_calcule : '';
+
+  return {
+    date_fin: formation.date_entree !== '' ? date_fin : '',
+    interruption_1: interruption_1,
+    interruption_2: interruption_2
+  }
+}
+
+function dateCount(startDate, endDate, jrsOuvre = true) {
+  // Nombre de jours ouvrés
+  // <param 1 = startDate> Date à partir de laquelle il faut compter
+  // <param 2 = endDate> Date jusqu'à laquelle il faut compter
+  // <param 3 = jrsOuvre> Bool pour savoir si on compte sur les jours ouvré
+  // Appel de la fonction JOURSFERIES qui listes les jours fériés selon l'année
+  // Retourn le nombre de jours ouvrés entre les deux dates
+
+  let count = 0;
+  let curDate = startDate;
+
+  let tab_1 = JoursFeries(startDate.getFullYear());
+  let tab_2 = JoursFeries(startDate.getFullYear() + 1);
+
+  while (curDate <= endDate) {
+    var dayofWeek = curDate.getDay();
+    if (!((dayofWeek === 6) || (dayofWeek === 0))) {
+      count++;
+      // On compte les jours fériés entre les dates d'interruption
+      if (jrsOuvre) {
+        for (let cpt_k = 0; cpt_k < 13; cpt_k++) {
+          if (curDate.getMonth() === tab_1[cpt_k].getMonth() && curDate.getFullYear() === tab_1[cpt_k].getFullYear() && curDate.getDate() === tab_1[cpt_k].getDate()) {
+            count--;
+            break;
+          }
+          if (curDate.getMonth() === tab_2[cpt_k].getMonth() && curDate.getFullYear() === tab_2[cpt_k].getFullYear() && curDate.getDate() === tab_2[cpt_k].getDate()) {
+            count--;
+            break;
+          }
+        }
+      }
+    }
+    curDate.setDate(curDate.getDate() + 1);
+
+  }
+  return count;
+}
+
+function JoursFeries(an) {
+  // JOURS FERIES
+  // <param 1 = an> Année concerné pour le tableau des jours fériés
+  // Retorune un tableau contenant tout les jours férié de l'année an
+
+  var JourAn = new Date(an, "00", "01");
+  var FeteTravail = new Date(an, "04", "01");
+  var Victoire1945 = new Date(an, "04", "08");
+  var FeteNationale = new Date(an, "06", "14");
+  var Assomption = new Date(an, "07", "15");
+  var Toussaint = new Date(an, "10", "01");
+  var Armistice = new Date(an, "10", "11");
+  var FeteCaf = new Date(an, "11", "20");
+  var Noel = new Date(an, "11", "25");
+
+  var G = an % 19;
+  var C = Math.floor(an / 100);
+  var H = (C - Math.floor(C / 4) - Math.floor((8 * C + 13) / 25) + 19 * G + 15) % 30;
+  var I = H - Math.floor(H / 28) * (1 - Math.floor(H / 28) * Math.floor(29 / (H + 1)) * Math.floor((21 - G) / 11));
+  var J = (an * 1 + Math.floor(an / 4) + I + 2 - C + Math.floor(C / 4)) % 7;
+  var L = I - J;
+
+  var MoisPaques = 3 + Math.floor((L + 40) / 44);
+  var JourPaques = L + 28 - 31 * Math.floor(MoisPaques / 4);
+  var Paques = new Date(an, MoisPaques - 1, JourPaques);
+  var LundiPaques = new Date(an, MoisPaques - 1, JourPaques + 1);
+  var Ascension = new Date(an, MoisPaques - 1, JourPaques + 39);
+  var Pentecote = new Date(an, MoisPaques - 1, JourPaques + 49);
+  var LundiPentecote = new Date(an, MoisPaques - 1, JourPaques + 50);
+
+  return [JourAn, Paques, LundiPaques, FeteTravail, Victoire1945, Ascension, Pentecote, LundiPentecote, FeteNationale, Assomption, Toussaint, Armistice, FeteCaf, Noel];
+}
+
+
+
+// ---------------------- FONCTION CALCULER DATE 
+function calculDate(dateDebut, nbjrs) {
+  // Calcul une date par rapport à une autre : Date début + nombre de jours = ...
+  // <param 1 = dateDebut> Date où il faut commencer le calcul
+  // <param 2 = nbjrs> Nombre de jours à ajouter à cette date
+  // Les weekend et jours férié en sont pas compté ! Ex : 13/07 + 2 = 16/07 (14/07 pas compté)
+  // Retorune la date résultant au format YYYY-MM-DD
+  if (dateDebut.includes('/')) {
+    let tmpDate = dateDebut.split('/')
+    dateDebut = tmpDate[2] + '-' + tmpDate[1] + '-' + tmpDate[0]
+  }
+  var madate = new Date(dateDebut)
+  // test = typeof(madate)
+  // // var date_now = new Date();
+  var date_now_annee = madate.getFullYear();
+  var date_now_mois = madate.getMonth();
+  var date_now_jour = madate.getDate();
+
+  //**init. des compteurs**//
+  var cpt_i = 0;
+  var cpt_j = 0;
+  var cpt_k = 0;
+
+  //**init. des tableaux récupérant les jours feries de l'annee en cours et de l'annee suivante.**//
+  var tab_1 = [];
+  var tab_2 = [];
+  tab_1 = JoursFeries(madate.getFullYear());
+  tab_2 = JoursFeries(madate.getFullYear() + 1);
+
+  for (cpt_i = 0; cpt_j < nbjrs; cpt_i++) {
+    var date_eval = new Date(date_now_annee, date_now_mois, date_now_jour + cpt_i);
+    var day_date_eval = date_eval.getDay();
+    if ((day_date_eval !== 6) && (day_date_eval !== 0)) {
+      cpt_j++;
+      for (cpt_k = 0; cpt_k < 13; cpt_k++) {
+        if (date_eval.getMonth() === tab_1[cpt_k].getMonth() && date_eval.getFullYear() === tab_1[cpt_k].getFullYear() && date_eval.getDate() === tab_1[cpt_k].getDate()) {
+          cpt_j--;
+          break;
+        }
+        if (date_eval.getMonth() === tab_2[cpt_k].getMonth() && date_eval.getFullYear() === tab_2[cpt_k].getFullYear() && date_eval.getDate() === tab_2[cpt_k].getDate()) {
+          cpt_j--;
+          break;
+        }
+      }
+    }
+  }
+  if (!nbjrs) {
+    nbjrs = 0
+    date_eval = new Date(dateDebut)
+  }
+  let year = date_eval.getFullYear();
+  let month = date_eval.getMonth() + 1;
+  let dt = date_eval.getDate();
+
+  if (dt < 10) {
+    dt = '0' + dt;
+  }
+  if (month < 10) {
+    month = '0' + month;
+  }
+
+  return (year + '-' + month + '-' + dt);
 }

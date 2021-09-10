@@ -128,18 +128,18 @@ export default function PermanentDrawerLeft() {
 
           <div className={classes.infoAvatar}>
             <p className='titre'>{user.nom}</p>
-            <p>{codeToName('formation_'+user.fonction)}</p>
+            <p>{codeToName('fonction_'+user.fonction)}</p>
           </div>
         </div>
       </div>
 
       <Divider />
       <List>
-        {IsPermitted(user, 'sollicitation', 'view') &&
+        {IsPermitted(user, 'formation', 'view') &&
           <ListItem button className='primary-h-color' component={Link} to="/home" selected={selectedIndex === 1}
             onClick={(event) => handleListItemClick(event, 1)}>
             <ListItemIcon><CreateNewFolderIcon /></ListItemIcon>
-            <ListItemText secondary='Sollicitation' />
+            <ListItemText secondary='Formation' />
           </ListItem>}
 
         {IsPermitted(user, 'catalogue', 'view') &&
