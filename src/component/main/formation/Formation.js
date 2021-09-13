@@ -11,18 +11,18 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Button from '@material-ui/core/Button';
-import ModalCreateSol from './Modal/ModalCreateSol';
+import ModalFormation from './Modal/ModalFormation';
 import { codeToName, dateFormat, calculDateFin } from '../../../utilities/Function';
 import SnackBar from '../../global/SnackBar/SnackBar';
 import './sollicitation.css';
+import { Tooltip } from '@material-ui/core';
+import InfoIcon from '@material-ui/icons/Info';
 import { IsPermitted } from '../../../utilities/Function';
 import IconButton from '@material-ui/core/IconButton';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import Grow from '@material-ui/core/Grow';
-import ClickAwayListener from '@material-ui/core/ClickAwayListener';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import { exit } from 'process';
 // import { title } from 'process';
 // import Cards from './Card/Cards';
 // import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -37,6 +37,19 @@ const getDateToday = () => {
 const useStyles = makeStyles((theme) => ({
     table: {
         minWidth: 650,
+    },
+    etatTooltip:{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+    },
+    icon: {
+        fill: '#777777',
+        cursor: 'default',
+    },
+    tooltip: {
+        fontSize: '15px',
+        maxWidth: 'none',
     },
     categorie: {
         marginTop: 20,
@@ -86,7 +99,6 @@ export default function Sollicitation() {
 
     const [openMoreOptions, setOpenMoreOptions] = useState('');
     const [moreOptionsList, setMoreOptionsList] = useState([]);
-    const [styleOptionsList, setStyleOptionsList] = useState({});
     const [openModalCreateSol, setOpenModalCreateSol] = useState(false)
     const [updateFormation, setupdateFormation] = useState({
         id: '',
@@ -96,7 +108,7 @@ export default function Sollicitation() {
         idgasi: user.idgasi,
         userFct: '',
         dt: '',
-        statut: 1,
+        etat: 1,
         agence_ref: 'all',
         dispositif: 1,
         n_Article: '',
@@ -106,7 +118,8 @@ export default function Sollicitation() {
         commune: '',
         id_commune: 'all',
         date_creation: getDateToday(),
-        date_entree: '',
+        date_entree_demandee: '',
+        date_entree_fixe: '',
         date_fin: '',
         date_DDINT1: '',
         date_DFINT1: '',
@@ -127,7 +140,17 @@ export default function Sollicitation() {
     const [openSnackBar, setOpenSnackBar] = useState(false);
     const [messageSnackBar, setMessageSnackBar] = useState('');
     const [severity, setSeverity] = useState();
+    const [anchorElMenu, setAnchorElMenu] = React.useState(null);
+    const openMenu = Boolean(anchorElMenu);
 
+    const handleClickOpenMenu = (event, id) => {
+        setOpenMoreOptions(id)
+        setAnchorElMenu(event.currentTarget);
+    };
+
+    const handleCloseOpenMenu = () => {
+        setAnchorElMenu(null);
+    };
     const handleCloseSnackbar = (reason) => {
         if (reason === 'clickaway') {
             return;
@@ -151,7 +174,10 @@ export default function Sollicitation() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user])
 
+
+
     const handleShowFormation = () => {
+        handleCloseOpenMenu()
         let formation = {};
         if (openMoreOptions !== '') {
             formation = formationList.find((v) => v.id === openMoreOptions);
@@ -188,7 +214,6 @@ export default function Sollicitation() {
 
         // Si id_lot !== 'all' = récupère le catalgoue du lot
         if (formation && formation.id_lot !== 'all') {
-            console.log('&é"&é"&é"&é"&éeazdeazdazdazdazdaz')
             axios({
                 method: 'GET',
                 url: '/catalogue/find?field=id_lot&data=' + formation.id_lot,
@@ -197,7 +222,7 @@ export default function Sollicitation() {
                 setCatalogueList(response.data);
             });
         }
-        
+
         // Si id_cata !== 'all' = récupère les communes possible (selon les attributaires)
         if (formation && formation.id_cata !== 'all') {
             axios({
@@ -208,21 +233,36 @@ export default function Sollicitation() {
                 setCommuneList(response.data);
             });
 
-            // si formation déjà créer, récupère la liste des attr 
+            // si formation déjà créer, 
+            // Récupère list des attr possible
+            // Récupère list des sol ?
             if (formation.id !== '') {
-                let sql = `id_cata=${formation.id_cata}&id_formation=${formation.id}`
+                let sql = `id_formation=${formation.id}`
                 axios({
                     method: 'GET',
                     url: '/formation/findAttributaires?' + sql,
                     headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
                 }).then((response) => setAttributaireList(response.data));
+
+                axios({
+                    method: 'GET',
+                    url: '/sollicitation/find?' + sql,
+                    headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+                }).then((response) => setSollicitationFormation(response.data));
             }
         }
 
         setOpenModalCreateSol(true);
     }
 
-    const handleChangeFormation = (k, v) => {
+    const [createNewFormationFromThis, setCreateNewFormationFromThis] = useState(false)
+
+    const handleCreateNewFormationFromThis = () => {
+        setCreateNewFormationFromThis(true);
+        setupdateFormation({ ...updateFormation, id: '' })
+        setSollicitationFormation([])
+    }
+    const ChangeFormation = (k, v) => {
         let calcul_date_fin = { date_fin: '', interruption_1: '', interruption_2: '' };
 
         switch (k) {
@@ -316,7 +356,7 @@ export default function Sollicitation() {
                 let commune = v === 'all' ? '' : communeList.find((x) => x.id === v).libelle;
                 setupdateFormation({ ...updateFormation, [k]: v, commune: commune });
                 break;
-            case 'date_entree':
+            case 'date_entree_demandee':
                 calcul_date_fin = calculDateFin({
                     ...updateFormation,
                     date_DDINT1: '',
@@ -390,120 +430,23 @@ export default function Sollicitation() {
             default:
                 setupdateFormation({ ...updateFormation, [k]: v });
         };
+    }
+    const handleChangeFormation = (k, v, changePrincipal = false) => {
+
+        if (changePrincipal) {
+            // Changement sur données principales => recommence les sollicitations
+            // Pour la date d'entrée l'OF les négos peuvent se jouer à +/- 15 jours
+            let resetForm;
+            if (k === 'date_entree_demandee') {
+                resetForm = Math.abs(parseInt(new Date(v) - new Date(updateFormation.date_entree_fixe)) / (24 * 3600 * 1000)) > 15;
+            } else resetForm = true;
+
+            if (resetForm) {
+                handleCreateNewFormationFromThis();
+            } else ChangeFormation(k, v)
+        } else ChangeFormation(k, v)
+
     };
-
-    // const [displayRows, setDisplayRows] = useState([]);
-    // const [openModal, setOpenModal] = useState(false);
-    // const [updateRow, setUpdateRow] = useState({})
-
-    // const ActionTable = (props) => {
-    //     return (
-    //         <TableCell align="right">
-    //             <div className='cell-flex'>
-
-    //                 {IsPermitted(user, 'sollicitation', 'delete') &&
-    //                     <Tooltip title="Supprimer">
-    //                         <IconButton aria-label="Editer" size="small" color="inherit" onClick={() => handleClickTest('delete formation')}>
-    //                             <DeleteOutlineIcon fontSize="small" />
-    //                         </IconButton>
-    //                     </Tooltip>}
-
-    //                 {IsPermitted(user, 'sollicitation', 'update') &&
-    //                     <Tooltip title="Editer">
-    //                         <IconButton aria-label="Editer" size="small" color="primary" onClick={() => handleOpenModal(props.row)}>
-    //                             <EditIcon fontSize="small" />
-    //                         </IconButton>
-    //                     </Tooltip>}
-
-    //                 {IsPermitted(user, 'sollicitation', 'validate') &&
-    //                     <Tooltip title="Valider">
-    //                         <IconButton aria-label="Editer" size="small" color="secondary" onClick={() => handleClickTest('valider la formation')}>
-    //                             <CheckIcon fontSize="small" />
-    //                         </IconButton>
-    //                     </Tooltip>}
-    //             </div>
-    //         </TableCell>
-    //     )
-    // }
-
-    // const handleClickTest = (e) => {
-    //     console.log(e)
-    // }
-
-    // const handleCloseModal = () => {
-    //     setOpenModal(false)
-    // }
-    // const handleOpenModal = (row) => {
-    //     setUpdateRow(row)
-    //     setOpenModal(true)
-    // }
-
-    // // --------------- SnackBar
-    // const [openSnackBar, setOpenSnackBar] = useState(false);
-    // const [messageSnackBar, setMessageSnackBar] = useState('');
-    // const [severity, setSeverity] = useState('success');
-    // const handleCloseSnackbar = (reason) => {
-    //     if (reason === 'clickaway') {
-    //         return;
-    //     }
-    //     setOpenSnackBar(false);
-    //     setMessageSnackBar('');
-    // };
-    // // ----------------------------
-
-    // const [nbFilter, setNbFilter] = useState(0);
-    // const [filterSelected, setFilterSelected] = useState({})
-
-    // const handleChangeFilter = (key, value) => {
-    //     console.log(key, value)
-    //     setFilterSelected({ ...filterSelected, [key]: value })
-    //     value !== 'none' ? setNbFilter(nbFilter + 1) : nbFilter > 0 ? setNbFilter(nbFilter - 1) : setNbFilter(0)
-    // };
-
-    // useEffect(() => {
-    //     let myFilter = Object.entries(filterSelected)[0]
-    //     let result = [];
-    //     if (myFilter) {
-    //         // eslint-disable-next-line array-callback-return
-    //         result = rows.filter((row) => {
-    //             for (let i = 0; i < myFilter.length; i++) {
-    //                 if (myFilter[i + 1] !== 'none') {
-    //                     if (row[myFilter[i]] === myFilter[i + 1]) {
-    //                         return row;
-    //                     } else {
-    //                         i++
-    //                     }
-    //                 } else {
-    //                     i++
-    //                     return row;
-    //                 }
-    //             }
-    //         })
-    //     } else {
-    //         result = rows;
-    //     }
-    //     setDisplayRows(result)
-    // }, [filterSelected, rows])
-
-    // const [lotList, setLotList] = useState([]);
-
-    // useEffect(() => {
-
-    //     axios({
-    //         method: 'GET',
-    //         url: '/global/getLot',
-    //         headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
-    //     }).then((response) => { setLotList(response.data) })
-    // }, [])
-
-    // // const handleChangeFilter = (event) => {
-    // //     setLotSelected(event.target.value);
-    // //     event.target.value === 'none'
-    // //         ? setDisplayRows(rows)
-    // //         : setDisplayRows(rows.filter((r) => {
-    // //             if (parseInt(r.lot) === parseInt(event.target.value)) { return r; } else { return false; }
-    // //         }))
-    // // };
 
     useEffect(() => {
         axios({
@@ -519,13 +462,15 @@ export default function Sollicitation() {
                     date_DFINT1: v.date_DFINT1 ? dateFormat(v.date_DFINT1, 'ANG') : '',
                     date_DFINT2: v.date_DFINT2 ? dateFormat(v.date_DFINT2, 'ANG') : '',
                     date_creation: v.date_creation ? dateFormat(v.date_creation, 'ANG') : '',
-                    date_entree: v.date_entree ? dateFormat(v.date_entree, 'ANG') : '',
+                    date_entree_demandee: v.date_entree_demandee ? dateFormat(v.date_entree_demandee, 'ANG') : '',
+                    date_entree_fixe: v.date_entree_fixe ? dateFormat(v.date_entree_fixe, 'ANG') : '',
                     date_fin: v.date_fin ? dateFormat(v.date_fin, 'ANG') : '',
+                    date_nconv: v.date_nconv ? dateFormat(v.date_nconv, 'ANG') : '',
                 };
             });
             setFormationList(formList);
         });
-    }, []);
+    }, [user]);
 
     const handleSaveFormation = () => {
         axios({
@@ -540,20 +485,40 @@ export default function Sollicitation() {
                 setFormationList(newFormationList);
                 setMessageSnackBar('Formation créé');
                 setSeverity('success');
-                handleCloseModal();
             } else {
-                handleCloseModal();
                 setMessageSnackBar('Erreur lors de la création de la foramtion');
                 setSeverity('error');
             }
+            handleCloseModal();
             setOpenSnackBar(true);
         });
     };
 
-    const handleOpenMoreOption = (e, id) => {
-        openMoreOptions === '' && setStyleOptionsList({ top: e.clientY + 20 });
-        setOpenMoreOptions(openMoreOptions === id ? '' : id);
-    };
+    const handleEditFormation = () => {
+        console.log(updateFormation)
+        axios({
+            method: 'PUT',
+            url: 'formation/update',
+            data: updateFormation,
+            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+        }).then((response) => {
+            console.log(response.data)
+            // if (response.status === 200) {
+            //     let newFormationList = [...formationList];
+            //     newFormationList.push({ ...updateFormation, id: response.data.insertId });
+            //     setFormationList(newFormationList);
+            //     setMessageSnackBar('Formation créé');
+            //     setSeverity('success');
+            //     handleCloseModal();
+            // } else {
+            //     handleCloseModal();
+            //     setMessageSnackBar('Erreur lors de la création de la foramtion');
+            //     setSeverity('error');
+            // }
+            // setOpenSnackBar(true);
+        });
+
+    }
 
     const handleSendMailOF = () => {
         console.log('sendmail', openMoreOptions)
@@ -564,6 +529,7 @@ export default function Sollicitation() {
     }
 
     const handleCloseModal = () => {
+        setCreateNewFormationFromThis(false);
         setOpenModalCreateSol(false);
         setCatalogueList([]);
         setCommuneList([]);
@@ -575,7 +541,7 @@ export default function Sollicitation() {
             idgasi: user.idgasi,
             userFct: '',
             dt: '',
-            statut: 1,
+            etat: 1,
             agence_ref: 'all',
             dispositif: 1,
             n_Article: '',
@@ -585,7 +551,8 @@ export default function Sollicitation() {
             commune: '',
             id_commune: 'all',
             date_creation: getDateToday(),
-            date_entree: '',
+            date_entree_demandee: '',
+            date_entree_fixe: '',
             date_fin: '',
             date_DDINT1: '',
             date_DFINT1: '',
@@ -601,19 +568,117 @@ export default function Sollicitation() {
 
 
     // ------------------------- sollicitation
-    const handleCreateSollicitation = () => {
-        console.log('create sol')
+    const [isSubmittingSol, setIsSubmittingSol] = useState(false)
+    const handleSubmitSol = () => {
+        setIsSubmittingSol(!isSubmittingSol)
+    }
+    const handleCreateSollicitation = (sollicitation) => {
+
+        setIsSubmittingSol(true)
+        // axios({
+        //     method: 'POST',
+        //     url: '/mail/sendSollicitationOF',
+        //     data: updateFormation,
+        //     headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+        // }).then((response) => console.log(response))
+
         axios({
-            method: 'POST',
-            url: '/mail/sendSollicitationOF',
-            data: updateFormation,
+            method: 'PUT',
+            url: '/sollicitation/create',
+            data: { ...updateFormation, attributaire: sollicitation },
             headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
-        }).then((response) => console.log(response))
+        }).then((response) => {
+            setIsSubmittingSol(false)
+            if (response.status === 200) {
+                let currentDate = new Date();
+                let date =
+                    currentDate.getFullYear().toString().padStart(2, '0') + '-' +
+                    (currentDate.getMonth() + 1).toString().padStart(2, '0') + '-' +
+                    currentDate.getDate().toString().padStart(2, '0');
+
+                let newSollArray = [...sollicitationFormation];
+                newSollArray.push({
+                    attributaire: sollicitation.id,
+                    dateMailOF: date,
+                    dateRespOF: null,
+                    dateValidation: null,
+                    date_etat: date,
+                    etat: 1,
+                    id_dateIcop: null,
+                    id_formation: updateFormation.id,
+                    lieu_execution: null,
+                })
+                setSollicitationFormation(newSollArray)
+
+                setMessageSnackBar('Sollicitation envoyé.');
+                setSeverity('success');
+            } else {
+                setMessageSnackBar('Erreur lors de la création de la foramtion');
+                setSeverity('error');
+            }
+            // handleCloseModal();
+            setOpenSnackBar(true);
+        })
+
     }
 
-    const handleClickAway = () => {
-        setOpenMoreOptions('');
+    const handleResponseSollicitation = (resp, sollicitation, txt) => {
+        txt = txt === '' ? null : txt
+
+        let currentDate = new Date();
+        let time =
+            currentDate.getFullYear().toString().padStart(2, '0') + '-' +
+            (currentDate.getMonth() + 1).toString().padStart(2, '0') + '-' +
+            currentDate.getDate().toString().padStart(2, '0') + ' ' +
+            currentDate.getHours().toString().padStart(2, '0') + ":" +
+            currentDate.getMinutes().toString().padStart(2, '0') + ":" +
+            currentDate.getSeconds().toString().padStart(2, '0');
+        let newTime = time.replace(' ', 'T') + '.000Z';
+
+        let etat = 0;
+        if (resp === 'accept') {
+            // Accepte la sollicitation, passe à l'état 2
+            etat = 2;
+        } else if (resp === 'refus') {
+            // Refuse la sollicitation, passe à l'état 3
+            etat = 3;
+        }
+
+        let newSollForm = sollicitationFormation.map((v) => {
+            if (v.id_sol === sollicitation.id_sol) {
+                return { ...v, etat: etat, date_etat: newTime, reason: txt }
+            } else return v;
+        })
+        if (newSollForm.filter((v) => v.etat !== 3).length === 0){
+            // Il n'y a plus d'OF à contacter
+            axios()
+        } 
+        setSollicitationFormation(newSollForm)
+
+        // axios({
+        //     method: 'PUT',
+        //     url: 'sollicitation/update',
+        //     data: { id_sol: sollicitation.id_sol, etat: etat, dateTime: time, reason: txt },
+        //     headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+        // }).then((response) => {
+        //     if (response.status === 200) {
+
+        //         let newSollForm = sollicitationFormation.map((v) => {
+        //             if (v.id_sol === sollicitation.id_sol) {
+        //                 return { ...v, etat: etat, date_etat: newTime, reason: txt }
+        //             } else return v;
+        //         })
+        //         setSollicitationFormation(newSollForm)
+        //     } else {
+        //         setMessageSnackBar('Une erreur inconnue est survenue');
+        //         setSeverity('error');
+        //         setOpenSnackBar(true);
+        //     }
+        // })
+
+
     }
+
     return (
         <>
             <SnackBar
@@ -641,6 +706,7 @@ export default function Sollicitation() {
                                     <TableCell align="right">REF</TableCell>
                                     <TableCell align="right">Dispositif</TableCell>
                                     <TableCell align="right">Commune</TableCell>
+                                    <TableCell align="right">Etat</TableCell>
                                     <TableCell align="right">Date d'entrée</TableCell>
                                     <TableCell align="right">Date de fin</TableCell>
                                     <TableCell align="right"></TableCell>
@@ -657,10 +723,20 @@ export default function Sollicitation() {
                                             <TableCell align="right">{row.agence_ref}</TableCell>
                                             <TableCell align="right">{codeToName('dispositif_' + row.dispositif)}</TableCell>
                                             <TableCell align="right">{row.commune}</TableCell>
-                                            <TableCell align="right">{dateFormat(row.date_entree)}</TableCell>
+                                            <TableCell align="right">
+                                                {row.etat_formation_tooltip
+                                                    ? <div className={classes.etatTooltip}>
+                                                    {row.etat_formation}
+                                                        <Tooltip classes={{ tooltip: classes.tooltip }} title={row.etat_formation_tooltip} aria-label="close">
+                                                            <InfoIcon className={classes.icon} />
+                                                        </Tooltip>
+                                                    </div>
+                                                    : row.etat_formation}
+                                            </TableCell>
+                                            <TableCell align="right">{dateFormat(row.date_entree_demandee)}</TableCell>
                                             <TableCell align="right">{dateFormat(row.date_fin)}</TableCell>
                                             <TableCell align="right">
-                                                <IconButton size="small" aria-label="Editer" color="secondary" onClick={(e) => handleOpenMoreOption(e, row.id)}>
+                                                <IconButton size="small" aria-label="Editer" color="secondary" onClick={(e) => handleClickOpenMenu(e, row.id)}>
                                                     <MoreHorizIcon fontSize="small" />
                                                 </IconButton>
                                             </TableCell>
@@ -674,31 +750,39 @@ export default function Sollicitation() {
                     </TableContainer>
                 </Paper>
             </div>
-            {/* <ClickAwayListener onClickAway={handleClickAway}> */}
-            <Grow in={(openMoreOptions !== '')} component={Paper} style={styleOptionsList}>
-                <List dense={true} className={classes.listOptions}>
-                    {moreOptionsList.indexOf('show') > -1 &&
-                        <ListItem button dense onClick={handleShowFormation}>
-                            <ListItemText primary='Voir plus' />
-                        </ListItem>}
 
-                    {moreOptionsList.indexOf('contact') > -1 &&
-                        <ListItem button dense onClick={handleSendMailOF}>
-                            <ListItemText primary='Voir les contacts' />
-                        </ListItem>}
+            <Menu
+                id="long-menu"
+                anchorEl={anchorElMenu}
+                keepMounted
+                open={openMenu}
+                onClose={handleCloseOpenMenu}
+            >
+                {moreOptionsList.indexOf('show') > -1 &&
+                    <MenuItem button dense onClick={handleShowFormation}>
+                        Voir plus
+                    </MenuItem>}
 
-                    {moreOptionsList.indexOf('cancel') > -1 &&
-                        <ListItem button dense onClick={handleCancelFormation}>
-                            <ListItemText primary='Annuler la formation' />
-                        </ListItem>}
+                {moreOptionsList.indexOf('contact') > -1 &&
+                    <MenuItem button dense onClick={handleSendMailOF}>
+                        Voir les contacts
+                    </MenuItem>}
 
-                </List>
-            </Grow >
-            {/* </ClickAwayListener> */}
+                {moreOptionsList.indexOf('cancel') > -1 &&
+                    <MenuItem button dense onClick={handleCancelFormation}>
+                        Annuler la formation
+                    </MenuItem>}
+            </Menu>
+
             {openModalCreateSol &&
-                <ModalCreateSol
+                <ModalFormation
                     openModal={openModalCreateSol}
                     handleCloseModal={handleCloseModal}
+                    updateFormation={updateFormation}
+                    createNewFormationFromThis={createNewFormationFromThis}
+                    user={user}
+
+                    // Formulaire
                     lotList={lotList}
                     dispositifList={dispositifList}
                     agence_refList={agence_refList}
@@ -706,10 +790,15 @@ export default function Sollicitation() {
                     communeList={communeList}
                     handleChangeFormation={handleChangeFormation}
                     handleSaveFormation={handleSaveFormation}
-                    updateFormation={updateFormation}
+                    handleEditFormation={handleEditFormation}
+
+                    // Sollicitation
                     attributaireList={attributaireList}
                     handleCreateSollicitation={handleCreateSollicitation}
-                    user={user}
+                    handleSubmitSol={handleSubmitSol}
+                    isSubmittingSol={isSubmittingSol}
+                    sollicitationFormation={sollicitationFormation}
+                    handleResponseSollicitation={handleResponseSollicitation}
                 />}
 
 

@@ -1,4 +1,4 @@
-import { exit } from 'process';
+// import { exit } from 'process';
 import HAB from './permissions';
 
 export function codeToName(str) {
@@ -46,9 +46,9 @@ export function codeToName(str) {
     case 'dispositif_3': return 'PEC Excellence';
     case 'dispositif_4': return '1J1S';
 
-    case 's_formation': return 'Statut';
-    case 's_formation_1': return 'En attente de validation';
-    case 's_formation_2': return 'En attente de conventionnement';
+    case 'formation_etat': return 'Statut';
+    case 'formation_etat_1': return 'En attente de validation';
+    case 'formation_etat_2': return 'En attente de conventionnement';
 
     case 'niveau_form': return 'Niveau';
     case 'niveau_form_1': return 'Indéterminé';
@@ -100,7 +100,7 @@ export function IsPermitted(user, target, action) {
 }
 
 export function dateFormat(date, format = 'FR') {
-  if (!date) { return ''; }
+  if (!date || date === '0000-00-00') { return ''; }
   let newDate = date;
   if (date.includes('T')) { // DateFormat yyyy-mm-ddThh:mm:ss.ssssZ de la bdd
     newDate = date.split('T')[0];
@@ -116,7 +116,14 @@ export function dateFormat(date, format = 'FR') {
   }
   return newDate;
 }
-
+export function dateTimeFormat(date, format = 'FR'){
+  if (!date || date === '0000-00-00' || !date.includes('T')) { return {data:'', time:''}; }
+  let dateTime = date.split('T')
+  let newDate_tmp = dateTime[0].split('-');
+  let newDate = newDate_tmp[2] + '/' + newDate_tmp[1] + '/' + newDate_tmp[0]
+  let newTime = dateTime[1].split('.')[0];
+  return {date:newDate, time:newTime};
+}
 // ---------------------- CALCUL DATE FIN FORMATION 
 export function calculDateFin(formation) {
 
@@ -132,18 +139,18 @@ export function calculDateFin(formation) {
   }
 
   let nb_jour_formation = Math.ceil(formation.heure_max_session / 7) + interruption_1 + interruption_2;
-  let date_fin_calcule = calculDate(formation.date_entree, nb_jour_formation);
-  let regexDate = /^\d{4}\-\d{2}\-\d{2}$/;
+  let date_fin_calcule = calculDate(formation.date_entree_demandee, nb_jour_formation);
+  let regexDate = /^\d{4}-\d{2}-\d{2}$/;
   let date_fin = regexDate.test(date_fin_calcule) ? date_fin_calcule : '';
 
   return {
-    date_fin: formation.date_entree !== '' ? date_fin : '',
+    date_fin: formation.date_entree_demandee !== '' ? date_fin : '',
     interruption_1: interruption_1,
     interruption_2: interruption_2
   }
 }
 
-function dateCount(startDate, endDate, jrsOuvre = true) {
+export function dateCount(startDate, endDate, jrsOuvre = true) {
   // Nombre de jours ouvrés
   // <param 1 = startDate> Date à partir de laquelle il faut compter
   // <param 2 = endDate> Date jusqu'à laquelle il faut compter

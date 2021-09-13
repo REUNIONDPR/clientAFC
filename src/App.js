@@ -4,7 +4,7 @@ import './App.css';
 import Main from './component/main/Main';
 import Catalogue from './component/main/catalogue/Catalogue';
 import { Switch, Route } from 'react-router-dom';
-import home from './component/main/sollicitation/Sollicitation';
+import home from './component/main/formation/Formation';
 import PrivateRoute from './hoc/PrivateRoute';
 import { UserContext } from './context/user.context';
 
@@ -68,12 +68,14 @@ function App() {
 
   useEffect(() => {
     if (!Cookie.get('authToken') && !user.hasOwnProperty('idgasi')) {
-      console.log('zer')
+      
       if (Cookie.get('xtidc') !== undefined) {
         setIsUser(true)
         logUser(Cookie.get('xtidc'))
       } else {
-        console.log('cookie existe pas')
+        window.open("http://accueil.pole-emploi.intra:8501/portail/index.jspz?id=237#", "intra")
+        
+        // console.log('cookie existe pas')
 
         Cookie.set("xtidc", 'IRLE5360');
         setIsUser(true)
