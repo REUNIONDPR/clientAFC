@@ -6,7 +6,8 @@ import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Typography from '@material-ui/core/Typography';
 import Avatar from '@material-ui/core/Avatar';
 import CheckIcon from '@material-ui/icons/Check';
-import { green } from '@material-ui/core/colors';
+import ClearIcon from '@material-ui/icons/Clear';
+import { green, red } from '@material-ui/core/colors';
 
 const useStyles = makeStyles((theme) => ({
     tooltip: {
@@ -25,33 +26,27 @@ const useStyles = makeStyles((theme) => ({
         color: '#fff',
         backgroundColor: green[500],
     },
-    blockSolAttr: {
-        display: 'flex',
-        alignItems: 'center',
-    },
-    blockAttributaire: {
-        // width: '40%',
-    },
-    blockSollicitation: {
-        width: '60%',
-        display: 'flex',
-        justifyContent: 'center',
-    },
-    listAttributaire: {
-        padding: 0,
-        border: '1px solid #e0e0e0',
-    },
-    spinnerBtn: {
-        color: "#fff",
+    red: {
+        color: '#fff',
+        backgroundColor: red[500],
     },
     attributaireDestinataire: {
         whiteSpace: 'nowrap',
     },
     attributaireStatus: {
         margin: 0,
+        fontWeight: 'bold',
         display: 'block',
+    },
+    errorMsg:{
         color: 'red',
-    }
+    },
+    valideMsg:{
+        color: 'green',
+    },
+    SollMsg:{
+        color: 'blue',
+    },
 }));
 
 export default function SollicitationListAttr(props) {
@@ -61,16 +56,28 @@ export default function SollicitationListAttr(props) {
         <div key={'divList_' + props.data.priorite}>
             <ListItem disabled={props.data.disabled} button alignItems="flex-start" key={'ListItem_' + props.data.libelle}>
                 <ListItemAvatar key={'ListItemAvatar_' + props.data.priorite}>
-                    <Avatar className={props.data.disabled 
-                            ? '' 
-                            : (props.data.sol && props.data.sol.etat === 2)
-                                ? classes.green
-                                : classes.avatar} 
-                        key={'avatar' + props.data.priorite}>
-                        {(props.data.sol && props.data.sol.etat === 2)
-                            ? <CheckIcon />
-                            : props.data.priorite}
-                    </Avatar>
+                    {props.data.disabled
+                        ? <Avatar key={'avatar' + props.data.priorite}>{props.data.priorite}</Avatar>
+                        : props.data.sol
+                            ? props.data.sol.etat === 3 // Si l'OF a accepté la sol
+                                ? <Avatar className={classes.green}
+                                    key={'avatar' + props.data.priorite}>
+                                    <CheckIcon />
+                                </Avatar>
+                                : props.data.sol.etat === 8 // Si l'OF a refusé la sol
+                                    ? <Avatar className={classes.red}
+                                        key={'avatar' + props.data.priorite}>
+                                        <ClearIcon />
+                                    </Avatar>
+                                    : <Avatar className={classes.avatar} // Si l'OF a pas encore répondu
+                                        key={'avatar' + props.data.priorite}>
+                                        {props.data.priorite}
+                                    </Avatar>
+                            : <Avatar className={classes.avatar} // Prochain OF à contacter
+                                key={'avatar' + props.data.priorite}>
+                                {props.data.priorite}
+                            </Avatar>
+                    }
                 </ListItemAvatar>
                 <ListItemText key={'ListItemText_' + props.data.priorite}
                     primary={props.data.libelle}
@@ -84,8 +91,13 @@ export default function SollicitationListAttr(props) {
                                 color="textPrimary">
                                 {`${props.data.destinataire} — ${props.data.destinataireMail}`}
                             </Typography>
-                            {props.data.disabled &&
-                                <span className={classes.attributaireStatus}>
+                            {props.data.text &&
+                                <span className={ `${classes.attributaireStatus} 
+                                    ${props.data.texterror === undefined 
+                                        ? classes.SollMsg 
+                                        : props.data.texterror 
+                                            ? classes.errorMsg 
+                                            : classes.valideMsg} ` }>
                                     {props.data.text} {(props.data.sol && props.data.sol.information) && ' : ' + props.data.sol.information}
                                 </span>}
                         </>

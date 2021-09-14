@@ -12,7 +12,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Button from '@material-ui/core/Button';
 import ModalFormation from './Modal/ModalFormation';
-import { codeToName, dateFormat, calculDateFin } from '../../../utilities/Function';
+import { codeToName, dateFormat, calculDateFin, getDateToday } from '../../../utilities/Function';
 import SnackBar from '../../global/SnackBar/SnackBar';
 import './sollicitation.css';
 import { Tooltip } from '@material-ui/core';
@@ -22,26 +22,29 @@ import IconButton from '@material-ui/core/IconButton';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-import { exit } from 'process';
+
 // import { title } from 'process';
 // import Cards from './Card/Cards';
 // import ListItemIcon from '@material-ui/core/ListItemIcon';
 
-const getDateToday = () => {
-    let date = new Date();
-    return date.getFullYear() + '-' +
-        (date.getMonth() + 1).toString().padStart(2, '0') + '-' +
-        date.getDate().toString().padStart(2, '0');
-}
+// const getDateToday = () => {
+//     let date = new Date();
+//     return date.getFullYear() + '-' +
+//         (date.getMonth() + 1).toString().padStart(2, '0') + '-' +
+//         date.getDate().toString().padStart(2, '0');
+// }
 
 const useStyles = makeStyles((theme) => ({
     table: {
         minWidth: 650,
     },
-    etatTooltip:{
+    etatTooltip: {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'flex-end',
+        '& > *': {
+            marginLeft: theme.spacing(2)
+        }
     },
     icon: {
         fill: '#777777',
@@ -117,7 +120,7 @@ export default function Sollicitation() {
         adresse: '',
         commune: '',
         id_commune: 'all',
-        date_creation: getDateToday(),
+        date_creation: '',
         date_entree_demandee: '',
         date_entree_fixe: '',
         date_fin: '',
@@ -175,6 +178,30 @@ export default function Sollicitation() {
     }, [user])
 
 
+    const updateEtatFormation = (etat, text, tooltip) => {
+
+        let id_formation = updateFormation.id;
+        let time = getDateToday();
+
+        axios({
+            method: 'put',
+            url: 'formation/historique',
+            data: { id_formation: id_formation, id_etat: etat, date_etat: time, information: user.idgasi },
+            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+        }).then((response) => {
+            if (response.status === 200) {
+                let newFormationList = formationList.map((v) => v.id === id_formation
+                    ? {
+                        ...v,
+                        etat: etat,
+                        etat_formation: text,
+                        etat_formation_tooltip: tooltip,
+                    }
+                    : v)
+                setFormationList(newFormationList)
+            }
+        })
+    }
 
     const handleShowFormation = () => {
         handleCloseOpenMenu()
@@ -476,7 +503,7 @@ export default function Sollicitation() {
         axios({
             method: 'PUT',
             url: 'formation/create',
-            data: updateFormation,
+            data: { ...updateFormation, date_creation: getDateToday() },
             headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
         }).then((response) => {
             if (response.status === 200) {
@@ -550,7 +577,7 @@ export default function Sollicitation() {
             adresse: '',
             commune: '',
             id_commune: 'all',
-            date_creation: getDateToday(),
+            date_creation: '',
             date_entree_demandee: '',
             date_entree_fixe: '',
             date_fin: '',
@@ -575,6 +602,8 @@ export default function Sollicitation() {
     const handleCreateSollicitation = (sollicitation) => {
 
         setIsSubmittingSol(true)
+
+        // Envoi MAIL à tester
         // axios({
         //     method: 'POST',
         //     url: '/mail/sendSollicitationOF',
@@ -585,11 +614,19 @@ export default function Sollicitation() {
         axios({
             method: 'PUT',
             url: '/sollicitation/create',
-            data: { ...updateFormation, attributaire: sollicitation },
+            data: { ...updateFormation, attributaire: sollicitation.id },
             headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
         }).then((response) => {
+
             setIsSubmittingSol(false)
             if (response.status === 200) {
+
+                // update etat formation -> Sollicitation en cours
+                updateEtatFormation(2, 'Sollicitation en cours', '');
+
+                let time = getDateToday();
+                let newTime = time.replace(' ', 'T') + '.000';
+
                 let currentDate = new Date();
                 let date =
                     currentDate.getFullYear().toString().padStart(2, '0') + '-' +
@@ -598,16 +635,18 @@ export default function Sollicitation() {
 
                 let newSollArray = [...sollicitationFormation];
                 newSollArray.push({
+                    id_sol: response.data.insertId,
                     attributaire: sollicitation.id,
                     dateMailOF: date,
                     dateRespOF: null,
                     dateValidation: null,
-                    date_etat: date,
+                    date_etat: newTime,
                     etat: 1,
                     id_dateIcop: null,
                     id_formation: updateFormation.id,
                     lieu_execution: null,
                 })
+
                 setSollicitationFormation(newSollArray)
 
                 setMessageSnackBar('Sollicitation envoyé.');
@@ -625,57 +664,60 @@ export default function Sollicitation() {
     const handleResponseSollicitation = (resp, sollicitation, txt) => {
         txt = txt === '' ? null : txt
 
-        let currentDate = new Date();
-        let time =
-            currentDate.getFullYear().toString().padStart(2, '0') + '-' +
-            (currentDate.getMonth() + 1).toString().padStart(2, '0') + '-' +
-            currentDate.getDate().toString().padStart(2, '0') + ' ' +
-            currentDate.getHours().toString().padStart(2, '0') + ":" +
-            currentDate.getMinutes().toString().padStart(2, '0') + ":" +
-            currentDate.getSeconds().toString().padStart(2, '0');
+        let time = getDateToday();
+
         let newTime = time.replace(' ', 'T') + '.000Z';
 
         let etat = 0;
+        let text = '';
+        let tooltip = '';
         if (resp === 'accept') {
             // Accepte la sollicitation, passe à l'état 2
-            etat = 2;
+            etat = 3;
+            text = 'Validée';
+            tooltip = 'L\'OF à accepté la sollicitation';
         } else if (resp === 'refus') {
             // Refuse la sollicitation, passe à l'état 3
-            etat = 3;
+            etat = 8;
+            text = 'Annulée';
+            tooltip = 'Aucun OF n\'a répondu favorablement aux sollicitations';
         }
 
-        let newSollForm = sollicitationFormation.map((v) => {
-            if (v.id_sol === sollicitation.id_sol) {
-                return { ...v, etat: etat, date_etat: newTime, reason: txt }
-            } else return v;
+        axios({
+            method: 'PUT',
+            url: 'sollicitation/update',
+            data: { id_sol: sollicitation.id_sol, etat: etat, dateTime: time, reason: txt },
+            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+        }).then((response) => {
+            if (response.status === 200) {
+
+                // Met à jour le tableau des sollicitations actuelles.
+                let newSollForm = sollicitationFormation.map((v) => {
+                    if (v.id_sol === sollicitation.id_sol) {
+                        return { ...v, etat: etat, date_etat: newTime, reason: txt, dateRespOF: time }
+                    } else return v;
+                })
+
+                // Si l'OF accepte, met à jour l'état de la formation.
+                if (etat === 3) {
+                    updateEtatFormation(etat, text, tooltip)
+                }
+
+                // ERREUR - ça ne veux pas dire qu'il n'y a plus personne à solliciter
+                // else if (newSollForm.filter((v) => v.etat !== 8).length === 0) {
+                //     // Il n'y a plus d'OF à contacter
+                //     // text = 'Annulée';
+                //     // tooltip = 'Aucun OF n\'a répondu favorablement aux sollicitations';
+                //     // updateEtatFormation(etat, text, tooltip)
+                // }
+
+                setSollicitationFormation(newSollForm)
+            } else {
+                setMessageSnackBar('Une erreur inconnue est survenue');
+                setSeverity('error');
+                setOpenSnackBar(true);
+            }
         })
-        if (newSollForm.filter((v) => v.etat !== 3).length === 0){
-            // Il n'y a plus d'OF à contacter
-            axios()
-        } 
-        setSollicitationFormation(newSollForm)
-
-        // axios({
-        //     method: 'PUT',
-        //     url: 'sollicitation/update',
-        //     data: { id_sol: sollicitation.id_sol, etat: etat, dateTime: time, reason: txt },
-        //     headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
-        // }).then((response) => {
-        //     if (response.status === 200) {
-
-        //         let newSollForm = sollicitationFormation.map((v) => {
-        //             if (v.id_sol === sollicitation.id_sol) {
-        //                 return { ...v, etat: etat, date_etat: newTime, reason: txt }
-        //             } else return v;
-        //         })
-        //         setSollicitationFormation(newSollForm)
-        //     } else {
-        //         setMessageSnackBar('Une erreur inconnue est survenue');
-        //         setSeverity('error');
-        //         setOpenSnackBar(true);
-        //     }
-        // })
-
 
     }
 
@@ -726,7 +768,7 @@ export default function Sollicitation() {
                                             <TableCell align="right">
                                                 {row.etat_formation_tooltip
                                                     ? <div className={classes.etatTooltip}>
-                                                    {row.etat_formation}
+                                                        {row.etat_formation}
                                                         <Tooltip classes={{ tooltip: classes.tooltip }} title={row.etat_formation_tooltip} aria-label="close">
                                                             <InfoIcon className={classes.icon} />
                                                         </Tooltip>

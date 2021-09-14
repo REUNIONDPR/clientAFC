@@ -7,8 +7,8 @@ import IconButton from '@material-ui/core/IconButton';
 import { Tooltip } from '@material-ui/core';
 import CloseRoundedIcon from '@material-ui/icons/CloseRounded';
 // import Stepper from './Stepper';
-import Formulaire from './Formulaire';
-import Sollicitation from './Sollicitation';
+import Formulaire from './children/formation/Formulaire';
+import Sollicitation from './children/sollicitation/Sollicitation';
 // import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles((theme) => ({
@@ -86,7 +86,14 @@ export default function ModalCreateSol(props) {
                 <Fade in={props.openModal}>
                     <div className={classes.paper}>
                         <div className={classes.titleModal}>
-                            <div><h2 id="transition-modal-title">{props.updateFormation.id === '' || props.updateFormation.id === 0 ? "Ajouter une" : "Modifier la"} formation</h2></div>
+                            <div>
+                                <h2 id="transition-modal-title">
+                                    {props.updateFormation.id === '' || props.updateFormation.id === 0
+                                        ? "Ajouter une"
+                                        : "Modifier la"}
+                                    formation
+                                </h2>
+                            </div>
                             {/* {(props.updateFormation.id !== '') && <Stepper />} */}
                             <div>
                                 {/* {(props.updateFormation.id === '' || props.updateFormation.id === 0)

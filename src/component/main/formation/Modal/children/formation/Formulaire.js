@@ -104,6 +104,11 @@ export default function Formulaire(props) {
                         </Select>
                     }
                 </FormControl>
+                <TextField required type="text" size="small" label="N° article" variant="outlined"
+                    disabled={props.updateFormation.id === ''}
+                    value={props.updateFormation.n_Article}
+                    onChange={(e) => props.handleChangeFormation('n_Article', e.target.value)}
+                />
             </div>
 
 
@@ -362,9 +367,9 @@ export default function Formulaire(props) {
         <div className={classes.blockEndForm}>
             <div className={classes.blockEndError}>
                 {props.updateFormation.id !== '' && <>
-                    <ErrorOutlineIcon className={classes.icon} /> 
+                    <ErrorOutlineIcon className={classes.icon} />
                     : Changement qui necessite de solliciter à nouveau l'ensemble des OF dans l'ordre de priorité
-                    </>}
+                </>}
             </div>
             <div className={classes.btnActionModal}>
                 <Button onClick={props.handleCloseModal} variant="outlined" color="primary">
