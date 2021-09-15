@@ -12,7 +12,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Button from '@material-ui/core/Button';
 import ModalFormation from './Modal/ModalFormation';
-import { codeToName, dateFormat, calculDateFin, getDateToday } from '../../../utilities/Function';
+import { codeToName, dateFormat, calculDateFin, getDateToday, dateTimeFormat } from '../../../utilities/Function';
 import SnackBar from '../../global/SnackBar/SnackBar';
 import './sollicitation.css';
 import { Tooltip } from '@material-ui/core';
@@ -96,6 +96,7 @@ export default function Sollicitation() {
     const [catalogueList, setCatalogueList] = useState([]);
     const [agence_refList, setAgence_refList] = useState([]);
     const [communeList, setCommuneList] = useState([]);
+    const [lieuExecutionList, setLieuExecutionList] = useState([])
 
     const [sollicitationFormation, setSollicitationFormation] = useState([]);
     const [attributaireList, setAttributaireList] = useState([]);
@@ -111,6 +112,8 @@ export default function Sollicitation() {
         idgasi: user.idgasi,
         userFct: '',
         dt: '',
+        icop: '',
+        arrayIcop: [],
         etat: 1,
         agence_ref: 'all',
         dispositif: 1,
@@ -137,6 +140,8 @@ export default function Sollicitation() {
         nConv: '',
         vague: '',
         id_sol: '',
+        id_attributaire:'',
+        lieuExecution: '',
     });
 
     // --------------- SnackBar
@@ -202,12 +207,32 @@ export default function Sollicitation() {
             }
         })
     }
-
+    const requestAsync = async (url) => {
+        return await axios({
+            method: 'GET',
+            url: url,
+            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+        });
+    }
     const handleShowFormation = () => {
         handleCloseOpenMenu()
         let formation = {};
+
+        // Si le modal s'ouvre pour voir une formation
         if (openMoreOptions !== '') {
             formation = formationList.find((v) => v.id === openMoreOptions);
+
+            // Si un OF à accepté une sollicitation -> formation validé (etat = 3)
+            if (formation.etat === 3) {
+                requestAsync('formation/icop?id_formation=' + openMoreOptions)
+                    .then((response) => formation.arrayIcop = response.data.map((v) => v.dateIcop));
+                console.log(formation)
+                // openMoreOptions, data.id_attributaire, formation.id_commune
+                // requestAsync('formation/lieuExecution?form='+updateFormation)
+                //     .then((response) => {console.log(response.data,)})
+                // setLieuExecutionList
+            }
+
             setupdateFormation(formation);
             setOpenMoreOptions('');
         }
@@ -560,6 +585,8 @@ export default function Sollicitation() {
         setOpenModalCreateSol(false);
         setCatalogueList([]);
         setCommuneList([]);
+        setAttributaireList([]);
+        setSollicitationFormation([]);
         setupdateFormation({
             id: '',
             id_lot: 'all',
@@ -568,6 +595,8 @@ export default function Sollicitation() {
             idgasi: user.idgasi,
             userFct: '',
             dt: '',
+            icop: '',
+            arrayIcop: [],
             etat: 1,
             agence_ref: 'all',
             dispositif: 1,
@@ -590,6 +619,8 @@ export default function Sollicitation() {
             date_nconv: '',
             nConv: '',
             vague: '',
+            id_attributaire:'',
+            lieuExecution: '',
         });
     };
 
@@ -721,6 +752,25 @@ export default function Sollicitation() {
 
     }
 
+    const handlAddIcop = (icop) => {
+        let dateTime = dateTimeFormat(icop, 'ANG');
+        // console.log((dateTime.date+' '+dateTime.time).replace(' ','T'))
+
+        // console.log(dateTimeFormat((dateTime.date+' '+dateTime.time).replace(' ','T')))
+        axios({
+            method: 'put',
+            url: 'formation/addIcop',
+            data: { id_formation: updateFormation.id, icop: dateTime.date + ' ' + dateTime.time },
+            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+        }).then((response) => {
+            if (response.status === 200) {
+                let newArrIcop = updateFormation.arrayIcop;
+                newArrIcop.push((dateTime.date + ' ' + dateTime.time).replace(' ', 'T'))
+                setupdateFormation({ ...updateFormation, arrayIcop: newArrIcop })
+            }
+        })
+    }
+
     return (
         <>
             <SnackBar
@@ -841,6 +891,8 @@ export default function Sollicitation() {
                     isSubmittingSol={isSubmittingSol}
                     sollicitationFormation={sollicitationFormation}
                     handleResponseSollicitation={handleResponseSollicitation}
+                    handlAddIcop={handlAddIcop}
+                    lieuExecutionList={lieuExecutionList}
                 />}
 
 

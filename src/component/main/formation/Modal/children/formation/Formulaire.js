@@ -9,6 +9,8 @@ import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 import { InputAdornment } from '@material-ui/core';
+import CommentIcon from '@material-ui/icons/Comment';
+
 
 const useStyles = makeStyles((theme) => ({
     tooltip: {
@@ -371,6 +373,7 @@ export default function Formulaire(props) {
                     : Changement qui necessite de solliciter à nouveau l'ensemble des OF dans l'ordre de priorité
                 </>}
             </div>
+            <CommentIcon />
             <div className={classes.btnActionModal}>
                 <Button onClick={props.handleCloseModal} variant="outlined" color="primary">
                     Annuler

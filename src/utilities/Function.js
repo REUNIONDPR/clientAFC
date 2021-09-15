@@ -102,11 +102,11 @@ export function IsPermitted(user, target, action) {
 export function getDateToday() {
   let currentDate = new Date();
   let datetime = currentDate.getFullYear().toString().padStart(2, '0') + '-' +
-  (currentDate.getMonth() + 1).toString().padStart(2, '0') + '-' +
-  currentDate.getDate().toString().padStart(2, '0') + ' ' +
-  currentDate.getHours().toString().padStart(2, '0') + ":" +
-  currentDate.getMinutes().toString().padStart(2, '0') + ":" +
-  currentDate.getSeconds().toString().padStart(2, '0');
+    (currentDate.getMonth() + 1).toString().padStart(2, '0') + '-' +
+    currentDate.getDate().toString().padStart(2, '0') + ' ' +
+    currentDate.getHours().toString().padStart(2, '0') + ":" +
+    currentDate.getMinutes().toString().padStart(2, '0') + ":" +
+    currentDate.getSeconds().toString().padStart(2, '0');
   return datetime;
 }
 
@@ -127,19 +127,28 @@ export function dateFormat(date, format = 'FR') {
   }
   return newDate;
 }
-export function dateTimeFormat(date, format = 'FR'){
+export function dateTimeFormat(date, format = 'FR') {
   // 'Indian/Reunion'
-  if (!date || date === '0000-00-00' || !date.includes('T')) { return {data:'', time:''}; }
-  
+  // if (!date || date === '0000-00-00' || !date.includes('T')) { return {data:'', time:''}; }
   let currentDate = new Date(date);
-  let newDate = currentDate.getDate().toString().padStart(2, '0') + '/' +
-  (currentDate.getMonth() + 1).toString().padStart(2, '0') + '/' +
-  currentDate.getFullYear().toString();
-  let newTime = currentDate.getHours().toString().padStart(2, '0') + ":" +
-  currentDate.getMinutes().toString().padStart(2, '0') + ":" +
-  currentDate.getSeconds().toString().padStart(2, '0');
-  
-  return {date:newDate, time:newTime};
+  let newDate = '';
+  let newTime = '';
+  if (format === 'FR') {
+    newDate = currentDate.getDate().toString().padStart(2, '0') + '/' +
+      (currentDate.getMonth() + 1).toString().padStart(2, '0') + '/' +
+      currentDate.getFullYear().toString();
+    newTime = currentDate.getHours().toString().padStart(2, '0') + ":" +
+      currentDate.getMinutes().toString().padStart(2, '0') + ":" +
+      currentDate.getSeconds().toString().padStart(2, '0');
+  } else {
+    newDate = currentDate.getFullYear().toString() + '-' +
+      (currentDate.getMonth() + 1).toString().padStart(2, '0') + '-' +
+      currentDate.getDate().toString().padStart(2, '0');
+    newTime = currentDate.getHours().toString().padStart(2, '0') + ":" +
+      currentDate.getMinutes().toString().padStart(2, '0') + ":" +
+      currentDate.getSeconds().toString().padStart(2, '0');
+  }
+  return { date: newDate, time: newTime };
 }
 // ---------------------- CALCUL DATE FIN FORMATION 
 export function calculDateFin(formation) {

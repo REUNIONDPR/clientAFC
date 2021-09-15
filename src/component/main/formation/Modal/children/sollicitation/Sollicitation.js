@@ -5,15 +5,11 @@ import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import SollicitationListAttr from './SollicitationListAttr';
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormControl from '@material-ui/core/FormControl';
 import { dateFormat, dateTimeFormat } from '../../../../../../utilities/Function';
-import TextField from '@material-ui/core/TextField';
 import { useState } from 'react';
 import CardValide from './CardValide';
 import CardWaiting from './CardWaiting';
+import CommentIcon from '@material-ui/icons/Comment';
 
 const useStyles = makeStyles((theme) => ({
     icon: {
@@ -132,7 +128,7 @@ export default function Sollicitation(props) {
             </div>
             <div className={classes.blockSollicitation}>
                 {isSolValidate
-                    ? <CardValide />
+                    ? <CardValide updateFormation={props.updateFormation} handlAddIcop={props.handlAddIcop}/>
                     : nextSollicitation
                         ? nextSollicitation.sol
                             ? !nextSollicitation.sol.dateRespOF && <CardWaiting
@@ -188,6 +184,7 @@ export default function Sollicitation(props) {
                     </div>
                 } */}
             </div>
+            <CommentIcon />
         </div>
     )
 }

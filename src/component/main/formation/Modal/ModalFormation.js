@@ -138,6 +138,7 @@ export default function ModalCreateSol(props) {
                                 isSubmittingSol={props.isSubmittingSol}
                                 sollicitationFormation={props.sollicitationFormation}
                                 handleResponseSollicitation={props.handleResponseSollicitation}
+                                handlAddIcop={props.handlAddIcop}
                             />
                             : <p>Pas d'OF attaché à la formation</p>}
                     </div>
