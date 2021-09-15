@@ -54,12 +54,13 @@ export default function SollicitationListAttr(props) {
     
     return (
         <div key={'divList_' + props.data.priorite}>
-            <ListItem disabled={props.data.disabled} button alignItems="flex-start" key={'ListItem_' + props.data.libelle}>
+            <ListItem disabled={props.data.disabled} button alignItems="flex-start" 
+                key={'ListItem_' + props.data.libelle} onClick={() => props.handleChangeSollicitationSelected(props.data.id)}>
                 <ListItemAvatar key={'ListItemAvatar_' + props.data.priorite}>
                     {props.data.disabled
                         ? <Avatar key={'avatar' + props.data.priorite}>{props.data.priorite}</Avatar>
                         : props.data.sol
-                            ? props.data.sol.etat === 3 // Si l'OF a accepté la sol
+                            ? (props.data.sol.etat === 3 || props.data.sol.etat === 4) // Si l'OF a accepté la sol
                                 ? <Avatar className={classes.green}
                                     key={'avatar' + props.data.priorite}>
                                     <CheckIcon />

@@ -74,7 +74,7 @@ export function DivAdress(props) {
     const classes = useStyles();
 
     return (
-        <div className={classes.adresse} >
+        <div key={props.id} className={classes.adresse} >
             <span>{props.label}</span>
             {props.adresseHabilited &&
                 <Tooltip classes={{ tooltip: classes.tooltip }} title="Supprimer l'adresse">
@@ -90,23 +90,23 @@ export default function Row(props) {
     const ActionTable = props.action;
     const row = props.row;
     const classes = useStyles();
-
+    
     return (
         <React.Fragment>
             <StyledTableRow >
 
-                {props.columns && props.columns.map((col) => (
+                {props.columns && props.columns.map((col, i) => (
                     props.checkColumnsVisible && (props.checkColumnsVisible.indexOf(col) !== -1 && (
                         col === 'adresse'
-                            ? <TableCell className={classes.center} key={row.id.toString() + '_' + col}>
+                            ? <TableCell className={classes.center} key={row.id.toString() + '_' + col + '_' + i}>
                                 <div className={classes.adresseCell}>
                                     <div className={classes.adresseBlock}>
                                         {row[col] && row[col].map((a) => (
                                             <DivAdress
-                                                adresseHabilited={props.adresseHabilited}
                                                 key={row.id + '_' + a.id}
+                                                adresseHabilited={props.adresseHabilited}
+                                                id={row.id + '_' + a.id}
                                                 label={a.adresse + ' - ' + a.commune}
-                                                id={a.id}
                                                 handleDeleteAdresse={() => { props.handleDeleteAdresse(row, { id: a.id, adresse: a.adresse, commune: a.commune }) }} />
                                         ))}
                                     </div>

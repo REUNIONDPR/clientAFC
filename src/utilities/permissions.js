@@ -12,6 +12,10 @@ const HAB = {
             "update": true,
             "delete": true,
             "validate": true,
+        }, "sollicitation": {
+            "updateDT": true,
+            "updateDDO": false,
+            "conv": false,
         }, "adresse": {
             "view": true,
             "create": false,
@@ -33,6 +37,10 @@ const HAB = {
             "update": false,
             "delete": false,
             "validate": false,
+        }, "sollicitation": {
+            "updateDT": true,
+            "updateDDO": false,
+            "conv": false,
         }, "adresse": {
             "view": true,
             "create": false,
@@ -54,6 +62,10 @@ const HAB = {
             "update": false,
             "delete": false,
             "validate": false,
+        }, "sollicitation": {
+            "updateDT": false,
+            "updateDDO": false,
+            "conv": true,
         }, "adresse": {
             "view": true,
             "create": false,
@@ -75,6 +87,10 @@ const HAB = {
             "update": false,
             "delete": false,
             "validate": false,
+        }, "sollicitation": {
+            "updateDT": false,
+            "updateDDO": false,
+            "conv": false,
         }, "adresse": {
             "view": true,
             "create": false,
@@ -96,6 +112,10 @@ const HAB = {
             "update": false,
             "delete": false,
             "validate": false,
+        }, "sollicitation": {
+            "updateDT": false,
+            "updateDDO": true,
+            "conv": false,
         }, "adresse": {
             "view": true,
             "create": false,
@@ -117,6 +137,10 @@ const HAB = {
             "update": true,
             "delete": true,
             "validate": true,
+        }, "sollicitation": {
+            "updateDT": true,
+            "updateDDO": true,
+            "conv": true,
         }, "adresse": {
             "view": true,
             "create": true,

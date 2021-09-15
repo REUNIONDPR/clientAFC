@@ -9,6 +9,7 @@ import CloseRoundedIcon from '@material-ui/icons/CloseRounded';
 // import Stepper from './Stepper';
 import Formulaire from './children/formation/Formulaire';
 import Sollicitation from './children/sollicitation/Sollicitation';
+import PartieBRS from './children/brs/PartieBRS';
 // import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles((theme) => ({
@@ -32,6 +33,8 @@ const useStyles = makeStyles((theme) => ({
         boxShadow: theme.shadows[5],
         padding: theme.spacing(2, 4, 3),
         width: '90%',
+        maxHeight: '90%',
+        overflow: 'scroll',
     },
     titleModal: {
         display: 'flex',
@@ -84,7 +87,7 @@ export default function ModalCreateSol(props) {
                 }}
             >
                 <Fade in={props.openModal}>
-                    <div className={classes.paper}>
+                    <div className={`${classes.paper} scrollBar-personnalize`}>
                         <div className={classes.titleModal}>
                             <div>
                                 <h2 id="transition-modal-title">
@@ -130,17 +133,37 @@ export default function ModalCreateSol(props) {
                         />
                         {/* Aficher seulement si updateFormation.id !== '' ? */}
                         {(!props.createNewFormationFromThis && props.attributaireList.length > 0)
-                            ? <Sollicitation
-                                attributaireList={props.attributaireList}
-                                updateFormation={props.updateFormation}
-                                handleCreateSollicitation={props.handleCreateSollicitation}
-                                handleSubmitSol={props.handleSubmitSol}
-                                isSubmittingSol={props.isSubmittingSol}
-                                sollicitationFormation={props.sollicitationFormation}
-                                handleResponseSollicitation={props.handleResponseSollicitation}
-                                handlAddIcop={props.handlAddIcop}
-                            />
-                            : <p>Pas d'OF attaché à la formation</p>}
+                            ? <>
+                                <Sollicitation
+                                    attributaireList={props.attributaireList}
+                                    updateFormation={props.updateFormation}
+                                    handleCreateSollicitation={props.handleCreateSollicitation}
+                                    handleSubmitSol={props.handleSubmitSol}
+                                    isSubmittingSol={props.isSubmittingSol}
+                                    sollicitationList={props.sollicitationList}
+                                    handleResponseSollicitation={props.handleResponseSollicitation}
+                                    handlAddIcop={props.handlAddIcop}
+                                    icopList={props.icopList}
+                                    lieuExecutionList={props.lieuExecutionList}
+                                    handleChangeSollicitation={props.handleChangeSollicitation}
+                                    sollicitation={props.sollicitation}
+                                    handleValideSollicitation={props.handleValideSollicitation}
+                                    user={props.user}
+                                />
+                                {props.sollicitation.dateValidationDT &&
+                                    <PartieBRS
+                                        updateFormation={props.updateFormation}
+                                        handleChangeFormation={props.handleChangeFormation}
+                                        handleCancelSollicitation={props.handleCancelSollicitation}
+                                        handleValideSollicitation={props.handleValideSollicitation}
+                                        sollicitation={props.sollicitation}
+                                        handleEditFormation={props.handleEditFormation}
+                                        user={props.user}
+                                    />}
+                            </>
+                            : <p>Pas d'OF attaché à la formation</p>
+                        }
+
                     </div>
                 </Fade>
             </Modal>

@@ -603,7 +603,7 @@ export default function Catalogue() {
         axios({
             method: 'put',
             url: '/attributaire/deleteAdresse',
-            data: { id_catalogue_attributaire: updatedRow.id_of_cata, id_adresse: adresse.id },
+            data: { id_cata_attr: updatedRow.id_of_cata, id_adresse: adresse.id },
             headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
         }).then((response) => {
             if (response.status === 200) {

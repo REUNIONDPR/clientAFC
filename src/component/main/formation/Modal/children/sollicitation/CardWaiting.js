@@ -1,19 +1,24 @@
-
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import { makeStyles } from '@material-ui/core/styles';
 
+const useStyles = makeStyles((theme) => ({
+    blockCenter: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+}));
 export default function CardWaiting(props) {
-    const classes = {};
+    const classes = useStyles();
+    
     return (
         <>
-
-            <p>{props.OF} contacté le {props.date}</p>
-
-            <div className={classes.blockSolActiveRadio}>
+            <div className={classes.blockCenter}>
                 <FormControl component="fieldset">
                     <RadioGroup row aria-label="responseOF" className={classes.radioGrp} name="responseOF" onChange={props.handleChangeRadioResp}>
                         <FormControlLabel
@@ -30,18 +35,19 @@ export default function CardWaiting(props) {
                 </FormControl>
             </div>
             <div>
-                {props.showDetailRefus && <TextField
-                    label="Détail du refus de l'OF"
+                <TextField
+                    label="Détail si refus"
                     fullWidth
+                    disabled={!props.showDetailRefus}
                     multiline
                     rows={4}
                     value={props.refusReason}
                     onChange={props.handleChangeRefusReason}
-                    placeholder="Détail du refus de l'OF"
+                    placeholder="Détail si refus"
                     variant="outlined"
-                />}
+                />
             </div>
-            <div className={classes.blockSolActiveBtn}>
+            <div className={classes.blockCenter}>
                 {props.radioSelected === ''
                     ? <Button disabled variant="contained" color="secondary">
                         Enregistrer

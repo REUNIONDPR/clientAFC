@@ -8,15 +8,30 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import { useState } from 'react';
 import { dateTimeFormat } from '../../../../../../utilities/Function';
+import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import Button from '@material-ui/core/Button';
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 import { makeStyles } from '@material-ui/core/styles';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import { IsPermitted } from '../../../../../../utilities/Function';
 
 const useStyles = makeStyles((theme) => ({
     blockIcop: {
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-around',
+        justifyContent: 'space-between',
+        marginBottom: theme.spacing(2)
+    },
+    blockLieu: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    lieuSelect: {
+        width: '70%',
     },
     listWidth: {
         width: 220,
@@ -25,35 +40,45 @@ const useStyles = makeStyles((theme) => ({
         border: '1px solid #bdbdbd',
     },
     radiobtn: {
-        '& > .MuiRadio-root':{
+        '& > .MuiRadio-root': {
             padding: 0,
         }
     },
-
+    block: {
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        height: '100%',
+    },
+    blockTitle: {
+        display: 'flex',
+        padding: 16,
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        '& > svg': {
+            color: 'green',
+        }
+    },
 }));
 
 export default function CardValide(props) {
     const classes = useStyles();
-
-    const [icopSelected, setIcopSelected] = useState('');
     const [dateicop, setDateIcop] = useState('');
 
     const handleChangeDateicop = (e) => {
         setDateIcop(e.target.value)
     }
-    const handleToggle = (value) => () => {
-        console.log(value)
-        setIcopSelected(value)
-    };
 
+    const isDisabled = !IsPermitted(props.user, 'sollicitation', 'updateDT')
+    
     return (
         <>
-            <p>Sollicitation validé</p>
             <div className={classes.blockIcop}>
                 <form>
                     <TextField
                         id="dateIcop"
                         size="small"
+                        disabled={isDisabled}
                         value={dateicop}
                         onChange={handleChangeDateicop}
                         variant="outlined"
@@ -64,25 +89,25 @@ export default function CardValide(props) {
                         }} />
                 </form>
 
-                <Button onClick={() => props.handlAddIcop(dateicop)} variant="contained" color="secondary"
+                <Button disabled={isDisabled} onClick={() => props.handlAddIcop(dateicop)} variant="contained" color="secondary"
                     endIcon={<ArrowForwardIcon />}>
                     Ajouter
                 </Button>
 
                 <List dense className={`${classes.listWidth} scrollBar-personnalize`}>
-                    <RadioGroup row aria-label="responseOF" name="responseOF" value={icopSelected} >
-                        {props.updateFormation.arrayIcop
-                            ? props.updateFormation.arrayIcop.map((value) => (
-                                <ListItem
-                                    key={props.updateFormation.id + '_' + dateTimeFormat(value).date} dense button
-                                    onClick={handleToggle(dateTimeFormat(value).date)}>
+                    <RadioGroup row aria-label="responseOF" name="responseOF" value={props.sollicitation.id_dateIcop} >
+                        {(props.icopList && props.icopList.length > 0)
+                            ? props.icopList.map((v) => (
+                                <ListItem disabled={isDisabled}
+                                    key={props.updateFormation.id + '_' + v.id} dense button
+                                    onClick={() => props.handleChangeSollicitation('id_dateIcop', v.id)}>
                                     <ListItemIcon>
                                         <FormControlLabel className={classes.radiobtn}
-                                            value={dateTimeFormat(value).date}
+                                            value={v.id}
                                             control={<Radio color="secondary" />}
                                         />
                                     </ListItemIcon>
-                                    <ListItemText id={'labelId'} primary={dateTimeFormat(value).date} />
+                                    <ListItemText primary={dateTimeFormat(v.dateIcop).date} />
                                 </ListItem>
                             ))
                             : <ListItem> Ajouter une date </ListItem>
@@ -91,7 +116,31 @@ export default function CardValide(props) {
                     </RadioGroup>
                 </List>
             </div>
-            <p>Saisie des date ICOP + lieu execution</p>
+            <div className={classes.blockLieu}>
+                <FormControl size="small" variant="outlined" disabled={isDisabled} className={classes.lieuSelect}>
+                    <InputLabel>Lieu d'execution</InputLabel>
+                    {props.lieuExecutionList &&
+                        <Select
+                            value={props.sollicitation.lieu_execution ? props.sollicitation.lieu_execution : 'all'}
+                            onChange={(e) => props.handleChangeSollicitation(e.target.name, e.target.value)}
+                            fullWidth
+                            name='lieu_execution'
+                            label="Lieu d'execution"
+                        >
+                            <MenuItem value="all">
+                                <em>Choisir</em>
+                            </MenuItem>
+                            {props.lieuExecutionList.map((v) => (
+                                <MenuItem key={v.id + '_' + v.adresse} value={v.id}>{v.adresse}</MenuItem>
+                            ))}
+                        </Select>
+                    }
+                </FormControl>
+                <Button disabled={isDisabled} onClick={() => props.handleValideSollicitation('DT')} variant="contained" color="secondary" >
+                    Enregistrer
+                </Button>
+
+            </div>
         </>
     )
 }

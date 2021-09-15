@@ -106,11 +106,6 @@ export default function Formulaire(props) {
                         </Select>
                     }
                 </FormControl>
-                <TextField required type="text" size="small" label="N° article" variant="outlined"
-                    disabled={props.updateFormation.id === ''}
-                    value={props.updateFormation.n_Article}
-                    onChange={(e) => props.handleChangeFormation('n_Article', e.target.value)}
-                />
             </div>
 
 
