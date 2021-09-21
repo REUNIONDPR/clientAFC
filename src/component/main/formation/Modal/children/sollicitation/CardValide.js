@@ -136,7 +136,10 @@ export default function CardValide(props) {
                         </Select>
                     }
                 </FormControl>
-                <Button disabled={isDisabled} onClick={() => props.handleValideSollicitation('DT')} variant="contained" color="secondary" >
+                <Button disabled={
+                    props.sollicitation.lieu_execution === 'all' || 
+                    props.sollicitation.id_dateIcop === '' || 
+                    isDisabled} onClick={() => props.handleValideSollicitation('DT')} variant="contained" color="secondary" >
                     Enregistrer
                 </Button>
 

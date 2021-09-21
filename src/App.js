@@ -7,7 +7,7 @@ import { Switch, Route } from 'react-router-dom';
 import home from './component/main/formation/Formation';
 import PrivateRoute from './hoc/PrivateRoute';
 import { UserContext } from './context/user.context';
-
+import Admin from './component/main/admin/Admin';
 import NavbarV from './component/global/Navbar/Navbar';
 import { makeStyles } from '@material-ui/core/styles';
 import Cookie from 'js-cookie';
@@ -102,6 +102,7 @@ function App() {
                 <Route exact path="/" component={home} />
                 <Route exact path='/:route' render={() => (<>
                   <PrivateRoute path='/catalogue' component={Catalogue} />
+                  <PrivateRoute path='/admin' component={Admin} />
                   <PrivateRoute path='/home' component={home} /> </>
                 )} />
               </Main>

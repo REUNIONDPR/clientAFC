@@ -89,7 +89,7 @@ export default function PermanentDrawerLeft() {
     console.log(Cookies.get())
     deleteUser();
   }
-  
+
   return (
 
     <div className={classes.navBar}>
@@ -128,7 +128,7 @@ export default function PermanentDrawerLeft() {
 
           <div className={classes.infoAvatar}>
             <p className='titre'>{user.nom}</p>
-            <p>{codeToName('fonction_'+user.fonction)}</p>
+            <p>{codeToName('fonction_' + user.fonction)}</p>
           </div>
         </div>
       </div>
@@ -150,17 +150,24 @@ export default function PermanentDrawerLeft() {
           </ListItem>}
 
         {IsPermitted(user, 'brs', 'view') &&
-          <ListItem button className='primary-h-color' component={Link} href="#" selected={selectedIndex === 3}
+          <ListItem button className='primary-h-color' component={Link} to="#" selected={selectedIndex === 3}
             onClick={(event) => handleListItemClick(event, 3)}>
             <ListItemIcon><FileCopyIcon /></ListItemIcon>
             <ListItemText secondary='BRS' />
           </ListItem>}
 
         {IsPermitted(user, 'dashboard', 'view') &&
-          <ListItem button className='primary-h-color' component={Link} href="#" selected={selectedIndex === 4}
+          <ListItem button className='primary-h-color' component={Link} to="#" selected={selectedIndex === 4}
             onClick={(event) => handleListItemClick(event, 4)}>
             <ListItemIcon><DashboardIcon /></ListItemIcon>
             <ListItemText secondary='Tableau de bord' />
+          </ListItem>}
+
+        {IsPermitted(user, 'admin', 'view') &&
+          <ListItem button className='primary-h-color' component={Link} to="admin" selected={selectedIndex === 4}
+            onClick={(event) => handleListItemClick(event, 5)}>
+            <ListItemIcon><DashboardIcon /></ListItemIcon>
+            <ListItemText secondary='Admin' />
           </ListItem>}
 
       </List>

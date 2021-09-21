@@ -1,7 +1,7 @@
 import { dateTimeFormat } from "../../../../../../utilities/Function"
 
 export default function CardHisto(props) {
-    console.log(props.data)
+    
     const getText = (i, info) => {
         let result = '';
         switch (i) {

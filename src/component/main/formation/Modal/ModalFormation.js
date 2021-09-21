@@ -10,6 +10,7 @@ import CloseRoundedIcon from '@material-ui/icons/CloseRounded';
 import Formulaire from './children/formation/Formulaire';
 import Sollicitation from './children/sollicitation/Sollicitation';
 import PartieBRS from './children/brs/PartieBRS';
+import CommentIcon from '@material-ui/icons/Comment';
 // import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles((theme) => ({
@@ -31,18 +32,32 @@ const useStyles = makeStyles((theme) => ({
         border: '2px solid',
         borderColor: theme.palette.primary.main,
         boxShadow: theme.shadows[5],
-        padding: theme.spacing(2, 4, 3),
+        paddingLeft: theme.spacing(3),
         width: '90%',
         maxHeight: '90%',
-        overflow: 'scroll',
+        // overflow: 'scroll',
     },
     titleModal: {
+        height: '10vh',
+        borderBottom: '2px solid',
+        borderColor: theme.palette.primary.main,
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
     },
+    titleModalBtn: {
+        display: 'flex',
+        alignItems: 'center',
+    },
     spinnerBtn: {
         color: "#fff",
+    },
+    body: {
+        maxHeight: '80vh',
+        overflowY: 'scroll',
+    },
+    bodyMain: {
+        padding: theme.spacing(2, 1, 2, 0),
     }
 }));
 
@@ -54,10 +69,10 @@ export default function ModalCreateSol(props) {
         setIsSubmit(false)
     }, [props])
 
-    const handleSubmit = () => {
+    const handleSubmit = (newFormFromOther) => {
         setIsSubmit(true)
         props.updateFormation.id === ''
-            ? props.handleSaveFormation()
+            ? props.handleSaveFormation(newFormFromOther)
             : props.handleEditFormation();
         //   let action = dataRow.id === '' || dataRow.id === 0 ? 'create' : 'update';
 
@@ -87,86 +102,83 @@ export default function ModalCreateSol(props) {
                 }}
             >
                 <Fade in={props.openModal}>
-                    <div className={`${classes.paper} scrollBar-personnalize`}>
+                    <div className={classes.paper}>
                         <div className={classes.titleModal}>
                             <div>
                                 <h2 id="transition-modal-title">
                                     {props.updateFormation.id === '' || props.updateFormation.id === 0
-                                        ? "Ajouter une"
-                                        : "Modifier la"}
+                                        ? "Ajouter une "
+                                        : "Détail de la "}
                                     formation
                                 </h2>
                             </div>
                             {/* {(props.updateFormation.id !== '') && <Stepper />} */}
-                            <div>
-                                {/* {(props.updateFormation.id === '' || props.updateFormation.id === 0)
-                                    ? <Tooltip title="Fermer" aria-label="delete">
-                                        <IconButton aria-label="close" color="primary" onClick={props.handleCloseModal}>
-                                            <CloseRoundedIcon />
-                                        </IconButton>
-                                    </Tooltip>
-                                    : <Tooltip title="Supprimer" aria-label="delete">
-                                        <IconButton aria-label="delete" color="primary" onClick={() => props.handleDeleteClick(props.updateFormation)}>
-                                            <DeleteIcon />
-                                        </IconButton>
-                                    </Tooltip>
-                                } */}
-                                <Tooltip title="Fermer" aria-label="close">
+                            <div className={classes.titleModalBtn}>
+
+                                {/* <Tooltip title="Ajouter un commentaire" aria-label="comm" classes={{ tooltip: classes.tooltip }}> */}
+                                    <IconButton disabled aria-label="close" color="primary" onClick={() => console.log('Créer un comm')}>
+                                        <CommentIcon />
+                                    </IconButton>
+                                {/* </Tooltip> */}
+                                <Tooltip title="Fermer" aria-label="close" classes={{ tooltip: classes.tooltip }}>
                                     <IconButton aria-label="close" color="primary" onClick={props.handleCloseModal}>
                                         <CloseRoundedIcon />
                                     </IconButton>
                                 </Tooltip>
                             </div>
                         </div>
-
-                        <Formulaire
-                            isSubmit={isSubmit}
-                            handleIsSubmitting={handleIsSubmitting}
-                            updateFormation={props.updateFormation}
-                            lotList={props.lotList}
-                            dispositifList={props.dispositifList}
-                            agence_refList={props.agence_refList}
-                            catalogueList={props.catalogueList}
-                            communeList={props.communeList}
-                            handleSubmit={handleSubmit}
-                            handleChangeFormation={props.handleChangeFormation}
-                        />
-                        {/* Aficher seulement si updateFormation.id !== '' ? */}
-                        {(!props.createNewFormationFromThis && props.attributaireList.length > 0)
-                            ? <>
-                                <Sollicitation
-                                    attributaireList={props.attributaireList}
+                        <div className={`${classes.body} scrollBar-personnalize`}>
+                            <div className={classes.bodyMain}>
+                                <Formulaire
+                                    isSubmit={isSubmit}
+                                    handleIsSubmitting={handleIsSubmitting}
                                     updateFormation={props.updateFormation}
-                                    handleCreateSollicitation={props.handleCreateSollicitation}
-                                    handleSubmitSol={props.handleSubmitSol}
-                                    isSubmittingSol={props.isSubmittingSol}
-                                    sollicitationList={props.sollicitationList}
-                                    handleResponseSollicitation={props.handleResponseSollicitation}
-                                    handlAddIcop={props.handlAddIcop}
-                                    icopList={props.icopList}
-                                    lieuExecutionList={props.lieuExecutionList}
-                                    handleChangeSollicitation={props.handleChangeSollicitation}
-                                    sollicitation={props.sollicitation}
-                                    handleValideSollicitation={props.handleValideSollicitation}
-                                    user={props.user}
+                                    lotList={props.lotList}
+                                    dispositifList={props.dispositifList}
+                                    agence_refList={props.agence_refList}
+                                    catalogueList={props.catalogueList}
+                                    communeList={props.communeList}
+                                    handleSubmit={handleSubmit}
+                                    createNewFormationFromThis={props.createNewFormationFromThis}
+                                    handleChangeFormation={props.handleChangeFormation}
                                 />
-                                {props.sollicitation.dateValidationDT &&
-                                    <PartieBRS
-                                        updateFormation={props.updateFormation}
-                                        handleChangeFormation={props.handleChangeFormation}
-                                        handleCancelSollicitation={props.handleCancelSollicitation}
-                                        handleValideSollicitation={props.handleValideSollicitation}
-                                        sollicitation={props.sollicitation}
-                                        handleEditFormation={props.handleEditFormation}
-                                        user={props.user}
-                                    />}
-                            </>
-                            : <p>Pas d'OF attaché à la formation</p>
-                        }
-
+                                {/* Aficher seulement si updateFormation.id !== '' ? */}
+                                {(props.updateFormation.id !== '' && props.attributaireList.length > 0)
+                                    ? <>
+                                        <Sollicitation
+                                            attributaireList={props.attributaireList}
+                                            updateFormation={props.updateFormation}
+                                            handleCreateSollicitation={props.handleCreateSollicitation}
+                                            handleSubmitSol={props.handleSubmitSol}
+                                            isSubmittingSol={props.isSubmittingSol}
+                                            sollicitationList={props.sollicitationList}
+                                            handleResponseSollicitation={props.handleResponseSollicitation}
+                                            handlAddIcop={props.handlAddIcop}
+                                            icopList={props.icopList}
+                                            lieuExecutionList={props.lieuExecutionList}
+                                            handleChangeSollicitation={props.handleChangeSollicitation}
+                                            sollicitation={props.sollicitation}
+                                            handleValideSollicitation={props.handleValideSollicitation}
+                                            user={props.user}
+                                        />
+                                        {props.sollicitation.dateValidationDT &&
+                                            <PartieBRS
+                                                updateFormation={props.updateFormation}
+                                                handleChangeFormation={props.handleChangeFormation}
+                                                handleCancelSollicitation={props.handleCancelSollicitation}
+                                                handleValideSollicitation={props.handleValideSollicitation}
+                                                sollicitation={props.sollicitation}
+                                                handleEditFormation={props.handleEditFormation}
+                                                user={props.user}
+                                            />}
+                                    </>
+                                    : <p>Pas d'OF attaché à la formation</p>
+                                }
+                            </div>
+                        </div>
                     </div>
                 </Fade>
             </Modal>
-        </div>
+        </div >
     );
 }

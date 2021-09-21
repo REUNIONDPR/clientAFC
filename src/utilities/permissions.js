@@ -147,6 +147,10 @@ const HAB = {
             "update": true,
             "delete": true,
             "validate": true,
+        }, "brs":{
+            "create":true,
+        }, "admin":{
+            'view':true,
         }
     },
 }

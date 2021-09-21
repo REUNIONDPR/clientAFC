@@ -15,12 +15,11 @@ import CloseIcon from '@material-ui/icons/Close';
 import { IsPermitted } from '../../../../utilities/Function';
 import Select from '@material-ui/core/Select';
 import SaveIcon from '@material-ui/icons/Save';
-import Paper from '@material-ui/core/Paper';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import MenuItem from '@material-ui/core/MenuItem';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
-import { InputAdornment, Tooltip, Typography } from '@material-ui/core';
+import { Tooltip, Typography } from '@material-ui/core';
 
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -99,8 +98,8 @@ const useStyles = makeStyles((theme) => ({
     overflowY: 'scroll',
     paddingTop: 1,
   },
-  table:{
-    height:300,
+  table: {
+    height: 300,
   },
   dividerTop: { margin: '20px 20px 0 20px' },
   dividerDown: { margin: '0 20px 20px 20px' },

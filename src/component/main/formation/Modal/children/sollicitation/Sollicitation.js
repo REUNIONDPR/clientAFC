@@ -10,7 +10,6 @@ import { useEffect, useState } from 'react';
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import CardValide from './CardValide';
 import CardWaiting from './CardWaiting';
-import CommentIcon from '@material-ui/icons/Comment';
 import axios from 'axios';
 import Cookie from 'js-cookie';
 import CardHisto from './CardHisto';
@@ -64,7 +63,7 @@ const useStyles = makeStyles((theme) => ({
     blockTitle: {
         display: 'flex',
         padding: 16,
-        justifyContent: 'center',
+        justifyContent: 'space-between',
         alignItems: 'center',
         '& > svg': {
             color: 'green',
@@ -119,6 +118,10 @@ export default function Sollicitation(props) {
                     if (firstSol) firstSol = false; // Ne plus avoir accès aux sollicitations suivantes
                     isSolValidate = true;
                     Obj = { etat: false, error: false, text: `Validation de la DT le ${myDate.date} à ${myDate.time}`, finDeSollicitation: true }
+                } else if (sol.etat === 41) {
+                    if (firstSol) firstSol = false; // Ne plus avoir accès aux sollicitations suivantes
+                    isSolValidate = true;
+                    Obj = { etat: false, error: false, text: `Modification de la DT le ${myDate.date} à ${myDate.time}`, finDeSollicitation: true }
                 } else if (sol.etat === 5) {
                     if (firstSol) firstSol = false; // Ne plus avoir accès aux sollicitations suivantes
                     isSolValidate = true;
@@ -149,7 +152,7 @@ export default function Sollicitation(props) {
 
     useEffect(() => {
         if (arrayAttrib.length > 0) {
-            
+
             if (sollicitationSelected === 0) {
                 let solValide = arrayAttrib.find((v) => v.isSolValidate);
                 if (!solValide) {
@@ -159,14 +162,14 @@ export default function Sollicitation(props) {
                 setSollicitationVisible(solValide);
             } else {
                 let sol = arrayAttrib.find((v) => v.id === sollicitationSelected);
-                if(sol.finDeSollicitation && !sol.isSolValidate){
+                if (sol.finDeSollicitation && !sol.isSolValidate) {
                     // axios get histo
                     axios({
-                        method:'GET',
-                        url:'sollicitation/findHistoric?id_sol='+sol.id_sol,
+                        method: 'GET',
+                        url: 'sollicitation/findHistoric?id_sol=' + sol.id_sol,
                         headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
                     }).then((response) => setHistoricList(response.data))
-                }else setHistoricList([])
+                } else setHistoricList([])
                 setSollicitationVisible(sol);
             }
         }
@@ -244,76 +247,9 @@ export default function Sollicitation(props) {
                                         handleValideSollicitation={props.handleValideSollicitation}
                                         user={props.user}
                                     />
-                                    : <CardHisto data={historicList} />
-                        }
+                                    : <CardHisto data={historicList} />}
                     </div>}
-                {/* {sollicitationVisible.isSolValidate
-                    ? <CardValide 
-                        updateFormation={props.updateFormation} 
-                        handlAddIcop={props.handlAddIcop} 
-                        icopList={props.icopList}
-                        lieuExecutionList={props.lieuExecutionList}
-                        handleChangeSollicitation={props.handleChangeSollicitation} 
-                        sollicitation={props.sollicitation}
-                        handleValideSollicitation={props.handleValideSollicitation}
-                        user={props.user}
-                        />
-                    : sollicitationVisible
-                        ? sollicitationVisible.sol
-                            ? !sollicitationVisible.sol.dateRespOF && <CardWaiting
-                                OF={sollicitationVisible.libelle}
-                                date={dateFormat(sollicitationVisible.sol.dateMailOF)}
-                                handleChangeRadioResp={handleChangeRadioResp}
-                                refusReason={refusReason}
-                                handleChangeRefusReason={handleChangeRefusReason}
-                                showDetailRefus={showDetailRefus}
-                                radioSelected={radioSelected}
-                                handleClickValide={() => props.handleResponseSollicitation(radioSelected, sollicitationVisible.sol, refusReason)} />
-                            : <div>
-                                <div><p>{sollicitationVisible.libelle}</p></div>
-                                <div className={classes.blockSolToContact}>{props.isSubmittingSol
-                                    ? <Button onClick={props.handleSubmitSol} variant="contained" color="secondary"
-                                        endIcon={<CircularProgress size={20} className={classes.spinnerBtn} />}
-                                        startIcon={<SendIcon />}>
-                                        Solliciter l'OF
-                                    </Button>
-                                    : <Button onClick={() => props.handleCreateSollicitation(sollicitationVisible)} variant="contained" color="secondary"
-                                        startIcon={<SendIcon />}>
-                                        Solliciter l'OF
-                                    </Button>}
-                                </div>
-                            </div>
-                        : <div>
-                            <p>Plus d'OF à contacter</p>
-                            <Button onClick={props.handleCancelForm} variant="contained" color="secondary" >
-                                Cliquez pour annuler la formation
-                            </Button>
-                        </div>} */}
-
-                {/* <p>Si changement formation => créer nouvelle formation copie de celle là pour créer de nouvelle sollicitation</p>
-                        <p> id_sol = 0 si aucune sollicitation ? -> Afficher les bouton pour solliciter</p> */}
-                {/* {props.updateFormation.id_sol === 0 &&
-                    <div className={classes.sollicitaitonBtn}>
-                        {props.attributaireList.length > 0
-                            ? props.isSubmittingSol
-                                ? <Button onClick={props.handleSubmitSol} variant="contained" color="secondary"
-                                    endIcon={<CircularProgress size={20} className={classes.spinnerBtn} />}
-                                    startIcon={<SendIcon />}>
-                                    Solliciter les OFs
-                                </Button>
-                                : <Button onClick={props.handleCreateSollicitation} variant="contained" color="secondary"
-                                    startIcon={<SendIcon />}>
-                                    Solliciter les OFs
-                                </Button>
-
-                            : <Button disabled variant="contained" color="secondary"
-                                startIcon={<SendIcon />}>
-                                Aucun OF à contacter
-                            </Button>}
-                    </div>
-                } */}
             </div>
-            {/* <CommentIcon /> */}
         </div>
     )
 }

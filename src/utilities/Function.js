@@ -5,6 +5,7 @@ export function codeToName(str) {
   switch (str) {
 
     case 'lot': return 'Lot';
+    case 'id_lot': return 'Lot';
     case 'of': return 'Attributaire';
     case 'n_Article': return 'N° Article';
     case 'intitule_form_marche': return 'Intitulé';
@@ -22,16 +23,25 @@ export function codeToName(str) {
     case 'commune': return 'Commune';
 
     case 'user': return 'Utilisateur';
+    case 'userFct' : return 'Contact';
     case 'agent_referent': return 'Agent référant';
     case 'agence_referente': return 'Agence référante';
+    case 'agence_ref': return 'Agence référante';
     case 'dispositif': return 'Dispositif';
+    case 'etat_formation': return 'Etat';
     case 'nb_place': return 'Nombre de place';
     case 'OF_dispensateur': return 'OF Dispensateur';
+    case 'date_entree_demandee': return 'Date d\'entrée';
+    case 'date_entree_fixe': return 'Date d\'entrée';
     case 'dateEntree': return 'Date d\'entrée';
     case 'dateIcop': return 'Date ICOP';
+    case 'date_DDINT1' : return 'Date début INT 1';
+    case 'date_DFINT1' : return 'Date fin INT 1';
+    case 'date_DDINT2' : return 'Date début INT 2';
+    case 'date_DFINT2' : return 'Date fin INT 2';
     case 'nConv': return 'N° Conventionnement';
     case 'dateConv': return 'Date Conventionnement';
-    case 'dateFin': return 'Date de fin';
+    case 'date_fin': return 'Date de fin';
     case 'nbH_centre': return 'Nombre d\'heure en centre';
     case 'nbH_ent': return 'Nombre d\'heure en entreprise';
     case 'nbH_appui': return 'Nombre d\'heure appui à la recherche d\'emploi';

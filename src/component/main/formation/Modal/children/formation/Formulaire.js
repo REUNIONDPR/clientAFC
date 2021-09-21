@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import FormControl from '@material-ui/core/FormControl';
@@ -9,10 +9,12 @@ import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 import { InputAdornment } from '@material-ui/core';
-import CommentIcon from '@material-ui/icons/Comment';
-
+import Confirm from '../../../../../global/Confirm';
 
 const useStyles = makeStyles((theme) => ({
+    main: {
+        // padding: theme.spacing(2, 4, 3),  
+    },
     tooltip: {
         fontSize: '15px',
         maxWidth: 'none',
@@ -62,7 +64,30 @@ const useStyles = makeStyles((theme) => ({
 export default function Formulaire(props) {
     const classes = useStyles();
 
-    return (<>
+    const [open, setOpen] = useState(false);
+    const [value, setValue] = useState({});
+
+    const handleOpenDialog = (k, older, newer) => {
+        setValue({ key: k, value_old:older, value_new: newer })
+        setOpen(true);
+    };
+
+    const handleCloseDialog = () => {
+        setValue({})
+        setOpen(false);
+    };
+
+    const handleValideDialog = () => {
+        setOpen(false);
+        props.handleChangeFormation(value.key, value.value_new, true)
+    }
+
+    return (<div className={classes.main}>
+        <Confirm open={open} handleValide={handleValideDialog} handleClose={handleCloseDialog} value={value} />
+        <Button onClick={handleOpenDialog} variant="contained" color="primary">
+            open
+        </Button>
+
         <form noValidate autoComplete="off">
             <div className={classes.blocForm}>
                 <FormControl size="small" variant="outlined"
@@ -112,11 +137,13 @@ export default function Formulaire(props) {
             {(props.updateFormation.id_lot !== 'all' && props.updateFormation.id_cata !== 'all') && <> <div className={classes.blocForm}>
                 <FormControl size="small" variant="outlined" error={props.updateFormation.id_commune === 'all' ? true : false}
                     disabled={props.updateFormation.id_cata === 'all' ? true : false}>
-                    <InputLabel>Commune</InputLabel>
+                    <InputLabel>Commune *</InputLabel>
                     {props.communeList &&
                         <Select
                             value={props.communeList.length > 0 ? props.updateFormation.id_commune : 'all'}
-                            onChange={(e) => props.handleChangeFormation(e.target.name, e.target.value, props.updateFormation.id !== '')}
+                            onChange={(e) => props.updateFormation.id !== ''
+                                ? handleOpenDialog(e.target.name, props.updateFormation.id_commune, e.target.value)
+                                : props.handleChangeFormation(e.target.name, e.target.value)}
                             fullWidth
                             name='id_commune'
                             label='Commune'
@@ -139,7 +166,7 @@ export default function Formulaire(props) {
 
                 <FormControl size="small" variant="outlined" error={props.updateFormation.agence_ref === 'all' ? true : false}
                     disabled={props.updateFormation.id_cata === 'all' ? true : false}>
-                    <InputLabel>Agence REF</InputLabel>
+                    <InputLabel>Agence REF *</InputLabel>
                     {props.agence_refList &&
                         <Select
                             value={props.agence_refList.length > 0 ? props.updateFormation.agence_ref : 'all'}
@@ -162,7 +189,9 @@ export default function Formulaire(props) {
                     disabled={props.updateFormation.id_commune === 'all'}
                     error={props.updateFormation.nb_place === '' ? true : false}
                     value={props.updateFormation.nb_place}
-                    onChange={(e) => props.handleChangeFormation('nb_place', e.target.value, props.updateFormation.id !== '')}
+                    onChange={(e) => props.updateFormation.id !== ''
+                        ? handleOpenDialog('nb_place', props.updateFormation.nb_place, e.target.value)
+                        : props.handleChangeFormation('nb_place', e.target.value)}
                     InputProps={
                         props.updateFormation.id !== ''
                             ? {
@@ -212,7 +241,11 @@ export default function Formulaire(props) {
                         variant="outlined"
                         label="Date d'entrée *"
                         type="date"
-                        onChange={(e) => props.handleChangeFormation('date_entree_demandee', e.target.value, props.updateFormation.id !== '')}
+                        onChange={(e) => props.updateFormation.id !== ''
+                            ? Math.abs(parseInt(new Date(e.target.value) - new Date(props.updateFormation.date_entree_fixe)) / (24 * 3600 * 1000)) > 15 
+                                ? handleOpenDialog('date_entree_demandee', props.updateFormation.date_entree_fixe, e.target.value)
+                                : props.handleChangeFormation('date_entree_demandee', e.target.value)
+                            : props.handleChangeFormation('date_entree_demandee', e.target.value)}
                         InputLabelProps={{
                             shrink: true,
                         }}
@@ -264,7 +297,9 @@ export default function Formulaire(props) {
                                             inputProps: { min: props.updateFormation.date_entree_demandee }
                                         }
                                 }
-                                onChange={(e) => props.handleChangeFormation('date_DDINT1', e.target.value, props.updateFormation.id !== '')}
+                                onChange={(e) => props.updateFormation.id !== ''
+                                    ? handleOpenDialog('date_DDINT1', props.updateFormation.date_DDINT1, e.target.value)
+                                    : props.handleChangeFormation('date_DDINT1', e.target.value)}
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
@@ -290,7 +325,9 @@ export default function Formulaire(props) {
                                             inputProps: { min: props.updateFormation.date_DDINT1 }
                                         }
                                 }
-                                onChange={(e) => props.handleChangeFormation('date_DFINT1', e.target.value, props.updateFormation.id !== '')}
+                                onChange={(e) => props.updateFormation.id !== ''
+                                    ? handleOpenDialog('date_DFINT1', props.updateFormation.date_DFINT1, e.target.value)
+                                    : props.handleChangeFormation('date_DFINT1', e.target.value)}
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
@@ -322,7 +359,9 @@ export default function Formulaire(props) {
                                             inputProps: { min: props.updateFormation.date_DFINT1 }
                                         }
                                 }
-                                onChange={(e) => props.handleChangeFormation('date_DDINT2', e.target.value, props.updateFormation.id !== '')}
+                                onChange={(e) => props.updateFormation.id !== ''
+                                    ? handleOpenDialog('date_DDINT2', props.updateFormation.date_DDINT2, e.target.value)
+                                    : props.handleChangeFormation('date_DDINT2', e.target.value)}
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
@@ -348,7 +387,9 @@ export default function Formulaire(props) {
                                             inputProps: { min: props.updateFormation.date_DDINT2 }
                                         }
                                 }
-                                onChange={(e) => props.handleChangeFormation('date_DFINT2', e.target.value, props.updateFormation.id !== '')}
+                                onChange={(e) => props.updateFormation.id !== ''
+                                    ? handleOpenDialog('date_DFINT2', props.updateFormation.date_DFINT2, e.target.value)
+                                    : props.handleChangeFormation('date_DFINT2', e.target.value)}
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
@@ -368,7 +409,6 @@ export default function Formulaire(props) {
                     : Changement qui necessite de solliciter à nouveau l'ensemble des OF dans l'ordre de priorité
                 </>}
             </div>
-            <CommentIcon />
             <div className={classes.btnActionModal}>
                 <Button onClick={props.handleCloseModal} variant="outlined" color="primary">
                     Annuler
@@ -389,7 +429,7 @@ export default function Formulaire(props) {
                                 variant="contained" color="primary" endIcon={<CircularProgress size={20} className={classes.spinnerBtn} />}>
                                 Enregistrer
                             </Button>
-                            : <Button onClick={props.handleSubmit} variant="contained" color="primary">
+                            : <Button onClick={() => props.handleSubmit(props.createNewFormationFromThis)} variant="contained" color="primary">
                                 Enregistrer
                             </Button>
                         : props.isSubmit
@@ -404,6 +444,6 @@ export default function Formulaire(props) {
             </div>
 
         </div>
-    </>
+    </div>
     )
 }
