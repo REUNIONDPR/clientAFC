@@ -12,11 +12,9 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Button from '@material-ui/core/Button';
 import ModalFormation from './Modal/ModalFormation';
-import { codeToName, dateFormat, calculDateFin, getDateToday, dateTimeFormat } from '../../../utilities/Function';
+import { codeToName, dateFormat, calculDateFin, getDateToday, getDateTime } from '../../../utilities/Function';
 import SnackBar from '../../global/SnackBar/SnackBar';
 import './sollicitation.css';
-import { Tooltip } from '@material-ui/core';
-import InfoIcon from '@material-ui/icons/Info';
 import { IsPermitted } from '../../../utilities/Function';
 import IconButton from '@material-ui/core/IconButton';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
@@ -43,7 +41,10 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 // }
 
 const useStyles = makeStyles((theme) => ({
-    table: {
+    containerTable: {
+        maxHeight: '80vh',
+        overflow: 'scroll',
+    }, table: {
         minWidth: 650,
     },
     flex: {
@@ -126,7 +127,7 @@ export default function Formation() {
         'agence_ref',
         'dispositif',
         'commune',
-        'etat_formation',
+        'etat_libelle',
         'date_entree_demandee',
         'date_fin',
     ]
@@ -135,7 +136,7 @@ export default function Formation() {
     const [formationListDisplay, setFormationListDisplay] = useState([]);
     const [filterValues, setFilterValues] = useState({
         id_lot: 'all',
-        etat: [1, 2, 3, 4, 5],
+        etat: [],
     });
 
     const [lotList, setLotList] = useState([]);
@@ -164,8 +165,7 @@ export default function Formation() {
         idgasi: user.idgasi,
         userFct: user.fonction,
         etat: 1,
-        etat_formation: '',
-        etat_formation_tooltip: '',
+        etat_libelle: '',
         agence_ref: 'all',
         dispositif: 1,
         n_Article: '',
@@ -201,6 +201,8 @@ export default function Formation() {
         attributaire: '',
         dateMailOF: '',
         dateRespOF: '',
+        etat: '',
+        date_etat: '',
         lieu_execution: 'all',
         id_dateIcop: '',
         dateValidationDT: '',
@@ -229,7 +231,7 @@ export default function Formation() {
         setOpenSnackBar(false);
         setMessageSnackBar('');
     };
-    // --------------- SnackBar
+    /* ------------------------------------------- */
 
     // --------------- useEffect
     useEffect(() => {
@@ -257,13 +259,13 @@ export default function Formation() {
             let formList = response.data.map((v) => {
                 return {
                     ...v,
+                    date_creation: v.date_creation ? dateFormat(v.date_creation, 'ANG') : '',
+                    date_entree_demandee: v.date_entree_demandee ? dateFormat(v.date_entree_demandee, 'ANG') : '',
+                    date_entree_fixe: v.date_entree_fixe ? dateFormat(v.date_entree_fixe, 'ANG') : '',
                     date_DDINT1: v.date_DDINT1 ? dateFormat(v.date_DDINT1, 'ANG') : '',
                     date_DDINT2: v.date_DDINT2 ? dateFormat(v.date_DDINT2, 'ANG') : '',
                     date_DFINT1: v.date_DFINT1 ? dateFormat(v.date_DFINT1, 'ANG') : '',
                     date_DFINT2: v.date_DFINT2 ? dateFormat(v.date_DFINT2, 'ANG') : '',
-                    date_creation: v.date_creation ? dateFormat(v.date_creation, 'ANG') : '',
-                    date_entree_demandee: v.date_entree_demandee ? dateFormat(v.date_entree_demandee, 'ANG') : '',
-                    date_entree_fixe: v.date_entree_fixe ? dateFormat(v.date_entree_fixe, 'ANG') : '',
                     date_fin: v.date_fin ? dateFormat(v.date_fin, 'ANG') : '',
                     date_nconv: v.date_nconv ? dateFormat(v.date_nconv, 'ANG') : '',
                 };
@@ -291,13 +293,22 @@ export default function Formation() {
 
         axios({
             method: 'GET',
-            url: 'global/findAll?table=formation_etat',
+            url: 'global/findAll?table=sollicitation_etat',
             headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
-        }).then((response) => setEtatList(response.data))
+        }).then((response) => {
+            setEtatList([{ etat: 'En cours d\'élaboration.', id: 0 }, ...response.data])
+            let allEtat = response.data.map((v) => v.id !== 20 && v.id)
+            allEtat.unshift(0)
+            setFilterValues({ ...filterValues, etat: allEtat })
+        })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user]);
 
     useEffect(() => {
         setAttributaireLotSelected('all');
+        let etat = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+        let attributaire = 'all';
+
         if (editionBRS && filterValues.id_lot !== 'all') {
             axios({
                 method: 'GET',
@@ -305,58 +316,54 @@ export default function Formation() {
                 headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
             }).then((response) => setAttributaireLotList(response.data))
         } else if (filterValues.id_lot === 'all') {
+            setFilterValues({ ...filterValues, id_attributaire: 'all' })
             setAttributaireLotList([]);
         } else if (!editionBRS) {
             setAttributaireLotList([]);
-            setFilterValues({ ...filterValues, etat: [1, 2, 3, 4], id_attributaire: '' })
 
         }
+        setFilterValues({ ...filterValues, etat: etat, id_attributaire: attributaire })
 
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [editionBRS, filterValues.id_lot])
+
+    useEffect(() => {
+        if (formationList.length > 0) {
+            let array = [];
+            array = formationList.filter((v) => {
+
+                for (let key in filterValues) {
+                    if (filterValues[key] === 'all' || filterValues[key] === '') continue;
+                    switch (key) {
+                        case 'id_lot':
+                            if ((v[key] && v[key].toString()) !== filterValues[key].toString()) return false
+                            break;
+                        case 'id_attributaire':
+                            if ((v[key] && v[key].toString()) !== filterValues[key].toString()) return false
+                            break;
+                        case 'etat':
+                            let value = [];
+                            value = filterValues[key];
+                            if (value.length > 0) {
+                                if (value.indexOf(v[key]) === -1) return false;
+                            } else {
+                                return false;
+                            }
+                            break;
+                        default: break;
+                    }
+                }
+                return v;
+            })
+            setFormationListDisplay(array)
+        }
+    }, [filterValues, formationList])
 
     useEffect(() => {
         console.log(formationList)
         setFormationListDisplay(formationList)
     }, [formationList])
-
-    // --------------- useEffect
-
-
-    // --------------- filter
-
-
-
-    // --------------- filter
-
-    const updateEtatFormation = (etat, text, tooltip) => {
-
-        let id_formation = updateFormation.id;
-        let time = getDateToday();
-
-        axios({
-            method: 'put',
-            url: 'formation/historique',
-            data: { id_formation: id_formation, id_etat: etat, date_etat: time, information: user.idgasi },
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
-        }).then((response) => {
-            if (response.status === 200) {
-                let newFormationList = formationList.map((v) => v.id === id_formation
-                    ? {
-                        ...v,
-                        etat: etat,
-                        etat_formation: text,
-                        etat_formation_tooltip: tooltip,
-                    }
-                    : v)
-                setFormationList(newFormationList)
-            }
-        })
-    }
-
-    // useEffect(() => {
-    //     console.log(sollicitation)
-    //     // eslint-disable-next-line react-hooks/exhaustive-deps
-    // }, [sollicitation])
+    /* ------------------------------------------- */
 
     const handleShowFormation = () => {
         handleCloseOpenMenu()
@@ -366,10 +373,9 @@ export default function Formation() {
         if (openMoreOptions !== '') {
             formation = formationList.find((v) => v.id === openMoreOptions);
             setupdateFormation({ ...updateFormation, ...formation });
+            // Si un OF à accepté une sollicitation -> formation validé (etat = 5)
             console.log(formation)
-            // Si un OF à accepté une sollicitation -> formation validé (etat = 3)
-            if (formation.etat === 3 || formation.etat === 4) {
-
+            if (formation.etat > 2 && formation.etat < 10) {
                 axios({
                     method: 'GET',
                     url: 'sollicitation/find?id_sol=' + formation.id_sol,
@@ -435,7 +441,7 @@ export default function Formation() {
         setOpenModalCreateSol(true);
     }
 
-    // Savoir si la modification de la formation cause une resollicitation des OF (quel form doit être remplacée)
+    // Savoir si la modification de la formation cause une resollicitation des OF (quelle form doit être remplacée)
     const [createNewFormationFromThis, setCreateNewFormationFromThis] = useState({ etat: false, field: '', user: '' })
 
     const handleCreateNewFormationFromThis = (k, v) => {
@@ -537,6 +543,10 @@ export default function Formation() {
                 let commune = v === 'all' ? '' : communeList.find((x) => x.id === v).libelle;
                 setupdateFormation({ ...updateFormation, [k]: v, commune: commune });
                 break;
+            case 'agence_ref':
+                let agence_ref_libelle = v === 'all' ? '' : agence_refList.find((x) => x.id === v).libelle_ape;
+                setupdateFormation({ ...updateFormation, [k]: v, agence_ref_libelle: agence_ref_libelle });
+                break;
             case 'date_entree_demandee':
                 calcul_date_fin = calculDateFin({
                     ...updateFormation,
@@ -621,12 +631,12 @@ export default function Formation() {
     }
 
     const handleSaveFormation = (createNewFormationFromThis) => {
-
+        console.log(updateFormation)
         axios({
             method: 'PUT',
             url: 'formation/create',
             data: {
-                ...updateFormation, date_creation: getDateToday(),
+                ...updateFormation, date_creation: getDateToday(), etat: 1,
                 date_entree_fixe: updateFormation.date_entree_demandee,
                 createNewFormationFromThis: createNewFormationFromThis,
             },
@@ -642,12 +652,11 @@ export default function Formation() {
                 newFormationList.push({
                     ...updateFormation, id: response.data.insertId,
                     etat: 1,
-                    etat_formation: "En cours d'élaboration",
-                    etat_formation_tooltip: null,
+                    etat_libelle: "En cours d'élaboration",
                     date_entree_fixe: updateFormation.date_entree_demandee,
                     id_sol: null,
                 });
-                console.log(newFormationList)
+
                 setFormationList(newFormationList);
                 setMessageSnackBar('Formation créé');
                 setSeverity('success');
@@ -661,27 +670,27 @@ export default function Formation() {
     };
 
     const handleEditFormation = () => {
-        console.log(updateFormation)
+        // if(sollicitation.etat === 9){
+        //     reeditBRS();
+        // }
         axios({
             method: 'PUT',
             url: 'formation/update',
             data: updateFormation,
             headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
         }).then((response) => {
-            console.log(response.data)
-            // if (response.status === 200) {
-            //     let newFormationList = [...formationList];
-            //     newFormationList.push({ ...updateFormation, id: response.data.insertId });
-            //     setFormationList(newFormationList);
-            //     setMessageSnackBar('Formation créé');
-            //     setSeverity('success');
-            //     handleCloseModal();
-            // } else {
-            //     handleCloseModal();
-            //     setMessageSnackBar('Erreur lors de la création de la foramtion');
-            //     setSeverity('error');
-            // }
-            // setOpenSnackBar(true);
+            if (response.status === 200) {
+                let newFormationList = formationList.map((v) => v.id === updateFormation.id ? updateFormation : v);
+                setFormationList(newFormationList);
+                setMessageSnackBar('Formation modifié avec succès');
+                setSeverity('success');
+                // handleCloseModal();
+            } else {
+                // handleCloseModal();
+                setMessageSnackBar('Erreur lors de la création de la foramtion');
+                setSeverity('error');
+            }
+            setOpenSnackBar(true);
         });
 
     }
@@ -701,6 +710,20 @@ export default function Formation() {
         setCommuneList([]);
         setAttributaireList([]);
         setSollicitationList([]);
+        setIcopList([]);
+        setSollicitation({
+            id_sol: '',
+            id_formation: '',
+            attributaire: '',
+            dateMailOF: '',
+            dateRespOF: '',
+            etat: '',
+            date_etat: '',
+            lieu_execution: 'all',
+            id_dateIcop: '',
+            dateValidationDT: '',
+            dateValidationDDO: '',
+        });
         setupdateFormation({
             id: '',
             id_lot: 'all',
@@ -709,8 +732,7 @@ export default function Formation() {
             idgasi: user.idgasi,
             userFct: user.fonction,
             etat: 1,
-            etat_formation: '',
-            etat_formation_tooltip: '',
+            etat_libelle: '',
             agence_ref: 'all',
             dispositif: 1,
             n_Article: '',
@@ -763,9 +785,19 @@ export default function Formation() {
 
             setIsSubmittingSol(false)
             if (response.status === 200) {
+                console.log(updateFormation)
+
+                // if (updateFormation.etat === 1) {
+                //     axios({
+                //         method: 'PUT',
+                //         url: '/formation/updateEtat',
+                //         data: { ...updateFormation, etat: 2 },
+                //         headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+                //     })
+                // }
 
                 // update etat formation -> Sollicitation en cours
-                updateEtatFormation(2, 'Sollicitation en cours', '');
+                // updateEtatFormation(2, 'Sollicitation en cours', '');
 
                 let time = getDateToday();
                 let newTime = time.replace(' ', 'T') + '.000';
@@ -776,8 +808,7 @@ export default function Formation() {
                     (currentDate.getMonth() + 1).toString().padStart(2, '0') + '-' +
                     currentDate.getDate().toString().padStart(2, '0');
 
-                let newSollArray = [...sollicitationList];
-                newSollArray.push({
+                let newSol = ({
                     id_sol: response.data.insertId,
                     attributaire: sollicitation.id,
                     dateMailOF: date,
@@ -790,9 +821,15 @@ export default function Formation() {
                     id_formation: updateFormation.id,
                     lieu_execution: null,
                 })
+                let newSollArray = [...sollicitationList];
+                newSollArray.push(newSol)
 
+                const newFormationList = formationList.map((v) => v.id === updateFormation.id ?
+                    { ...updateFormation, etat: 1, etat_libelle: 'Mail envoyé à l\'OF' } : v)
+
+                setSollicitation(newSol)
+                setFormationList(newFormationList)
                 setSollicitationList(newSollArray)
-
                 setMessageSnackBar('Sollicitation envoyé.');
                 setSeverity('success');
             } else {
@@ -806,7 +843,6 @@ export default function Formation() {
     }
 
     const handleResponseSollicitation = (resp, sol, txt) => {
-        txt = txt === '' ? null : txt
 
         let time = getDateToday();
 
@@ -814,23 +850,20 @@ export default function Formation() {
 
         let etat = 0;
         let text = '';
-        let tooltip = '';
         if (resp === 'accept') {
-            // Accepte la sollicitation, passe à l'état 2
-            etat = 3;
-            text = 'Validée';
-            tooltip = 'L\'OF à accepté la sollicitation';
+            // Accepte la sollicitation, passe à l'état 3
+            etat = 4;
+            text = 'L\'OF à accepté la sollicitation';
         } else if (resp === 'refus') {
-            // Refuse la sollicitation, passe à l'état 3
-            etat = 8;
-            text = 'Annulée';
-            tooltip = 'Aucun OF n\'a répondu favorablement aux sollicitations';
+            // Refuse la sollicitation, passe à l'état 8
+            etat = 3;
+            text = 'L\'OF à refusé la sollicitation';
         }
 
         axios({
             method: 'PUT',
             url: 'sollicitation/update',
-            data: { id_sol: sol.id_sol, etat: etat, dateTime: time, reason: txt },
+            data: { id_sol: sol.id_sol, etat: etat, dateTime: time, reason: txt === '' ? user.idgasi : txt },
             headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
         }).then((response) => {
             if (response.status === 200) {
@@ -842,18 +875,21 @@ export default function Formation() {
                     } else return v;
                 })
 
+                let newSol = {}
                 // Si l'OF accepte, met à jour l'état de la formation.
-                if (etat === 3) {
-
+                if (etat === 4) {
+                    console.log('soll actpé', sol)
                     // Mettre à jour le hook sollicitation
-                    setSollicitation({
+                    newSol = {
                         ...sollicitation,
                         id_sol: sol.id_sol,
                         id_formation: sol.id_formation,
                         attributaire: sol.attributaire,
                         dateMailOF: sol.dateMailOF,
                         dateRespOF: time,
-                    })
+                        etat: etat,
+                        date_etat: time,
+                    }
 
                     // Récupère liste des adresse pour la formation
                     axios({
@@ -861,23 +897,17 @@ export default function Formation() {
                         url: 'sollicitation/lieuExecution?id_sol=' + sol.id_sol,
                         headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
                     }).then((response) => setLieuExecutionList(response.data))
-
-                    // UpdateFotmation et etat de la formation
-                    setupdateFormation({
-                        ...updateFormation,
-                        id_attributaire: sol.attributaire
-                    })
-                    updateEtatFormation(etat, text, tooltip)
+                }
+                
+                // UpdateFotmation et etat de la formation
+                let newUpdateFormation = {
+                    ...updateFormation, etat: etat, etat_libelle: text,
+                    id_attributaire: sol.attributaire
                 }
 
-                // ERREUR - ça ne veux pas dire qu'il n'y a plus personne à solliciter
-                // else if (newSollForm.filter((v) => v.etat !== 8).length === 0) {
-                //     // Il n'y a plus d'OF à contacter
-                //     // text = 'Annulée';
-                //     // tooltip = 'Aucun OF n\'a répondu favorablement aux sollicitations';
-                //     // updateEtatFormation(etat, text, tooltip)
-                // }
-
+                setSollicitation(newSol)
+                setupdateFormation(newUpdateFormation)
+                setFormationList(formationList.map((v) => v.id === updateFormation.id ? newUpdateFormation : v))
                 setSollicitationList(newSollArray)
             } else {
                 setMessageSnackBar('Une erreur inconnue est survenue');
@@ -889,21 +919,22 @@ export default function Formation() {
     }
 
     const handlAddIcop = (icop) => {
-        let dateTime = dateTimeFormat(icop, 'ANG');
-
-        axios({
-            method: 'put',
-            url: 'sollicitation/addIcop',
-            data: { id_sol: sollicitation.id_sol, icop: dateTime.date + ' ' + dateTime.time },
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
-        }).then((response) => {
-            console.log(response)
-            if (response.status === 200) {
-                let newArrIcop = [...icopList];
-                newArrIcop.push({ id: response.data.insertId, dateIcop: (dateTime.date + ' ' + dateTime.time).replace(' ', 'T') })
-                setIcopList(newArrIcop)
-            }
-        })
+        if (icop && sollicitation.id_sol !== '') {
+            let dateTime = getDateTime(icop, 'ANG');
+            axios({
+                method: 'put',
+                url: 'sollicitation/addIcop',
+                data: { id_sol: sollicitation.id_sol, icop: dateTime.date + ' ' + dateTime.time },
+                headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+            }).then((response) => {
+                console.log(response)
+                if (response.status === 200) {
+                    let newArrIcop = [...icopList];
+                    newArrIcop.push({ id: response.data.insertId, dateIcop: (dateTime.date + ' ' + dateTime.time).replace(' ', 'T') })
+                    setIcopList(newArrIcop)
+                }
+            })
+        }
     }
 
     const handleCancelSollicitation = () => {
@@ -913,37 +944,55 @@ export default function Formation() {
     const handleValideSollicitation = (valideType) => {
         let dateTime = getDateToday();
         let information = '';
-        let etat;
-
+        let etat = '';
+        let etat_libelle = '';
         let sol = { ...sollicitation };
+        let reeditingBRS = false;
 
-        switch (valideType) {
-            case 'DT':
-                if (sol.dateValidationDT) {
-                    etat = 41;
-                    information = 'Modifiation DT (' + user.idgasi + ')';
-                } else {
-                    etat = 4;
-                    sol.dateValidationDT = dateTime;
-                    information = 'Validation DT (' + user.idgasi + ')';
-                }
-                break;
-            case 'DDO':
-                if (sol.dateValidationDDO) {
-                    etat = 51;
-                    information = 'Modifiation DDO (' + user.idgasi + ')';
-                } else {
-                    etat = 5;
-                    sol.dateValidationDDO = dateTime;
+        if (sol.etat === 9) {
+            // enregistre changement + etat = 11
+            etat = 11;
+            information = 'Modification du BRS';
+            etat_libelle = 'Modification du BRS en cours';
+            console.log(sol)
+            reeditingBRS = true;
+            // get all soll du brs -> etat = 10
+        } else if (sol.etat !== 9) {
+            switch (valideType) {
+                case 'DT':
+                    if (sol.dateValidationDT) {
+                        etat = 5;
+                        sol.dateValidationDT = '';
+                        sol.dateValidationDDO = '';
+                        etat_libelle = 'Modification de la DT';
+                        information = 'Modifiation DT (' + user.idgasi + ')';
+                    } else {
+                        etat = 6;
+                        sol.dateValidationDT = dateTime;
+                        etat_libelle = 'Validé par la DT';
+                        information = 'Validation DT (' + user.idgasi + ')';
+                    }
+                    break;
+                case 'DDO':
+                    // if (sol.dateValidationDDO) {
+                    //     etat = 7;
+                    //     sol.dateValidationDDO = '';
+                    //     etat_libelle = 'Modification de la DDO';
+                    //     information = 'Modifiation DDO (' + user.idgasi + ')';
+                    // } else {
+                    //     // updateEtatFormation(4, 'Validé DDO', '')
+                    etat = 8;
+                    sol.dateValidationDDO = sol.dateValidationDDO ? sol.dateValidationDDO : dateTime;
+                    etat_libelle = 'Validé par la DDO';
                     information = 'Validation DDO (' + user.idgasi + ')';
-                    updateEtatFormation(4, 'Validé DDO', '')
-                }
-                break;
-            default:
-                break;
+                    // }
+                    break;
+                default:
+                    break;
+            }
         }
 
-        axios({
+        etat !== '' && axios({
             method: 'put',
             url: 'sollicitation/save',
             data: {
@@ -956,58 +1005,46 @@ export default function Formation() {
         }).then((response) => {
 
             if (response.status === 200) {
+                
                 let newSollArray = sollicitationList.map((v) => {
                     if (v.id_sol === sol.id_sol) {
                         return { ...v, etat: etat, date_etat: dateTime, reason: information }
                     } else return v;
                 })
+                // UpdateFotmation et etat de la formation
+                let newUpdateFormation = { ...updateFormation, etat: etat, etat_libelle: etat_libelle }
+                setupdateFormation(newUpdateFormation)
+                setFormationList(formationList.map((v) => v.id === updateFormation.id ? newUpdateFormation : v))
+                setSollicitation({...sol, etat:etat, etat_libelle:etat_libelle})
                 setSollicitationList(newSollArray)
-                setSollicitation(sol)
-                setMessageSnackBar('Sollicitation validée.');
-                setSeverity('success');
+
+                if (reeditingBRS) {
+                    console.log('EDIT BRS')
+                    axios({
+                        method: 'put',
+                        url: 'brs/edit',
+                        data: { ...sol },
+                        headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+                    }).then((response) => {
+                        console.log(response)
+                    })
+                    setMessageSnackBar('Modification du BRS.');
+                    setSeverity('success');
+                } else {
+                    setMessageSnackBar('Sollicitation validée.');
+                    setSeverity('success');
+                }
             } else {
                 setMessageSnackBar('Une erreur est survenue lors de la validation de la sollicitation.');
                 setSeverity('error');
             }
-            setOpenSnackBar(true);
+            (etat !== 5 && etat !== 7) && setOpenSnackBar(true);
         })
     }
 
     const handleChangeFilter = (k, v) => {
         setFilterValues({ ...filterValues, [k]: v })
     }
-
-    useEffect(() => {
-        if (formationList.length > 0) {
-            let array = [];
-            array = formationList.filter((v) => {
-
-                for (let key in filterValues) {
-                    if (filterValues[key] === 'all' || filterValues[key] === '') continue;
-                    switch (key) {
-                        case 'id_lot':
-                            if ((v[key] && v[key].toString()) !== filterValues[key].toString()) return false
-                            break;
-                        case 'id_attributaire':
-                            if ((v[key] && v[key].toString()) !== filterValues[key].toString()) return false
-                            break;
-                        case 'etat':
-                            let value = [];
-                            value = filterValues[key];
-                            if (value.length > 0) {
-                                if (value.indexOf(v[key]) === -1) return false;
-                            } else {
-                                return false;
-                            }
-                            break;
-                        default: break;
-                    }
-                }
-                return v;
-            })
-            setFormationListDisplay(array)
-        }
-    }, [filterValues, formationList])
 
     const [attributaireLotSelected, setAttributaireLotSelected] = useState('all');
     const [attributaireLotList, setAttributaireLotList] = useState([]);
@@ -1018,11 +1055,10 @@ export default function Formation() {
     }
 
     const handleChangeAttribLotSelected = (id) => {
-        setFilterValues({ ...filterValues, id_attributaire: id, etat: id === 'all' ? [1, 2, 3, 4, 5] : [4] })
+        setFilterValues({ ...filterValues, id_attributaire: id, etat: id === 'all' ? [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] : [7, 8] })
         setAttributaireLotSelected(id)
     }
     const handleEditionBRS = () => {
-        setEditingBRS(true)
         // Récupère les données pour BDD / BRS
         axios({
             method: 'get',
@@ -1031,7 +1067,7 @@ export default function Formation() {
         }).then((response) => {
             if (response.status === 200) {
                 if (response.data.length > 0) {
-                    console.log(response)
+
                     let time = getDateToday();
                     let lot = response.data[0].lot ? response.data[0].lot.split(' - ')[0].replace(' ', '') : 'LOT?';
                     let version = 0;
@@ -1109,10 +1145,9 @@ export default function Formation() {
                                     sollicitation: array_id_sol,
                                     id_brs: responseCreate.data.insertId,
                                     dateTime: time,
+                                    filename: filename,
                                 },
                                 headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
-                            }).then((response) => {
-                                console.log(response)
                             })
                             // Créer fichier BRS et Download
                             createBRS(lot, n_brs, filename, brs, attrib, rowsTable)
@@ -1121,8 +1156,7 @@ export default function Formation() {
                             setSeverity('success');
 
                             const newFormationList = formationList.map((v) =>
-                                array_id_sol.indexOf(v.id_sol) !== -1 ? { ...v, etat: 5, etat_formation: 'BRS Edité' } : v)
-                            console.log(newFormationList)
+                                array_id_sol.indexOf(v.id_sol) !== -1 ? { ...v, etat: 9, etat_libelle: 'BRS Edité' } : v)
                             setFormationList(newFormationList)
 
                         } else {
@@ -1135,6 +1169,10 @@ export default function Formation() {
 
                 } else console.log('Aucune donnée')
             }
+            setEditingBRS(false)
+            // Reset filtre OF
+            // setAttributaireLotSelected('all')
+            // setAttributaireLotList([])
         })
     }
 
@@ -1169,6 +1207,7 @@ export default function Formation() {
 
     const [ascOrder, setAscOrder] = useState({ key: '', ASC: true })
     const handleOrderBy = (k) => {
+        console.log(k)
         setAscOrder({ key: k, ASC: !ascOrder.ASC })
         let newArray = [...formationListDisplay].sort((a, b) => {
             let ordered = [];
@@ -1176,7 +1215,7 @@ export default function Formation() {
                 ordered = ascOrder.ASC ? b[k] - a[k] : a[k] - b[k];
             } else if (k === 'date_entree_demandee' || k === 'date_fin') {
                 ordered = ascOrder.ASC ? new Date(b[k]) - new Date(a[k]) : new Date(a[k]) - new Date(b[k]);
-            } else if (k === 'n_Article' || k === 'etat_formation' || k === 'commune') {
+            } else if (k === 'n_Article' || k === 'etat_libelle' || k === 'commune') {
                 ordered = ascOrder.ASC
                     ? b[k] > a[k] ? -1 : a[k] > b[k] ? 1 : 0
                     : b[k] > a[k] ? 1 : a[k] > b[k] ? -1 : 0;
@@ -1184,6 +1223,22 @@ export default function Formation() {
             return ordered;
         });
         setFormationListDisplay(newArray)
+    }
+
+    const reeditBRS = () => {
+        if (sollicitation.etat === 9) {
+            // Change sollicitation souhaitée
+            // les autres sollicitation du BRS phase 'en attente de modification'
+            // Prevenir DDO pur validation + edition
+
+
+            // Recupére BRS et ensemble sollicitation
+            // Nouveau BRS avec changements appliqué
+
+            console.log(sollicitationList)
+            console.log('Rédité BRS')
+            console.log(sollicitation)
+        }
     }
 
     return (
@@ -1229,7 +1284,7 @@ export default function Formation() {
                                         label='OF' >
                                         <MenuItem value="all"><em>Tous</em></MenuItem>
                                         {attributaireLotList.map((v) => (
-                                            <MenuItem key={'selectOF_EditBRS_' + v.attributaire} value={v.attributaire} >
+                                            <MenuItem key={'selectOF_EditBRS_' + v.id} value={v.id} >
                                                 {v.libelle}
                                             </MenuItem>
                                         ))}
@@ -1239,7 +1294,7 @@ export default function Formation() {
                                 <Button disabled={!editionBRS || editingBRS ||
                                     filterValues.id_lot === 'all' ||
                                     attributaireLotSelected === 'all'}
-                                    variant="contained" color="primary" onClick={handleEditionBRS}>Edititer</Button>
+                                    variant="contained" color="primary" onClick={() => { setEditingBRS(true); handleEditionBRS() }}>Edititer</Button>
                             </>}
                             <FormControlLabel
                                 control={<Switch checked={editionBRS} onChange={handleToggleEditionBRS} name="checkedA" />}
@@ -1258,9 +1313,16 @@ export default function Formation() {
                 </div>
 
                 <Paper>
-                    <TableContainer component={Paper}>
+                    <TableContainer component={Paper} className={`${classes.containerTable} scrollBar-personnalize`}>
                         <Table size="small" className={classes.table} aria-label="simple table">
                             <TableHead>
+                                {formationList.length > 0 && <Filter
+                                    data={formationList}
+                                    lotList={lotList}
+                                    etatList={etatList}
+                                    filterValues={filterValues}
+                                    handleChangeFilter={handleChangeFilter}
+                                />}
                                 <TableRow>
                                     {columnTableau.map((v) =>
                                         <TableCell onClick={() => handleOrderBy(v)} className={classes.cellHead} key={'cellHead_' + v}>
@@ -1277,13 +1339,6 @@ export default function Formation() {
                                 </TableRow >
                             </TableHead >
                             <TableBody>
-                                {formationList.length > 0 && <Filter
-                                    data={formationList}
-                                    lotList={lotList}
-                                    etatList={etatList}
-                                    filterValues={filterValues}
-                                    handleChangeFilter={handleChangeFilter}
-                                />}
                                 {formationList.length > 0
                                     ? formationListDisplay.map((row) => (
                                         <TableRow key={row.id + '_' + row.n_Article}>
@@ -1297,16 +1352,7 @@ export default function Formation() {
                                             <TableCell align="right">{row.agence_ref_libelle}</TableCell>
                                             <TableCell align="right">{codeToName('dispositif_' + row.dispositif)}</TableCell>
                                             <TableCell align="right">{row.commune}</TableCell>
-                                            <TableCell align="right">
-                                                {row.etat_formation_tooltip
-                                                    ? <div className={classes.etatTooltip}>
-                                                        {row.etat_formation}
-                                                        <Tooltip classes={{ tooltip: classes.tooltip }} title={row.etat_formation_tooltip} aria-label="close">
-                                                            <InfoIcon className={classes.icon} />
-                                                        </Tooltip>
-                                                    </div>
-                                                    : row.etat_formation}
-                                            </TableCell>
+                                            <TableCell align="right">{row.etat_libelle}</TableCell>
                                             <TableCell align="right">{dateFormat(row.date_entree_demandee)}</TableCell>
                                             <TableCell align="right">{dateFormat(row.date_fin)}</TableCell>
                                             <TableCell align="right">
@@ -1354,6 +1400,7 @@ export default function Formation() {
                     handleCloseModal={handleCloseModal}
                     updateFormation={updateFormation}
                     createNewFormationFromThis={createNewFormationFromThis}
+                    sollicitation={sollicitation}
                     user={user}
 
                     // Formulaire
@@ -1376,7 +1423,6 @@ export default function Formation() {
                     handlAddIcop={handlAddIcop}
                     icopList={icopList}
                     lieuExecutionList={lieuExecutionList}
-                    sollicitation={sollicitation}
                     handleChangeSollicitation={handleChangeSollicitation}
                     handleValideSollicitation={handleValideSollicitation}
                     handleCancelSollicitation={handleCancelSollicitation}

@@ -87,6 +87,7 @@ export default function ModalCreateSol(props) {
     const handleIsSubmitting = () => {
         setIsSubmit(!isSubmit)
     }
+    console.log(props.sollicitation)
     return (
         <div>
             <Modal
@@ -133,12 +134,14 @@ export default function ModalCreateSol(props) {
                                     isSubmit={isSubmit}
                                     handleIsSubmitting={handleIsSubmitting}
                                     updateFormation={props.updateFormation}
+                                    handleCloseModal={props.handleCloseModal}
                                     lotList={props.lotList}
                                     dispositifList={props.dispositifList}
                                     agence_refList={props.agence_refList}
                                     catalogueList={props.catalogueList}
                                     communeList={props.communeList}
                                     handleSubmit={handleSubmit}
+                                    sollicitation={props.sollicitation}
                                     createNewFormationFromThis={props.createNewFormationFromThis}
                                     handleChangeFormation={props.handleChangeFormation}
                                 />

@@ -1,4 +1,4 @@
-import { dateTimeFormat } from "../../../../../../utilities/Function"
+import { getDateTime } from "../../../../../../../utilities/Function"
 
 export default function CardHisto(props) {
     
@@ -21,7 +21,7 @@ export default function CardHisto(props) {
             {props.data.map((v) => (
 
                 <div key={'histoSol_' + v.id}>
-                    {dateTimeFormat(v.date_etat).date} à {dateTimeFormat(v.date_etat).time} : {getText(v.etat, v.information)}
+                    {getDateTime(v.date_etat).date} à {getDateTime(v.date_etat).time} : {getText(v.etat, v.information)}
                 </div>
 
             )

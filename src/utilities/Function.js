@@ -23,22 +23,22 @@ export function codeToName(str) {
     case 'commune': return 'Commune';
 
     case 'user': return 'Utilisateur';
-    case 'userFct' : return 'Contact';
+    case 'userFct': return 'Contact';
     case 'agent_referent': return 'Agent référant';
     case 'agence_referente': return 'Agence référante';
     case 'agence_ref': return 'Agence référante';
     case 'dispositif': return 'Dispositif';
-    case 'etat_formation': return 'Etat';
+    case 'etat_libelle': return 'Etat';
     case 'nb_place': return 'Nombre de place';
     case 'OF_dispensateur': return 'OF Dispensateur';
     case 'date_entree_demandee': return 'Date d\'entrée';
     case 'date_entree_fixe': return 'Date d\'entrée';
     case 'dateEntree': return 'Date d\'entrée';
     case 'dateIcop': return 'Date ICOP';
-    case 'date_DDINT1' : return 'Date début INT 1';
-    case 'date_DFINT1' : return 'Date fin INT 1';
-    case 'date_DDINT2' : return 'Date début INT 2';
-    case 'date_DFINT2' : return 'Date fin INT 2';
+    case 'date_DDINT1': return 'Date début INT 1';
+    case 'date_DFINT1': return 'Date fin INT 1';
+    case 'date_DDINT2': return 'Date début INT 2';
+    case 'date_DFINT2': return 'Date fin INT 2';
     case 'nConv': return 'N° Conventionnement';
     case 'dateConv': return 'Date Conventionnement';
     case 'date_fin': return 'Date de fin';
@@ -120,24 +120,7 @@ export function getDateToday() {
   return datetime;
 }
 
-export function dateFormat(date, format = 'FR') {
-  if (!date || date === '0000-00-00') { return ''; }
-  let newDate = date;
-  if (date.includes('T')) { // DateFormat yyyy-mm-ddThh:mm:ss.ssssZ de la bdd
-    newDate = date.split('T')[0];
-    if (format === 'FR') {
-      let newDate_tmp = newDate.split('-');
-      newDate = newDate_tmp[2] + '/' + newDate_tmp[1] + '/' + newDate_tmp[0]
-    }
-  } else if (date.includes('-')) {
-    if (format === 'FR') {
-      let newDate_tmp = date.split('-');
-      newDate = newDate_tmp[2] + '/' + newDate_tmp[1] + '/' + newDate_tmp[0]
-    } else if (format === 'ANG') newDate = date
-  }
-  return newDate;
-}
-export function dateTimeFormat(date, format = 'FR') {
+export function getDateTime(date, format = 'FR') {
   // 'Indian/Reunion'
   // if (!date || date === '0000-00-00' || !date.includes('T')) { return {data:'', time:''}; }
   let currentDate = new Date(date);
@@ -160,6 +143,17 @@ export function dateTimeFormat(date, format = 'FR') {
   }
   return { date: newDate, time: newTime };
 }
+
+export function dateFormat(date, format = 'FR') {
+  if (!date || date === '0000-00-00') { return ''; }
+  let newDate = new Date(date).toLocaleDateString();
+  if (format !== 'FR') {
+    let newDate_tmp = newDate.split('/');
+    newDate = newDate_tmp[2] + '-' + newDate_tmp[1] + '-' + newDate_tmp[0]
+  }
+  return newDate;
+}
+
 // ---------------------- CALCUL DATE FIN FORMATION 
 export function calculDateFin(formation) {
 

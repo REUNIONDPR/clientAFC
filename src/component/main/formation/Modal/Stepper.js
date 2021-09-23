@@ -6,8 +6,8 @@ import StepLabel from '@material-ui/core/StepLabel';
 import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles((theme) => ({
-    root: {
-        width: '70%',
+    stepper: {
+        padding: 0,
     },
     button: {
         marginRight: theme.spacing(1),
@@ -19,17 +19,17 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function getSteps() {
-    return ['Validée DDO', 'BRS Edité', 'Conventionné.'];
+    return ['Validée DT', 'Validée DDO', 'BRS édité', 'Conventionné'];
 }
 
-export default function HorizontalLinearStepper() {
+export default function HorizontalLinearStepper(props) {
     const classes = useStyles();
-    const activeStep = 1;
+    const activeStep = props.step;
     const steps = getSteps();
 
     return (
         <div className={classes.root}>
-            <Stepper activeStep={activeStep}>
+            <Stepper activeStep={activeStep} className={classes.stepper}>
                 {steps.map((label, index) => {
                     const stepProps = {};
                     const labelProps = {};

@@ -59,13 +59,12 @@ export default function SollicitationListAttr(props) {
                 <ListItemAvatar key={'ListItemAvatar_' + props.data.priorite}>
                     {props.data.disabled
                         ? <Avatar key={'avatar' + props.data.priorite}>{props.data.priorite}</Avatar>
-                        : props.data.sol
-                            ? (props.data.sol.etat === 3 || props.data.sol.etat === 4) // Si l'OF a accepté la sol
+                        : (props.data.etat > 3 && props.data.etat !== 20) // Si l'OF a accepté la sol
                                 ? <Avatar className={classes.green}
                                     key={'avatar' + props.data.priorite}>
                                     <CheckIcon />
                                 </Avatar>
-                                : props.data.sol.etat === 8 // Si l'OF a refusé la sol
+                                : props.data.etat === 3 // Si l'OF a refusé la sol
                                     ? <Avatar className={classes.red}
                                         key={'avatar' + props.data.priorite}>
                                         <ClearIcon />
@@ -74,10 +73,10 @@ export default function SollicitationListAttr(props) {
                                         key={'avatar' + props.data.priorite}>
                                         {props.data.priorite}
                                     </Avatar>
-                            : <Avatar className={classes.avatar} // Prochain OF à contacter
-                                key={'avatar' + props.data.priorite}>
-                                {props.data.priorite}
-                            </Avatar>
+                            // : <Avatar className={classes.avatar} // Prochain OF à contacter
+                            //     key={'avatar' + props.data.priorite}>
+                            //     {props.data.priorite}
+                            // </Avatar>
                     }
                 </ListItemAvatar>
                 <ListItemText key={'ListItemText_' + props.data.priorite}

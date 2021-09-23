@@ -1,18 +1,17 @@
-
 import List from '@material-ui/core/List';
 import SendIcon from '@material-ui/icons/Send';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import SollicitationListAttr from './SollicitationListAttr';
-import { dateFormat, dateTimeFormat } from '../../../../../../utilities/Function';
+import { dateFormat, getDateTime } from '../../../../../../utilities/Function';
 import { useEffect, useState } from 'react';
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
-import CardValide from './CardValide';
-import CardWaiting from './CardWaiting';
+import CardValide from './card/CardValide';
+import CardWaiting from './card/CardWaiting';
 import axios from 'axios';
 import Cookie from 'js-cookie';
-import CardHisto from './CardHisto';
+import CardHisto from './card/CardHisto';
 
 const useStyles = makeStyles((theme) => ({
     blockSolAttr: {
@@ -107,27 +106,28 @@ export default function Sollicitation(props) {
             let isSolValidate = false;
 
             if (sol.hasOwnProperty('date_etat')) {
-                let myDate = dateTimeFormat(sol.date_etat)
-                if (sol.etat === 8) {
+                let myDate = getDateTime(sol.date_etat)
+                if (firstSol) firstSol = false; // Ne plus avoir accès aux sollicitations suivantes
+                isSolValidate = true;
+
+                if (sol.etat === 3) {
+                    isSolValidate = false;
+                    firstSol = true;
                     Obj = { etat: false, error: true, text: `L'OF à refusé la sollicitation le ${myDate.date} à ${myDate.time}`, finDeSollicitation: true }
-                } else if (sol.etat === 3) {
-                    if (firstSol) firstSol = false; // Ne plus avoir accès aux sollicitations suivantes
-                    isSolValidate = true;
-                    Obj = { etat: false, error: false, text: `L'OF à accepté la sollicitation le ${myDate.date} à ${myDate.time}`, finDeSollicitation: true }
                 } else if (sol.etat === 4) {
-                    if (firstSol) firstSol = false; // Ne plus avoir accès aux sollicitations suivantes
-                    isSolValidate = true;
-                    Obj = { etat: false, error: false, text: `Validation de la DT le ${myDate.date} à ${myDate.time}`, finDeSollicitation: true }
-                } else if (sol.etat === 41) {
-                    if (firstSol) firstSol = false; // Ne plus avoir accès aux sollicitations suivantes
-                    isSolValidate = true;
-                    Obj = { etat: false, error: false, text: `Modification de la DT le ${myDate.date} à ${myDate.time}`, finDeSollicitation: true }
+                    Obj = { etat: false, error: false, text: `L'OF à accepté la sollicitation le ${myDate.date} à ${myDate.time}`, finDeSollicitation: true }
                 } else if (sol.etat === 5) {
-                    if (firstSol) firstSol = false; // Ne plus avoir accès aux sollicitations suivantes
-                    isSolValidate = true;
+                    Obj = { etat: false, error: false, text: `Modification de la DT le ${myDate.date} à ${myDate.time}`, finDeSollicitation: true }
+                } else if (sol.etat === 6) {
+                    Obj = { etat: false, error: false, text: `Validation de la DT le ${myDate.date} à ${myDate.time}`, finDeSollicitation: true }
+                } else if (sol.etat === 7) {
+                    Obj = { etat: false, error: false, text: `Modification de la DDO le ${myDate.date} à ${myDate.time}`, finDeSollicitation: true }
+                } else if (sol.etat === 8) {
                     Obj = { etat: false, error: false, text: `Validation de la DDO le ${myDate.date} à ${myDate.time}`, finDeSollicitation: true }
+                }else if (sol.etat === 9) {
+                    Obj = { etat: false, error: false, text: `BRS édité le ${myDate.date} à ${myDate.time}`, finDeSollicitation: true }
                 } else {
-                    if (firstSol) firstSol = false; // Ne plus avoir accès aux sollicitations suivantes le temps que celle ci évolue
+                    isSolValidate = false;
                     Obj = { etat: false, error: undefined, text: `Sollicité le ${myDate.date} à ${myDate.time}`, finDeSollicitation: false }
                 }
             } else {
@@ -244,6 +244,7 @@ export default function Sollicitation(props) {
                                         lieuExecutionList={props.lieuExecutionList}
                                         handleChangeSollicitation={props.handleChangeSollicitation}
                                         sollicitation={props.sollicitation}
+                                        stepper={sollicitationVisible.etat}
                                         handleValideSollicitation={props.handleValideSollicitation}
                                         user={props.user}
                                     />

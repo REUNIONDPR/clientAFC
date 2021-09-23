@@ -1,4 +1,3 @@
-import Paper from '@material-ui/core/Paper';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -8,10 +7,7 @@ import Select from '@material-ui/core/Select';
 import { makeStyles } from '@material-ui/core/styles';
 import OutlinedInput from '@material-ui/core/OutlinedInput';
 import ListItemText from '@material-ui/core/ListItemText';
-import Tooltip from '@material-ui/core/Tooltip';
-import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import Checkbox from '@material-ui/core/Checkbox';
-import InputAdornment from '@material-ui/core/InputAdornment';
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -70,10 +66,14 @@ export default function Filter(props) {
                             input={<OutlinedInput label='Etat' />}
                             renderValue={(selected) => selected.length + ' Choisi(s)'}
                         >
+                            {/* <MenuItem key="null" value="null">
+                                <Checkbox checked={props.filterValues.etat ? props.filterValues.etat.indexOf('null') > -1 : false} />
+                                <ListItemText primary="En cours d'élaboration" />
+                            </MenuItem> */}
                             {props.etatList.map((v) => (
                                 <MenuItem key={v.id} value={v.id}>
                                     <Checkbox checked={props.filterValues.etat ? props.filterValues.etat.indexOf(v.id) > -1 : false} />
-                                    <ListItemText primary={v.libelle} />
+                                    <ListItemText primary={v.etat} />
                                 </MenuItem>
                             ))}
                         </Select>

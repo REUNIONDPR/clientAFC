@@ -7,8 +7,7 @@ import Radio from '@material-ui/core/Radio';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import { useState } from 'react';
-import { dateTimeFormat } from '../../../../../../utilities/Function';
-import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
+import { getDateTime } from '../../../../../../../utilities/Function';
 import Button from '@material-ui/core/Button';
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 import { makeStyles } from '@material-ui/core/styles';
@@ -16,7 +15,8 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
-import { IsPermitted } from '../../../../../../utilities/Function';
+import { IsPermitted } from '../../../../../../../utilities/Function';
+import Stepper from '../../../Stepper';
 
 const useStyles = makeStyles((theme) => ({
     blockIcop: {
@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme) => ({
     },
     listWidth: {
         width: 220,
-        maxHeight: 120,
+        maxHeight: 70,
         overflowY: 'scroll',
         border: '1px solid #bdbdbd',
     },
@@ -70,9 +70,18 @@ export default function CardValide(props) {
     }
 
     const isDisabled = !IsPermitted(props.user, 'sollicitation', 'updateDT')
-    
+
     return (
         <>
+            <Stepper step={props.stepper === 6
+                ? 1
+                : props.stepper === 7
+                    ? 1
+                    : props.stepper === 8
+                        ? 2
+                        : props.stepper === 9
+                            ? 3
+                            : 0} />
             <div className={classes.blockIcop}>
                 <form>
                     <TextField
@@ -89,7 +98,7 @@ export default function CardValide(props) {
                         }} />
                 </form>
 
-                <Button disabled={isDisabled} onClick={() => props.handlAddIcop(dateicop)} variant="contained" color="secondary"
+                <Button disabled={isDisabled || dateicop === ''} onClick={() => { props.handlAddIcop(dateicop); setDateIcop('') }} variant="contained" color="secondary"
                     endIcon={<ArrowForwardIcon />}>
                     Ajouter
                 </Button>
@@ -107,7 +116,7 @@ export default function CardValide(props) {
                                             control={<Radio color="secondary" />}
                                         />
                                     </ListItemIcon>
-                                    <ListItemText primary={dateTimeFormat(v.dateIcop).date} />
+                                    <ListItemText primary={getDateTime(v.dateIcop).date} />
                                 </ListItem>
                             ))
                             : <ListItem> Ajouter une date </ListItem>
@@ -137,12 +146,20 @@ export default function CardValide(props) {
                     }
                 </FormControl>
                 <Button disabled={
-                    props.sollicitation.lieu_execution === 'all' || 
-                    props.sollicitation.id_dateIcop === '' || 
+                    !props.sollicitation.lieu_execution ||
+                    props.sollicitation.id_dateIcop === '' ||
+                    props.sollicitation.dateValidationDT === '' ||
                     isDisabled} onClick={() => props.handleValideSollicitation('DT')} variant="contained" color="secondary" >
-                    Enregistrer
+                    Modifier
                 </Button>
-
+                <Button disabled={
+                    !props.sollicitation.lieu_execution ||
+                    props.sollicitation.id_dateIcop === '' ||
+                    props.sollicitation.dateValidationDT !== '' ||
+                    isDisabled} onClick={() => props.handleValideSollicitation('DT')} variant="contained" color="secondary" >
+                    Valider
+                </Button>
+                
             </div>
         </>
     )
