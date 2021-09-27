@@ -9,7 +9,7 @@ const UserContextProvider = (props) => {
     const [user, setUser] = useState({});
 
     useEffect(() => {
-        if (Cookies.get('authToken') && !user.idgasi) {
+        if (Cookies.get('authTokenAFC') && !user.idgasi) {
             getUser()
         }
 
@@ -25,7 +25,7 @@ const UserContextProvider = (props) => {
             method: 'get',
             url: '/auth/profile',
             headers: {
-                Authorization: 'Bearer ' + Cookies.get('authToken')
+                Authorization: 'Bearer ' + Cookies.get('authTokenAFC')
             }
         })
             .then((res) => { setUser(res.data); })
@@ -66,7 +66,7 @@ const UserContextProvider = (props) => {
                         flash: res.flash
                     });
 
-                    Cookies.set('authToken', token, { expires: 360 });
+                    Cookies.set('authTokenAFC', token, { expires: 360 });
                     // Cookies.set('idgasi', idgasi, { expires: 360 });
                 } else {
                     setUser({ flash: res.flash, token: false });

@@ -7,7 +7,7 @@ export default function DisplayName(props) {
     useEffect(() => {
         let isMounted = true;
         axios.get(`global/findName?v=${props.variable}&t=${props.table}`, {
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((r) => { if (isMounted) setData(r.data[0].libelle) });
         return () => { isMounted = false }
     }, [props])

@@ -4,15 +4,15 @@ import './App.css';
 import Main from './component/main/Main';
 import Catalogue from './component/main/catalogue/Catalogue';
 import { Switch, Route } from 'react-router-dom';
-import home from './component/main/sollicitation/Sollicitation';
+import home from './component/main/formation/Formation';
 import PrivateRoute from './hoc/PrivateRoute';
 import { UserContext } from './context/user.context';
-
+import Admin from './component/main/admin/Admin';
 import NavbarV from './component/global/Navbar/Navbar';
 import { makeStyles } from '@material-ui/core/styles';
 import Cookie from 'js-cookie';
 import { frFR } from '@material-ui/core/locale';
-
+import Juridique from './component/main/juridique/Juridique';
 function App() {
 
   const theme = createMuiTheme({
@@ -67,13 +67,15 @@ function App() {
   const [isUser, setIsUser] = useState(false)
 
   useEffect(() => {
-    if (!Cookie.get('authToken') && !user.hasOwnProperty('idgasi')) {
-      console.log('zer')
+    if (!Cookie.get('authTokenAFC') && !user.hasOwnProperty('idgasi')) {
+      
       if (Cookie.get('xtidc') !== undefined) {
         setIsUser(true)
         logUser(Cookie.get('xtidc'))
       } else {
-        console.log('cookie existe pas')
+        window.open("http://accueil.pole-emploi.intra:8501/portail/index.jspz?id=237#", "intra")
+        
+        // console.log('cookie existe pas')
 
         Cookie.set("xtidc", 'IRLE5360');
         setIsUser(true)
@@ -100,6 +102,8 @@ function App() {
                 <Route exact path="/" component={home} />
                 <Route exact path='/:route' render={() => (<>
                   <PrivateRoute path='/catalogue' component={Catalogue} />
+                  <PrivateRoute path='/admin' component={Admin} />
+                  <PrivateRoute path='/bdd' component={Juridique} />
                   <PrivateRoute path='/home' component={home} /> </>
                 )} />
               </Main>

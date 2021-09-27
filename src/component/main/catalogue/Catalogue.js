@@ -129,7 +129,7 @@ export default function Catalogue() {
         axios({
             method: 'GET',
             url: '/global/getLot',
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => {
             setLotList(response.data)
         })
@@ -138,7 +138,7 @@ export default function Catalogue() {
         axios({
             method: 'GET',
             url: '/catalogue/findAll',
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => {
 
             let data = response.data.map((v) => {
@@ -196,7 +196,7 @@ export default function Catalogue() {
             axios({
                 method: 'GET',
                 url: 'catalogue/of?id_cata=' + row.id,
-                headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+                headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
             }).then((response) => {
                 setUpdateRowCatalogue({ ...row, list_of: response.data })
             });
@@ -273,7 +273,7 @@ export default function Catalogue() {
             method: 'put',
             url: '/catalogue/create',
             data: dataRow,
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), },
         }).then((response) => {
             if (response.status === 200) {
                 let newDataRow = [...rows];
@@ -311,7 +311,7 @@ export default function Catalogue() {
         //     method: 'put',
         //     url: '/catalogue/update',
         //     data: updatedRowFromCata,
-        //     headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+        //     headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), },
         // }).then((response) => {
         //     if (response.status === 200) {
         //         let newDataRow = updateRowsTableAfterPutAxios(updatedRowFromCata)
@@ -341,7 +341,7 @@ export default function Catalogue() {
                 id_attr: rowOF.id_attr,
                 id_cata: updatedRowFromCata.id,
             },
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), },
         }).then((response) => {
             if (response.status === 200) {
                 let newDataRow = [];
@@ -385,7 +385,7 @@ export default function Catalogue() {
             method: 'put',
             url: '/catalogue/update_of',
             data: { priorite: priorite, id: id },
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), },
         }).then((response) => {
             if (response.status === 200) {
                 let newRows = rows.map((v) => v.id === id_cata && v.id_of_cata === id ? { ...v, priorite: priorite } : v)
@@ -400,7 +400,7 @@ export default function Catalogue() {
             method: 'put',
             url: '/catalogue/delete_of',
             data: { id: id },
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), },
         }).then((response) => {
             if (response.status === 200) {
 
@@ -441,7 +441,7 @@ export default function Catalogue() {
             method: 'put',
             url: '/catalogue/delete',
             data: dataRow,
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), },
         }).then((response) => {
             if (response.status === 200) {
                 let newDataRow = rows.filter((v) => v.id !== dataRow.id)
@@ -468,7 +468,7 @@ export default function Catalogue() {
             method: 'put',
             url: '/catalogue/add_commune_of',
             data: commune,
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), },
         }).then((response) => {
             if (response.status === 200) {
 
@@ -507,7 +507,7 @@ export default function Catalogue() {
             method: 'put',
             url: '/catalogue/delete_commune_of',
             data: { id_of_cata: id_of_attr, id_commune: id_commune },
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), },
         }).then((response) => {
             if (response.status === 200) {
 
@@ -576,7 +576,7 @@ export default function Catalogue() {
             method: 'put',
             url: '/attributaire/addAdresse',
             data: { id_catalogue_attributaire: updatedRow.id_of_cata, id_adresse: adresse.id },
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), },
         }).then((response) => {
             if (response.status === 200) {
 
@@ -603,8 +603,8 @@ export default function Catalogue() {
         axios({
             method: 'put',
             url: '/attributaire/deleteAdresse',
-            data: { id_catalogue_attributaire: updatedRow.id_of_cata, id_adresse: adresse.id },
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+            data: { id_cata_attr: updatedRow.id_of_cata, id_adresse: adresse.id },
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), },
         }).then((response) => {
             if (response.status === 200) {
 
@@ -633,7 +633,7 @@ export default function Catalogue() {
             method: 'put',
             url: '/adresse/create',
             data: { adresse: adresse.adresse, commune: ville.id, actif: 1 },
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), },
         }).then((response) => {
             if (response.status === 200) {
                 let objAdresse = { id: response.data.insertId, adresse: adresse.adresse, commune: ville.commune }

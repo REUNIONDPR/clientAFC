@@ -15,12 +15,11 @@ import CloseIcon from '@material-ui/icons/Close';
 import { IsPermitted } from '../../../../utilities/Function';
 import Select from '@material-ui/core/Select';
 import SaveIcon from '@material-ui/icons/Save';
-import Paper from '@material-ui/core/Paper';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import MenuItem from '@material-ui/core/MenuItem';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
-import { InputAdornment, Tooltip, Typography } from '@material-ui/core';
+import { Tooltip, Typography } from '@material-ui/core';
 
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -99,8 +98,8 @@ const useStyles = makeStyles((theme) => ({
     overflowY: 'scroll',
     paddingTop: 1,
   },
-  table:{
-    height:300,
+  table: {
+    height: 300,
   },
   dividerTop: { margin: '20px 20px 0 20px' },
   dividerDown: { margin: '0 20px 20px 20px' },
@@ -184,13 +183,13 @@ export default function ModalCatalogue(props) {
       axios({
         method: 'GET',
         url: 'attributaire/findOuter?id_cata=' + dataRow.id,
-        headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+        headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
       }).then((response) => setListOfSelect(response.data));
 
       axios({
         method: 'GET',
         url: 'adresse/findOuterCommune?id_cata_attr=' + dataRow.id_of_cata,
-        headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+        headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
       }).then((response) => setListCommuneSelect(response.data));
 
       arrayOf.push({ id: 'new_' + listOf.length, priorite: '', libelle: '' });
@@ -224,7 +223,7 @@ export default function ModalCatalogue(props) {
     axios({
       method: 'GET',
       url: 'adresse/findOuterCommune?id_cata_attr=' + id_of_cata,
-      headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+      headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
     }).then((response) => setListCommuneSelect(response.data));
     setAddCommune({ id_of_cata: id_of_cata, id_commune: 'all', commune: '' })
   }
@@ -320,7 +319,7 @@ export default function ModalCatalogue(props) {
                 <SelectPersonnalize
                   error={isSubmit && dataRow.niveau_form === 'all' ? true : false}
                   handleChangeValue={props.handleChangeUpdateRow}
-                  path={'global/findAll?table=formation_niveau'}
+                  path={'global/findAll?table=niveau'}
                   rowKey='niveau_form'
                   value={dataRow.niveau_form}
                   displayvalue='libelle'
@@ -329,7 +328,7 @@ export default function ModalCatalogue(props) {
                 <SelectPersonnalize
                   error={isSubmit && dataRow.objectif_form === 'all' ? true : false}
                   handleChangeValue={props.handleChangeUpdateRow}
-                  path={'global/findAll?table=formation_objectif'}
+                  path={'global/findAll?table=objectif'}
                   rowKey='objectif_form'
                   value={dataRow.objectif_form}
                   displayvalue='libelle'

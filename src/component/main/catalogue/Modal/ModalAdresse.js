@@ -110,7 +110,7 @@ export default function ModalAdresse(props) {
         axios({
             method: 'GET',
             url: 'adresse/findOuter?commune=' + adresse.ville + '&id_catalogue_attributaire=' + dataRow.id_of_cata,
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => setListAdresse(response.data));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [adresse.ville])
@@ -120,7 +120,7 @@ export default function ModalAdresse(props) {
         axios({
             method: 'GET',
             url: 'global/findAll?table=ville',
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => setListVille(response.data));
         setAdresse({ ville: 'all', adresse: 'all' })
     }, [])
