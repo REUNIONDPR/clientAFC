@@ -6,6 +6,7 @@ export function codeToName(str) {
 
     case 'lot': return 'Lot';
     case 'id_lot': return 'Lot';
+    case 'n_marche' : return 'N° Marché';
     case 'of': return 'Attributaire';
     case 'n_Article': return 'N° Article';
     case 'intitule_form_marche': return 'Intitulé';
@@ -94,7 +95,7 @@ export function codeToName(str) {
     case 'fonction_4': return 'AMAJ';
     case 'fonction_5': return 'DDO';
     case 'fonction_6': return 'DPR';
-    default: return str;
+    default: return str ? str.charAt(0).toUpperCase() + str.slice(1) : str; // Premiere lettre en maj
   }
 }
 

@@ -95,6 +95,7 @@ export default function Row(props) {
         <React.Fragment>
             <StyledTableRow >
 
+            <ActionTable row={row} />
                 {props.columns && props.columns.map((col, i) => (
                     props.checkColumnsVisible && (props.checkColumnsVisible.indexOf(col) !== -1 && (
                         col === 'adresse'
@@ -136,7 +137,6 @@ export default function Row(props) {
                                     : <TableCell key={row.id.toString() + '_' + col} className='nowrap'>{row[col]}</TableCell>
                     ))
                 ))}
-                <ActionTable row={row} />
             </StyledTableRow>
         </React.Fragment >
     );

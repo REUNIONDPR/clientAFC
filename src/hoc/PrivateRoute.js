@@ -10,7 +10,7 @@ export default function PrivateRoute({ component: Component, ...rest}){
         <Route
             {...rest}
             render={
-                    (props) => Cookie.get('authToken') 
+                    (props) => Cookie.get('authTokenAFC') 
                             ? <Component {...props} /> 
                             : history.push('/')
                     }

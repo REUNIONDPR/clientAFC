@@ -15,7 +15,7 @@ export default function SelectPersonnalize(props) {
         axios({
             method: 'GET',
             url: url,
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => setData(response.data));
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])

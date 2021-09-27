@@ -14,17 +14,17 @@ export default function Cards(props) {
         axios({
             method: 'GET',
             url: `/formation/count?s=0`,
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => SetCountTotal(response.data[0].count));
         axios({
             method: 'GET',
             url: `/formation/count?s=1`,
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => SetCountWaintingCheck(response.data[0].count));
         axios({
             method: 'GET',
             url: `/formation/count?s=2`,
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => SetCountWaitingConv(response.data[0].count));
     }, [])
 

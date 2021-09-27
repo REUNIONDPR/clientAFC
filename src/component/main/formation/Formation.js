@@ -254,7 +254,7 @@ export default function Formation() {
         axios({
             method: 'GET',
             url: `/formation/findAll`,
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => {
             let formList = response.data.map((v) => {
                 return {
@@ -276,25 +276,25 @@ export default function Formation() {
         axios({
             method: 'GET',
             url: 'global/findAll?table=lot',
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => setLotList(response.data));
 
         axios({
             method: 'GET',
             url: 'global/findAll?table=dispositif',
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => setDispositifList(response.data));
 
         axios({
             method: 'GET',
             url: 'global/findAll?table=ape',
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => setAgence_refList(response.data));
 
         axios({
             method: 'GET',
             url: 'global/findAll?table=sollicitation_etat',
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => {
             setEtatList([{ etat: 'En cours d\'élaboration.', id: 0 }, ...response.data])
             let allEtat = response.data.map((v) => v.id !== 20 && v.id)
@@ -313,7 +313,7 @@ export default function Formation() {
             axios({
                 method: 'GET',
                 url: 'sollicitation/OFValidePourBRS?id_lot=' + filterValues.id_lot,
-                headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+                headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
             }).then((response) => setAttributaireLotList(response.data))
         } else if (filterValues.id_lot === 'all') {
             setFilterValues({ ...filterValues, id_attributaire: 'all' })
@@ -379,19 +379,19 @@ export default function Formation() {
                 axios({
                     method: 'GET',
                     url: 'sollicitation/find?id_sol=' + formation.id_sol,
-                    headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+                    headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
                 }).then((response) => setSollicitation({ ...sollicitation, ...response.data[0] }))
 
                 axios({
                     method: 'GET',
                     url: 'sollicitation/icop?id_sol=' + formation.id_sol,
-                    headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+                    headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
                 }).then((response) => setIcopList(response.data))
 
                 axios({
                     method: 'GET',
                     url: 'sollicitation/lieuExecution?id_sol=' + formation.id_sol,
-                    headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+                    headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
                 }).then((response) => setLieuExecutionList(response.data))
             }
 
@@ -403,7 +403,7 @@ export default function Formation() {
             axios({
                 method: 'GET',
                 url: '/catalogue/find?field=id_lot&data=' + formation.id_lot,
-                headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+                headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
             }).then((response) => {
                 setCatalogueList(response.data);
             });
@@ -414,7 +414,7 @@ export default function Formation() {
             axios({
                 method: 'GET',
                 url: '/catalogue/findCommune?id_cata=' + formation.id_cata,
-                headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+                headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
             }).then((response) => {
                 setCommuneList(response.data);
             });
@@ -427,13 +427,13 @@ export default function Formation() {
                 axios({
                     method: 'GET',
                     url: '/formation/findAttributaires?' + sql,
-                    headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+                    headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
                 }).then((response) => setAttributaireList(response.data));
 
                 axios({
                     method: 'GET',
                     url: '/sollicitation/findAll?' + sql,
-                    headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+                    headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
                 }).then((response) => setSollicitationList(response.data));
             }
         }
@@ -460,7 +460,7 @@ export default function Formation() {
                     axios({
                         method: 'GET',
                         url: '/catalogue/find?field=id_lot&data=' + v,
-                        headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+                        headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
                     }).then((response) => {
                         setCatalogueList(response.data);
                     });
@@ -475,7 +475,7 @@ export default function Formation() {
                     axios({
                         method: 'GET',
                         url: '/catalogue/findCommune?id_cata=' + v,
-                        headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+                        headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
                     }).then((response) => {
                         setCommuneList(response.data)
                     });
@@ -483,7 +483,7 @@ export default function Formation() {
                     axios({
                         method: 'GET',
                         url: '/catalogue/find?field=id&data=' + v,
-                        headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+                        headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
                     }).then((response) => {
 
                         // Calcul nombre d'heure de formation
@@ -640,7 +640,7 @@ export default function Formation() {
                 date_entree_fixe: updateFormation.date_entree_demandee,
                 createNewFormationFromThis: createNewFormationFromThis,
             },
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), },
         }).then((response) => {
             if (response.status === 200) {
                 let newFormationList = [];
@@ -677,7 +677,7 @@ export default function Formation() {
             method: 'PUT',
             url: 'formation/update',
             data: updateFormation,
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), },
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), },
         }).then((response) => {
             if (response.status === 200) {
                 let newFormationList = formationList.map((v) => v.id === updateFormation.id ? updateFormation : v);
@@ -773,14 +773,14 @@ export default function Formation() {
         //     method: 'POST',
         //     url: '/mail/sendSollicitationOF',
         //     data: updateFormation,
-        //     headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+        //     headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         // }).then((response) => console.log(response))
 
         axios({
             method: 'PUT',
             url: '/sollicitation/create',
             data: { ...updateFormation, attributaire: sollicitation.id },
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => {
 
             setIsSubmittingSol(false)
@@ -792,7 +792,7 @@ export default function Formation() {
                 //         method: 'PUT',
                 //         url: '/formation/updateEtat',
                 //         data: { ...updateFormation, etat: 2 },
-                //         headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+                //         headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
                 //     })
                 // }
 
@@ -864,7 +864,7 @@ export default function Formation() {
             method: 'PUT',
             url: 'sollicitation/update',
             data: { id_sol: sol.id_sol, etat: etat, dateTime: time, reason: txt === '' ? user.idgasi : txt },
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => {
             if (response.status === 200) {
 
@@ -895,7 +895,7 @@ export default function Formation() {
                     axios({
                         method: 'GET',
                         url: 'sollicitation/lieuExecution?id_sol=' + sol.id_sol,
-                        headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+                        headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
                     }).then((response) => setLieuExecutionList(response.data))
                 }
                 
@@ -925,7 +925,7 @@ export default function Formation() {
                 method: 'put',
                 url: 'sollicitation/addIcop',
                 data: { id_sol: sollicitation.id_sol, icop: dateTime.date + ' ' + dateTime.time },
-                headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+                headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
             }).then((response) => {
                 console.log(response)
                 if (response.status === 200) {
@@ -1001,7 +1001,7 @@ export default function Formation() {
                 dateTime: dateTime,
                 etat: etat,
             },
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => {
 
             if (response.status === 200) {
@@ -1024,7 +1024,7 @@ export default function Formation() {
                         method: 'put',
                         url: 'brs/edit',
                         data: { ...sol },
-                        headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+                        headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
                     }).then((response) => {
                         console.log(response)
                     })
@@ -1063,7 +1063,7 @@ export default function Formation() {
         axios({
             method: 'get',
             url: 'sollicitation/findBRS?id_lot=' + filterValues.id_lot + '&attributaire=' + attributaireLotSelected + '&user=' + user.idgasi,
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => {
             if (response.status === 200) {
                 if (response.data.length > 0) {
@@ -1133,7 +1133,7 @@ export default function Formation() {
                             dateTime: time,
                             nb_brs: response.data[0].nb_brs + 1,
                         },
-                        headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+                        headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
                     }).then((responseCreate) => {
                         if (responseCreate.status === 200) {
 
@@ -1147,7 +1147,7 @@ export default function Formation() {
                                     dateTime: time,
                                     filename: filename,
                                 },
-                                headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+                                headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
                             })
                             // Créer fichier BRS et Download
                             createBRS(lot, n_brs, filename, brs, attrib, rowsTable)
@@ -1189,7 +1189,7 @@ export default function Formation() {
                 attrib: attrib,
                 rowsTable: rowsTable,
             },
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => {
             setEditingBRS(false)
             if (response.status === 200) {

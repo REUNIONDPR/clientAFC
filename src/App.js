@@ -12,7 +12,7 @@ import NavbarV from './component/global/Navbar/Navbar';
 import { makeStyles } from '@material-ui/core/styles';
 import Cookie from 'js-cookie';
 import { frFR } from '@material-ui/core/locale';
-
+import Juridique from './component/main/juridique/Juridique';
 function App() {
 
   const theme = createMuiTheme({
@@ -67,7 +67,7 @@ function App() {
   const [isUser, setIsUser] = useState(false)
 
   useEffect(() => {
-    if (!Cookie.get('authToken') && !user.hasOwnProperty('idgasi')) {
+    if (!Cookie.get('authTokenAFC') && !user.hasOwnProperty('idgasi')) {
       
       if (Cookie.get('xtidc') !== undefined) {
         setIsUser(true)
@@ -103,6 +103,7 @@ function App() {
                 <Route exact path='/:route' render={() => (<>
                   <PrivateRoute path='/catalogue' component={Catalogue} />
                   <PrivateRoute path='/admin' component={Admin} />
+                  <PrivateRoute path='/bdd' component={Juridique} />
                   <PrivateRoute path='/home' component={home} /> </>
                 )} />
               </Main>

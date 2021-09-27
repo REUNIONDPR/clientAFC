@@ -183,13 +183,13 @@ export default function ModalCatalogue(props) {
       axios({
         method: 'GET',
         url: 'attributaire/findOuter?id_cata=' + dataRow.id,
-        headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+        headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
       }).then((response) => setListOfSelect(response.data));
 
       axios({
         method: 'GET',
         url: 'adresse/findOuterCommune?id_cata_attr=' + dataRow.id_of_cata,
-        headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+        headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
       }).then((response) => setListCommuneSelect(response.data));
 
       arrayOf.push({ id: 'new_' + listOf.length, priorite: '', libelle: '' });
@@ -223,7 +223,7 @@ export default function ModalCatalogue(props) {
     axios({
       method: 'GET',
       url: 'adresse/findOuterCommune?id_cata_attr=' + id_of_cata,
-      headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+      headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
     }).then((response) => setListCommuneSelect(response.data));
     setAddCommune({ id_of_cata: id_of_cata, id_commune: 'all', commune: '' })
   }
@@ -319,7 +319,7 @@ export default function ModalCatalogue(props) {
                 <SelectPersonnalize
                   error={isSubmit && dataRow.niveau_form === 'all' ? true : false}
                   handleChangeValue={props.handleChangeUpdateRow}
-                  path={'global/findAll?table=formation_niveau'}
+                  path={'global/findAll?table=niveau'}
                   rowKey='niveau_form'
                   value={dataRow.niveau_form}
                   displayvalue='libelle'
@@ -328,7 +328,7 @@ export default function ModalCatalogue(props) {
                 <SelectPersonnalize
                   error={isSubmit && dataRow.objectif_form === 'all' ? true : false}
                   handleChangeValue={props.handleChangeUpdateRow}
-                  path={'global/findAll?table=formation_objectif'}
+                  path={'global/findAll?table=objectif'}
                   rowKey='objectif_form'
                   value={dataRow.objectif_form}
                   displayvalue='libelle'

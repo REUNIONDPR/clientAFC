@@ -9,7 +9,7 @@ export default function Admin(props){
         axios({
             method:'GET',
             url:'stocks/lotattr',
-            headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => console.log(response))
     }
     return(

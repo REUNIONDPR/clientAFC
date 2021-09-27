@@ -10,6 +10,7 @@ import Badge from '@material-ui/core/Badge';
 import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
 import DashboardIcon from '@material-ui/icons/Dashboard';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import StorageIcon from '@material-ui/icons/Storage';
 import { UserContext } from './../../../context/user.context'
 // import { Link } from '@material-ui/core';
 import { Link } from 'react-router-dom';
@@ -85,7 +86,7 @@ export default function PermanentDrawerLeft() {
   };
 
   const handleLogOut = () => {
-    Cookies.remove('authToken', user.token);
+    Cookies.remove('authTokenAFC', user.token);
     console.log(Cookies.get())
     deleteUser();
   }
@@ -163,9 +164,16 @@ export default function PermanentDrawerLeft() {
             <ListItemText secondary='Tableau de bord' />
           </ListItem>}
 
-        {IsPermitted(user, 'admin', 'view') &&
-          <ListItem button className='primary-h-color' component={Link} to="admin" selected={selectedIndex === 4}
+        {IsPermitted(user, 'bdd', 'view') &&
+          <ListItem button className='primary-h-color' component={Link} to="bdd" selected={selectedIndex === 5}
             onClick={(event) => handleListItemClick(event, 5)}>
+            <ListItemIcon><StorageIcon /></ListItemIcon>
+            <ListItemText secondary='Base de donnée' />
+          </ListItem>}
+
+        {IsPermitted(user, 'admin', 'view') &&
+          <ListItem button className='primary-h-color' component={Link} to="admin" selected={selectedIndex === 6}
+            onClick={(event) => handleListItemClick(event, 6)}>
             <ListItemIcon><DashboardIcon /></ListItemIcon>
             <ListItemText secondary='Admin' />
           </ListItem>}

@@ -58,7 +58,7 @@ export default function TablePersonnalize(props) {
   const handleCloseSnackBar = props.handleCloseSnackbar;
 
   // ------------ Toggle show column
-  
+
   const [checkColumnsVisible, SetCheckColumnsVisible] = useState(props.columns);
   const [checkAll, setCheckAll] = useState(true);
 
@@ -111,6 +111,7 @@ export default function TablePersonnalize(props) {
         <Table aria-label="collapsible table" size="small" stickyHeader>
           <TableHead>
             <TableRow>
+            <TableCell align="center" className={classes.cellHead} key='actionT'>Action</TableCell>
               {props.columns.map((col) => (
                 checkColumnsVisible.indexOf(col) !== -1 &&
                 <TableCell align="center"
@@ -119,7 +120,6 @@ export default function TablePersonnalize(props) {
                   key={col}>{codeToName(col)}
                 </TableCell>
               ))}
-              <TableCell align="center" className={classes.cellHead} key='actionT'>Action</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

@@ -151,6 +151,8 @@ const HAB = {
             "create":true,
         }, "admin":{
             'view':true,
+        }, "bdd":{
+            "view":true,
         }
     },
 }

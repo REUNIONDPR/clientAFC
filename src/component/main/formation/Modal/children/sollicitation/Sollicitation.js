@@ -167,7 +167,7 @@ export default function Sollicitation(props) {
                     axios({
                         method: 'GET',
                         url: 'sollicitation/findHistoric?id_sol=' + sol.id_sol,
-                        headers: { Authorization: 'Bearer ' + Cookie.get('authToken'), }
+                        headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
                     }).then((response) => setHistoricList(response.data))
                 } else setHistoricList([])
                 setSollicitationVisible(sol);
