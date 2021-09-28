@@ -812,14 +812,14 @@ export default function Formation() {
                     id_sol: response.data.insertId,
                     attributaire: sollicitation.id,
                     dateMailOF: date,
-                    dateRespOF: null,
-                    dateValidationDT: null,
-                    dateValidationDDO: null,
+                    dateRespOF: '',
+                    dateValidationDT: '',
+                    dateValidationDDO: '',
                     date_etat: newTime,
                     etat: 1,
-                    id_dateIcop: null,
+                    id_dateIcop: '',
                     id_formation: updateFormation.id,
-                    lieu_execution: null,
+                    lieu_execution: '',
                 })
                 let newSollArray = [...sollicitationList];
                 newSollArray.push(newSol)
@@ -898,7 +898,7 @@ export default function Formation() {
                         headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
                     }).then((response) => setLieuExecutionList(response.data))
                 }
-                
+
                 // UpdateFotmation et etat de la formation
                 let newUpdateFormation = {
                     ...updateFormation, etat: etat, etat_libelle: text,
@@ -927,7 +927,6 @@ export default function Formation() {
                 data: { id_sol: sollicitation.id_sol, icop: dateTime.date + ' ' + dateTime.time },
                 headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
             }).then((response) => {
-                console.log(response)
                 if (response.status === 200) {
                     let newArrIcop = [...icopList];
                     newArrIcop.push({ id: response.data.insertId, dateIcop: (dateTime.date + ' ' + dateTime.time).replace(' ', 'T') })
@@ -1005,7 +1004,7 @@ export default function Formation() {
         }).then((response) => {
 
             if (response.status === 200) {
-                
+
                 let newSollArray = sollicitationList.map((v) => {
                     if (v.id_sol === sol.id_sol) {
                         return { ...v, etat: etat, date_etat: dateTime, reason: information }
@@ -1015,7 +1014,7 @@ export default function Formation() {
                 let newUpdateFormation = { ...updateFormation, etat: etat, etat_libelle: etat_libelle }
                 setupdateFormation(newUpdateFormation)
                 setFormationList(formationList.map((v) => v.id === updateFormation.id ? newUpdateFormation : v))
-                setSollicitation({...sol, etat:etat, etat_libelle:etat_libelle})
+                setSollicitation({ ...sol, etat: etat, etat_libelle: etat_libelle })
                 setSollicitationList(newSollArray)
 
                 if (reeditingBRS) {
@@ -1393,7 +1392,7 @@ export default function Formation() {
                         Annuler la formation
                     </MenuItem>}
             </Menu>
-
+            Ligne 1157 Quand edite un brs plusieurs sollicitation, les sollicitions ne change pas toutes de status (front)
             {openModalCreateSol &&
                 <ModalFormation
                     openModal={openModalCreateSol}

@@ -87,7 +87,7 @@ export default function ModalCreateSol(props) {
     const handleIsSubmitting = () => {
         setIsSubmit(!isSubmit)
     }
-    console.log(props.sollicitation)
+    
     return (
         <div>
             <Modal
@@ -175,7 +175,7 @@ export default function ModalCreateSol(props) {
                                                 user={props.user}
                                             />}
                                     </>
-                                    : <p>Pas d'OF attaché à la formation</p>
+                                    : props.updateFormation.id !== '' && <p>Pas d'OF attaché à la formation</p>
                                 }
                             </div>
                         </div>

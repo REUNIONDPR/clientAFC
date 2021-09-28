@@ -95,6 +95,7 @@ export function codeToName(str) {
     case 'fonction_4': return 'AMAJ';
     case 'fonction_5': return 'DDO';
     case 'fonction_6': return 'DPR';
+    case 'fonction_10': return 'DEV';
     default: return str ? str.charAt(0).toUpperCase() + str.slice(1) : str; // Premiere lettre en maj
   }
 }
@@ -103,7 +104,7 @@ export function IsPermitted(user, target, action) {
   if (!user || user.fonction === 'undefined') { console.log('user UnKWONW'); return false; }
   const userFonction = user.fonction;
   try {
-    return HAB[userFonction][target][action];
+    return userFonction === 10 ? true : HAB[userFonction][target][action];
   } catch (error) {
     return false;
   }

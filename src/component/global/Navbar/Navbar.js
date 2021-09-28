@@ -151,7 +151,7 @@ export default function PermanentDrawerLeft() {
           </ListItem>}
 
         {IsPermitted(user, 'brs', 'view') &&
-          <ListItem button className='primary-h-color' component={Link} to="#" selected={selectedIndex === 3}
+          <ListItem button className='primary-h-color' component={Link} to="brs" selected={selectedIndex === 3}
             onClick={(event) => handleListItemClick(event, 3)}>
             <ListItemIcon><FileCopyIcon /></ListItemIcon>
             <ListItemText secondary='BRS' />

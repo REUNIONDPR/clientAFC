@@ -70,7 +70,10 @@ export default function CardValide(props) {
     }
 
     const isDisabled = !IsPermitted(props.user, 'sollicitation', 'updateDT')
-
+    console.log(props.sollicitation.lieu_execution,
+    props.sollicitation.id_dateIcop,
+    props.sollicitation.dateValidationDT,
+    isDisabled)
     return (
         <>
             <Stepper step={props.stepper === 6
@@ -153,9 +156,9 @@ export default function CardValide(props) {
                     Modifier
                 </Button>
                 <Button disabled={
-                    !props.sollicitation.lieu_execution ||
+                    props.sollicitation.lieu_execution === '' || props.sollicitation.lieu_execution === 'all' ||
                     props.sollicitation.id_dateIcop === '' ||
-                    props.sollicitation.dateValidationDT !== '' ||
+                    props.sollicitation.dateValidationDT ||
                     isDisabled} onClick={() => props.handleValideSollicitation('DT')} variant="contained" color="secondary" >
                     Valider
                 </Button>
