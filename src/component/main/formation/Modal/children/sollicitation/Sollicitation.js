@@ -124,8 +124,14 @@ export default function Sollicitation(props) {
                     Obj = { etat: false, error: false, text: `Modification de la DDO le ${myDate.date} à ${myDate.time}`, finDeSollicitation: true }
                 } else if (sol.etat === 8) {
                     Obj = { etat: false, error: false, text: `Validation de la DDO le ${myDate.date} à ${myDate.time}`, finDeSollicitation: true }
-                }else if (sol.etat === 9) {
+                } else if (sol.etat === 9) {
                     Obj = { etat: false, error: false, text: `BRS édité le ${myDate.date} à ${myDate.time}`, finDeSollicitation: true }
+                } else if (sol.etat === 10) {
+                    Obj = { etat: false, error: false, text: `Modification du BRS le ${myDate.date} à ${myDate.time}`, finDeSollicitation: true }
+                } else if (sol.etat === 11) {
+                    Obj = { etat: false, error: false, text: `BRS modifié le ${myDate.date} à ${myDate.time}`, finDeSollicitation: true }
+                } else if (sol.etat === 12) {
+                    Obj = { etat: false, error: false, text: `Conventionné le ${myDate.date} à ${myDate.time}`, finDeSollicitation: true }
                 } else {
                     isSolValidate = false;
                     Obj = { etat: false, error: undefined, text: `Sollicité le ${myDate.date} à ${myDate.time}`, finDeSollicitation: false }
@@ -137,7 +143,7 @@ export default function Sollicitation(props) {
 
             return {
                 ...v, ...sol,
-                disabled: Obj.etat,
+                disabled: props.updateFormation.etat === 20 ? true : Obj.etat,
                 text: Obj.text,
                 texterror: Obj.error,
                 finDeSollicitation: Obj.finDeSollicitation,
@@ -146,7 +152,6 @@ export default function Sollicitation(props) {
         })
 
         setArrayAttrib(arrayAttributaire)
-
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props.sollicitationList])
 
@@ -210,7 +215,7 @@ export default function Sollicitation(props) {
                 {sollicitationVisible &&
                     <div className={classes.block} >
                         <div className={classes.blockTitle}>
-                            {sollicitationVisible.libelle} {sollicitationVisible.dateValidationDT && <CheckCircleOutlineIcon />}
+                            {sollicitationVisible.libelle} {sollicitationVisible.date_ValidationDT && <CheckCircleOutlineIcon />}
                         </div>
 
                         {!sollicitationVisible.dateMailOF // Si OF pas encore contacté
@@ -220,7 +225,7 @@ export default function Sollicitation(props) {
                                     startIcon={<SendIcon />}>
                                     Solliciter l'OF
                                 </Button>
-                                : <Button disabled={sollicitationVisible.id !== nextSollicitation.id} onClick={() => props.handleCreateSollicitation(sollicitationVisible)} variant="contained" color="secondary"
+                                : <Button disabled={sollicitationVisible.id !== nextSollicitation.id && props.updateFormation !== 20} onClick={() => props.handleCreateSollicitation(sollicitationVisible)} variant="contained" color="secondary"
                                     startIcon={<SendIcon />}>
                                     Solliciter l'OF
                                 </Button>}
@@ -228,6 +233,7 @@ export default function Sollicitation(props) {
                             : !sollicitationVisible.dateRespOF  // Si pas encore de réponse de l'OF 
                                 ? <CardWaiting
                                     OF={sollicitationVisible.libelle}
+                                    updateFormation={props.updateFormation}
                                     date={dateFormat(sollicitationVisible.dateMailOF)}
                                     handleChangeRadioResp={handleChangeRadioResp}
                                     refusReason={refusReason}

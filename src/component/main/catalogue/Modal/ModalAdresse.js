@@ -87,15 +87,12 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ModalAdresse(props) {
     const classes = useStyles();
-    const dataRow = props.updateRow;
+    const updateRow = props.updateRow;
     const [textAdresse, setTextAdresse] = useState('');
-
-    const [adresse, setAdresse] = useState({})
-
-    // Comment faire autrement ?
-    useEffect(() => {
-        setAdresse({ ville: 'all', adresse: 'all' })
-    }, [props.openModal])
+    const [listAdresse, setListAdresse] = useState([]);
+    const [listVille, setListVille] = useState([]);
+    const [adresse, setAdresse] = useState({ ville: 'all', adresse: 'all' })
+    const [checkClose, setCheckClose] = useState(true)
 
     const handleChange = (key, value) => {
         if (key === 'ville') {
@@ -104,28 +101,26 @@ export default function ModalAdresse(props) {
         } else setAdresse({ ...adresse, adresse: value })
     };
 
-    const [listAdresse, setListAdresse] = useState([]);
     useEffect(() => {
-        console.log(dataRow)
-        axios({
-            method: 'GET',
-            url: 'adresse/findOuter?commune=' + adresse.ville + '&id_catalogue_attributaire=' + dataRow.id_of_cata,
-            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
-        }).then((response) => setListAdresse(response.data));
+        if (adresse.ville !== 'all') {
+            console.log(updateRow)
+            axios({
+                method: 'GET',
+                url: 'adresse/findOuter?commune=' + adresse.ville + '&id_of_cata=' + updateRow.id_of_cata,
+                headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
+            }).then((response) => setListAdresse(response.data));
+        } else listAdresse.length > 0 && setListAdresse([]);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [adresse.ville])
 
-    const [listVille, setListVille] = useState([]);
     useEffect(() => {
         axios({
             method: 'GET',
-            url: 'global/findAll?table=ville',
+            url: 'attributaire/findCommune?id_of_cata='+updateRow.id_of_cata,
             headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => setListVille(response.data));
-        setAdresse({ ville: 'all', adresse: 'all' })
     }, [])
 
-    const [checkClose, setCheckClose] = useState(true)
     const handleChangeCheckBox = () => {
         setCheckClose(!checkClose)
     }
@@ -155,7 +150,7 @@ export default function ModalAdresse(props) {
                             <div><h2 id="transition-modal-title">Adresse</h2></div>
                             <div>
                                 <Tooltip title="Fermer" aria-label="close">
-                                    <IconButton aria-label="fermer" color="primary" onClick={() => props.handleCloseModal(dataRow)}>
+                                    <IconButton aria-label="fermer" color="primary" onClick={() => props.handleCloseModal(updateRow)}>
                                         <CloseIcon />
                                     </IconButton>
                                 </Tooltip>
@@ -198,8 +193,8 @@ export default function ModalAdresse(props) {
                                     <div className={classes.blocFormBtn}>
                                         <Button disabled={adresse.adresse === 'all'}
                                             onClick={() => {
-                                                props.handleAddAdresse(dataRow, listAdresse.filter((v) => v.id === adresse.adresse)[0])
-                                                if (checkClose) { props.handleCloseModal(dataRow) } else removeAddFromList(adresse)
+                                                props.handleAddAdresse(updateRow, listAdresse.filter((v) => v.id === adresse.adresse)[0])
+                                                if (checkClose) { props.handleCloseModal(updateRow) } else removeAddFromList(adresse)
                                             }}
                                             variant="contained" color="primary" >
                                             Ajouter
@@ -224,12 +219,12 @@ export default function ModalAdresse(props) {
                                     />
                                     <div className={classes.blocFormBtn}>
                                         <Button disabled={adresse.ville === 'all' || textAdresse === ''}
-                                            onClick={() => { 
-                                                props.handleCreateAdresse(dataRow, {
-                                                    id:'', 
-                                                    adresse:textAdresse,
-                                                }, {id:adresse.ville, commune:listVille.filter((v) => v.id === adresse.ville)[0].libelle})
-                                                if (checkClose) { props.handleCloseModal(dataRow) } else setTextAdresse('')
+                                            onClick={() => {
+                                                props.handleCreateAdresse(updateRow, {
+                                                    id: '',
+                                                    adresse: textAdresse,
+                                                }, { id: adresse.ville, commune: listVille.filter((v) => v.id === adresse.ville)[0].libelle })
+                                                if (checkClose) { props.handleCloseModal(updateRow) } else setTextAdresse('')
                                             }}
                                             variant="contained" color="primary" >
                                             Créer

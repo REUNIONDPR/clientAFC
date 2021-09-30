@@ -8,8 +8,8 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
-import { InputAdornment } from '@material-ui/core';
-import Confirm from '../../../../../global/Confirm';
+import { InputAdornment, Tooltip } from '@material-ui/core';
+import Confirm from '../../../../global/Confirm';
 
 const useStyles = makeStyles((theme) => ({
     main: {
@@ -36,6 +36,15 @@ const useStyles = makeStyles((theme) => ({
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
+    },
+    blockEndError: {
+        display: 'flex',
+        color: 'red',
+        fontStyle: 'italic',
+    },
+    blockEndErrorIcon: {
+        cursor: 'default',
+        fill:'red',
     },
     btnActionModal: {
         display: 'flex',
@@ -76,19 +85,16 @@ export default function Formulaire(props) {
         setValue({})
         setOpen(false);
     };
-    
+
     const handleValideDialog = () => {
         setOpen(false);
-        if(value.key==='commune'){
+        if (value.key === 'commune') {
             props.handleChangeFormation('id_commune', props.communeList.find((v) => v.libelle === value.value_new).id, true)
-        }else props.handleChangeFormation(value.key, value.value_new, true)
+        } else props.handleChangeFormation(value.key, value.value_new, true)
     }
 
     return (<div className={classes.main}>
         <Confirm open={open} handleValide={handleValideDialog} handleClose={handleCloseDialog} value={value} />
-        <Button onClick={handleOpenDialog} variant="contained" color="primary">
-            open
-        </Button>
 
         <form noValidate autoComplete="off">
             <div className={classes.blocForm}>
@@ -143,7 +149,7 @@ export default function Formulaire(props) {
                     {props.communeList &&
                         <Select
                             value={props.communeList.length > 0 ? props.updateFormation.id_commune : 'all'}
-                            onChange={(e) => (props.updateFormation.id !== '' && props.sollicitation.id_sol !== '')
+                            onChange={(e) => (props.updateFormation.id !== '' && props.updateFormation.id_sol !== '')
                                 ? handleOpenDialog('commune',
                                     props.updateFormation.commune,
                                     props.communeList.find((v) => v.id === e.target.value).libelle
@@ -194,7 +200,7 @@ export default function Formulaire(props) {
                     disabled={props.updateFormation.id_commune === 'all'}
                     error={props.updateFormation.nb_place === '' ? true : false}
                     value={props.updateFormation.nb_place}
-                    onChange={(e) => (props.updateFormation.id !== '' && props.sollicitation.id_sol !== '')
+                    onChange={(e) => (props.updateFormation.id !== '' && props.updateFormation.id_sol !== '' && props.updateFormation.id_sol !== null)
                         ? handleOpenDialog('nb_place', props.updateFormation.nb_place, e.target.value)
                         : props.handleChangeFormation('nb_place', e.target.value)}
                     InputProps={
@@ -246,7 +252,7 @@ export default function Formulaire(props) {
                         variant="outlined"
                         label="Date d'entrée *"
                         type="date"
-                        onChange={(e) => (props.updateFormation.id !== '' && props.sollicitation.id_sol !== '')
+                        onChange={(e) => (props.updateFormation.id !== '' && props.updateFormation.id_sol !== '' && props.updateFormation.id_sol !== null)
                             ? Math.abs(parseInt(new Date(e.target.value) - new Date(props.updateFormation.date_entree_fixe)) / (24 * 3600 * 1000)) > 15
                                 ? handleOpenDialog('date_entree_demandee', props.updateFormation.date_entree_fixe, e.target.value)
                                 : props.handleChangeFormation('date_entree_demandee', e.target.value)
@@ -302,7 +308,7 @@ export default function Formulaire(props) {
                                             inputProps: { min: props.updateFormation.date_entree_demandee }
                                         }
                                 }
-                                onChange={(e) => (props.updateFormation.id !== '' && props.sollicitation.id_sol !== '')
+                                onChange={(e) => (props.updateFormation.id !== '' && props.updateFormation.id_sol !== '' && props.updateFormation.id_sol !== null)
                                     ? handleOpenDialog('date_DDINT1', props.updateFormation.date_DDINT1, e.target.value)
                                     : props.handleChangeFormation('date_DDINT1', e.target.value)}
                                 InputLabelProps={{
@@ -330,7 +336,7 @@ export default function Formulaire(props) {
                                             inputProps: { min: props.updateFormation.date_DDINT1 }
                                         }
                                 }
-                                onChange={(e) => (props.updateFormation.id !== '' && props.sollicitation.id_sol !== '')
+                                onChange={(e) => (props.updateFormation.id !== '' && props.updateFormation.id_sol !== '' && props.updateFormation.id_sol !== null)
                                     ? handleOpenDialog('date_DFINT1', props.updateFormation.date_DFINT1, e.target.value)
                                     : props.handleChangeFormation('date_DFINT1', e.target.value)}
                                 InputLabelProps={{
@@ -364,7 +370,7 @@ export default function Formulaire(props) {
                                             inputProps: { min: props.updateFormation.date_DFINT1 }
                                         }
                                 }
-                                onChange={(e) => (props.updateFormation.id !== '' && props.sollicitation.id_sol !== '')
+                                onChange={(e) => (props.updateFormation.id !== '' && props.updateFormation.id_sol !== '' && props.updateFormation.id_sol !== null)
                                     ? handleOpenDialog('date_DDINT2', props.updateFormation.date_DDINT2, e.target.value)
                                     : props.handleChangeFormation('date_DDINT2', e.target.value)}
                                 InputLabelProps={{
@@ -392,7 +398,7 @@ export default function Formulaire(props) {
                                             inputProps: { min: props.updateFormation.date_DDINT2 }
                                         }
                                 }
-                                onChange={(e) => (props.updateFormation.id !== '' && props.sollicitation.id_sol !== '')
+                                onChange={(e) => (props.updateFormation.id !== '' && props.updateFormation.id_sol !== '' && props.updateFormation.id_sol !== null)
                                     ? handleOpenDialog('date_DFINT2', props.updateFormation.date_DFINT2, e.target.value)
                                     : props.handleChangeFormation('date_DFINT2', e.target.value)}
                                 InputLabelProps={{
@@ -410,8 +416,8 @@ export default function Formulaire(props) {
         <div className={classes.blockEndForm}>
             <div className={classes.blockEndError}>
                 {props.updateFormation.id !== '' && <>
-                    <ErrorOutlineIcon className={classes.icon} />
-                    : Changement qui necessite de solliciter à nouveau l'ensemble des OF dans l'ordre de priorité
+                    <ErrorOutlineIcon className={classes.blockEndErrorIcon} />
+                    : Changement qui necessite de solliciter à nouveau l'ensemble des OF dans l'ordre de priorité. Si un BRS est édité, il sera annulé.
                 </>}
             </div>
             <div className={classes.btnActionModal}>
@@ -429,6 +435,7 @@ export default function Formulaire(props) {
                         Enregistrer
                     </Button>
                     : props.updateFormation.id === ''
+                        // Créer une action de formation
                         ? props.isSubmit
                             ? <Button onClick={props.handleIsSubmitting}
                                 variant="contained" color="primary" endIcon={<CircularProgress size={20} className={classes.spinnerBtn} />}>
@@ -437,14 +444,22 @@ export default function Formulaire(props) {
                             : <Button onClick={() => props.handleSubmit(props.createNewFormationFromThis)} variant="contained" color="primary">
                                 Enregistrer
                             </Button>
+                        // Modifier une action de formation
                         : props.isSubmit
                             ? <Button onClick={props.handleIsSubmitting}
                                 variant="contained" color="primary" endIcon={<CircularProgress size={20} className={classes.spinnerBtn} />}>
                                 Modifier
                             </Button>
-                            : <Button onClick={props.handleSubmit} variant="contained" color="primary">
-                                Modifier
-                            </Button>
+                            : (props.updateFormation.etat === 9 || props.updateFormation.etat === 12)
+                                ? <Tooltip title="Cette action annulera le BRS édité" aria-label="cancel" classes={{ tooltip: classes.tooltip }}>
+                                    <Button disabled={props.updateFormation.etat === 20} onClick={props.handleSubmit}
+                                        variant="contained" color="primary" startIcon={<ErrorOutlineIcon />}>
+                                        Modifier
+                                    </Button>
+                                </Tooltip>
+                                : <Button disabled={props.updateFormation.etat === 20} onClick={props.handleSubmit} variant="contained" color="primary">
+                                    Modifier
+                                </Button>
                 }
             </div>
 

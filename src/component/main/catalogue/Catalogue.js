@@ -140,7 +140,7 @@ export default function Catalogue() {
             url: '/catalogue/findAll',
             headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => {
-
+            console.log(response.data)
             let data = response.data.map((v) => {
                 let adr = [];
                 if (v.adresse) {
@@ -174,6 +174,7 @@ export default function Catalogue() {
             id: '',
             id_lot: 'all',
             id_of_cata: '',
+            id_of_cata_commune: '',
             adresse: [],
             list_of: [],
             n_Article: '',
@@ -333,6 +334,7 @@ export default function Catalogue() {
 
     const handleSaveNewOf = (updatedRowFromCata, rowOF) => {
         // // Ajouter un ligne au tableau avec attribut of / priorite
+
         axios({
             method: 'put',
             url: '/catalogue/add_of',
@@ -480,6 +482,7 @@ export default function Catalogue() {
                     : v)
                 let newRow = {
                     ...updateRowCatalogue,
+                    id_of_cata_commune:response.data.insertId,
                     commune: updateRowCatalogue.commune
                         ? updateRowCatalogue.commune + ' | ' + commune.id_commune + ':' + commune.commune
                         : commune.id_commune + ':' + commune.commune,
@@ -541,17 +544,17 @@ export default function Catalogue() {
 
     // ---------------------------------- MODAL ADRESSE
     const [openModalAdresse, setOpenModalAdresse] = useState(false)
-    const [updateRowAdresse, setUpdateRowAdresse] = useState({})
     const handleShowModalAdresse = (row) => {
-        setUpdateRowAdresse(row)
+        setUpdateRowCatalogue(row)
         setOpenModalAdresse(true)
     }
 
     const handleCloseModalAdresse = () => {
-        setUpdateRowAdresse({
+        setUpdateRowCatalogue({
             id: '',
             id_lot: 'all',
             id_of_cata: '',
+            id_of_cata_commune: '',
             adresse: [],
             list_of: [],
             n_Article: '',
@@ -575,7 +578,7 @@ export default function Catalogue() {
         axios({
             method: 'put',
             url: '/attributaire/addAdresse',
-            data: { id_catalogue_attributaire: updatedRow.id_of_cata, id_adresse: adresse.id },
+            data: { id_of_cata_commune: updatedRow.id_of_cata_commune, id_adresse: adresse.id },
             headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), },
         }).then((response) => {
             if (response.status === 200) {
@@ -629,6 +632,7 @@ export default function Catalogue() {
 
     // ---------------------------------- Créer une adresse
     const handleCreateAdresse = (updatedRow, adresse, ville) => {
+        console.log(updatedRow, adresse, ville)
         axios({
             method: 'put',
             url: '/adresse/create',
@@ -644,7 +648,6 @@ export default function Catalogue() {
                 setOpenSnackBar(true);
             }
         })
-
     }
 
     return (
@@ -692,11 +695,11 @@ export default function Catalogue() {
                     user={user}
                 />
             }
-            {updateRowAdresse.id !== undefined &&
+            {(updateRowCatalogue.id !== undefined && openModalAdresse) &&
                 <ModalAdresse
                     openModal={openModalAdresse}
                     handleCloseModal={handleCloseModalAdresse}
-                    updateRow={updateRowAdresse}
+                    updateRow={updateRowCatalogue}
                     handleAddAdresse={handleAddAdresse}
                     handleCreateAdresse={handleCreateAdresse}
                 />
