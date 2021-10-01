@@ -97,12 +97,7 @@ export default function Sollicitation(props) {
             // finDeSollicitation : pour trouver la sollicitation suivante si refus de l'OF.
             // isSolValidate : si la sollicitation à été validé
 
-            Obj = arrayCommunes.indexOf(props.updateFormation.id_commune) === -1
-                ? { ...Obj, etat: true, error: true, text: 'Commune indisponible', finDeSollicitation: true }
-                : { ...Obj }
-
             let sol = props.sollicitationList.find((s) => s.attributaire === v.id) || {}
-
             let isSolValidate = false;
 
             if (sol.hasOwnProperty('date_etat')) {
@@ -136,8 +131,10 @@ export default function Sollicitation(props) {
                     isSolValidate = false;
                     Obj = { etat: false, error: undefined, text: `Sollicité le ${myDate.date} à ${myDate.time}`, finDeSollicitation: false }
                 }
+            } else if(arrayCommunes.indexOf(props.updateFormation.id_commune) === -1){
+                Obj = { ...Obj, etat: true, error: true, text: 'Commune indisponible', finDeSollicitation: true };
             } else {
-                Obj = { etat: !firstSol, error: undefined, text: `Aucune sollicitation`, finDeSollicitation: false }
+                Obj = { etat: !firstSol, error: undefined, text: `Aucune sollicitation`, finDeSollicitation: false };
                 if (firstSol) firstSol = false;
             }
 

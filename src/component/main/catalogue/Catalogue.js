@@ -97,28 +97,21 @@ export default function Catalogue() {
 
     useEffect(() => {
         setNbFilter(Object.entries(filterSelected).filter(([k, v]) => v !== 'none' && v !== 'all').length)
-        let myFilter = Object.entries(filterSelected)[0]
-        let result = [];
-        if (myFilter) {
-            // eslint-disable-next-line array-callback-return
-            result = rows.filter((row) => {
-                for (let i = 0; i < myFilter.length; i++) {
-                    if (myFilter[i + 1] !== 'none') {
-                        if (row[myFilter[i]] === myFilter[i + 1]) {
-                            return row;
-                        } else {
-                            i++
-                        }
+        if (rows.length > 0) {
+            let array = [];
+            array = rows.filter((v) => {
+                for (let key in filterSelected) {
+                    if (key === 'id_lot') {
+                        if (v[key].toString() !== filterSelected[key].toString()) return false
                     } else {
-                        i++
-                        return row;
+                        return false
                     }
                 }
+                return v;
             })
-        } else {
-            result = rows;
+
+            setDisplayRows(array)
         }
-        setDisplayRows(result)
     }, [filterSelected, rows])
 
     const [lotList, setLotList] = useState([]);
@@ -140,7 +133,6 @@ export default function Catalogue() {
             url: '/catalogue/findAll',
             headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => {
-            console.log(response.data)
             let data = response.data.map((v) => {
                 let adr = [];
                 if (v.adresse) {
@@ -587,7 +579,7 @@ export default function Catalogue() {
                 let newDataRow = updateRowsTableAfterPutAxios(updatedRow, 'adresse')
 
                 setRows(newDataRow)
-                setDisplayRows(newDataRow)
+                // setDisplayRows(newDataRow)
 
                 socket.emit("updateAdresse", newDataRow);
                 setMessageSnackBar('Modification enregistré.');
@@ -616,7 +608,7 @@ export default function Catalogue() {
                 let newDataRow = updateRowsTableAfterPutAxios(updatedRow, 'adresse')
 
                 setRows(newDataRow)
-                setDisplayRows(newDataRow)
+                // setDisplayRows(newDataRow)
 
                 socket.emit("updateAdresse", newDataRow);
                 setMessageSnackBar('Supprimé avec succès.');

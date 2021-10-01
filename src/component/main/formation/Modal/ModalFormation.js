@@ -45,6 +45,7 @@ const useStyles = makeStyles((theme) => ({
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
+        marginBottom:theme.spacing(1)
     },
     titleModalBtn: {
         display: 'flex',
@@ -54,7 +55,7 @@ const useStyles = makeStyles((theme) => ({
         color: "#fff",
     },
     body: {
-        maxHeight: '80vh',
+        maxHeight: '75vh',
         overflowY: 'scroll',
     },
     bodyMain: {
@@ -90,9 +91,12 @@ export default function ModalCreateSol(props) {
 
     const handleSubmit = (newFormFromOther) => {
         setIsSubmit(true)
+        
         props.updateFormation.id === ''
             ? props.handleSaveFormation(newFormFromOther)
             : props.handleEditFormation();
+
+
         //   let action = dataRow.id === '' || dataRow.id === 0 ? 'create' : 'update';
 
         //   switch (action) {
@@ -191,7 +195,7 @@ export default function ModalCreateSol(props) {
                                                     handleCancelSollicitation={props.handleCancelSollicitation}
                                                     handleValideSollicitation={props.handleValideSollicitation}
                                                     sollicitation={props.sollicitation}
-                                                    handleEditFormation={props.handleEditFormation}
+                                                    changeNArticle={props.changeNArticle}
                                                     user={props.user}
                                                 />}
                                             {props.sollicitation.date_EditBRS &&

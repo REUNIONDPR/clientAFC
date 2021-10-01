@@ -69,7 +69,7 @@ export default function CardValide(props) {
     const handleChangeDateicop = (e) => {
         setDateIcop(e.target.value)
     }
-
+    
     const isDisabled = !IsPermitted(props.user, 'sollicitation', 'updateDT')
     return (
         <>
@@ -90,7 +90,7 @@ export default function CardValide(props) {
             */
             step={(props.stepper === 6 || props.stepper === 7 || props.stepper === 10)
                 ? 1
-                : props.stepper === 8 
+                : (props.stepper === 8 )
                     ? 2
                     : props.stepper === 9
                         ? 3
@@ -164,31 +164,31 @@ export default function CardValide(props) {
                     ? props.sollicitation.date_ValidationDT
                         ? <Button startIcon={<ErrorOutlineIcon />}
                             disabled={
-                                (props.sollicitation.lieu_execution === '' || props.sollicitation.lieu_execution === 'all' || props.sollicitation.lieu_execution === null) ||
-                                props.sollicitation.id_dateIcop === '' ||
+                                (props.sollicitation.lieu_execution === null || props.sollicitation.lieu_execution === 'all' || props.sollicitation.lieu_execution === null) ||
+                                props.sollicitation.id_dateIcop === null ||
                                 (props.sollicitation.date_ValidationDT === '' || props.sollicitation.date_ValidationDT === null) ||
                                 isDisabled} onClick={() => props.handleValideSollicitation('DT')} variant="contained" color="secondary" >
                             Modifier
                         </Button>
                         : <Button startIcon={<ErrorOutlineIcon />}
                             disabled={
-                                props.sollicitation.lieu_execution === '' || props.sollicitation.lieu_execution === 'all' ||
-                                props.sollicitation.id_dateIcop === '' ||
+                                props.sollicitation.lieu_execution === null || props.sollicitation.lieu_execution === 'all' ||
+                                props.sollicitation.id_dateIcop === null ||
                                 (props.sollicitation.date_ValidationDT !== '' && props.sollicitation.date_ValidationDT !== null) ||
                                 isDisabled} onClick={() => props.handleValideSollicitation('DT')} variant="contained" color="secondary" >
                             Valider
                         </Button>
                     : props.sollicitation.date_ValidationDT
                         ? <Button disabled={
-                            (props.sollicitation.lieu_execution === '' || props.sollicitation.lieu_execution === 'all' || props.sollicitation.lieu_execution === null) ||
-                            props.sollicitation.id_dateIcop === '' ||
+                            (props.sollicitation.lieu_execution === null || props.sollicitation.lieu_execution === 'all' || props.sollicitation.lieu_execution === null) ||
+                            props.sollicitation.id_dateIcop === null ||
                             (props.sollicitation.date_ValidationDT === '' || props.sollicitation.date_ValidationDT === null) ||
                             isDisabled} onClick={() => props.handleValideSollicitation('DT')} variant="contained" color="secondary" >
                             Modifier
                         </Button>
                         : <Button disabled={
-                            props.sollicitation.lieu_execution === '' || props.sollicitation.lieu_execution === 'all' ||
-                            props.sollicitation.id_dateIcop === '' ||
+                            (props.sollicitation.lieu_execution === null || props.sollicitation.lieu_execution === 'all') ||
+                            props.sollicitation.id_dateIcop === null ||
                             (props.sollicitation.date_ValidationDT !== '' && props.sollicitation.date_ValidationDT !== null) ||
                             isDisabled} onClick={() => props.handleValideSollicitation('DT')} variant="contained" color="secondary" >
                             Valider

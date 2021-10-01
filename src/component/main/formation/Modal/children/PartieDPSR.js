@@ -27,11 +27,11 @@ export default function PartieDPSR(props) {
             <div className={classes.blockAction}>
                 <TextField disabled={isDisabled || (props.updateFormation.nConv !== '' && props.updateFormation.nConv !== null)}
                     required type="text" size="small" label="Conventionnement" variant="outlined"
-                    value={props.updateFormation.nConv}
+                    value={props.updateFormation.nConv ? props.updateFormation.nConv : ''}
                     onChange={(e) => props.handleChangeFormation('nConv_tmp', e.target.value)}
                 />
 
-                <Button disabled={isDisabled || (props.updateFormation.nConv !== '' && props.updateFormation.nConv !== null)} onClick={props.handleSaveConv} variant="contained" color="primary">
+                <Button disabled={isDisabled || !(props.updateFormation.nConv !== '' && props.updateFormation.nConv !== null)} onClick={props.handleSaveConv} variant="contained" color="primary">
                     Valider
                 </Button>
             </div>

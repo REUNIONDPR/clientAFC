@@ -28,7 +28,7 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import Switch from '@material-ui/core/Switch';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Sollicitation from './Modal/children/sollicitation/Sollicitation';
+import Commentaire from '../../global/commentaire/Commentaire';
 
 // import { title } from 'process';
 // import Cards from './Card/Cards';
@@ -51,6 +51,9 @@ const useStyles = makeStyles((theme) => ({
     flex: {
         display: 'flex',
         alignItems: 'center',
+    },
+    error: {
+        backgroundColor: theme.palette.warning.main
     },
     cellHead: {
         cursor: 'pointer',
@@ -309,7 +312,7 @@ export default function Formation() {
 
     useEffect(() => {
         setAttributaireLotSelected('all');
-        let etat = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+        let etat = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
         if (editionBRS && filterValues.id_lot !== 'all') {
             axios({
@@ -335,23 +338,21 @@ export default function Formation() {
             array = formationList.filter((v) => {
                 for (let key in filterValues) {
                     if (filterValues[key] === 'all' || filterValues[key] === '') continue;
-                    switch (key) {
-                        case 'id_lot':
-                            if ((v[key] && v[key].toString()) !== filterValues[key].toString()) return false
-                            break;
-                        case 'id_attributaire':
-                            if ((v[key] && v[key].toString()) !== filterValues[key].toString()) return false
-                            break;
-                        case 'etat':
-                            let value = [];
-                            value = filterValues[key];
-                            if (value.length > 0) {
-                                if (value.indexOf(v[key]) === -1) return false;
-                            } else {
-                                return false;
-                            }
-                            break;
-                        default: break;
+                    if (key === 'id_lot' || key === 'id_attributaire' || key === 'userFct' || key === 'agence_ref' ||
+                        key === 'dispositif') {
+                        if ((v[key] && v[key].toString()) !== filterValues[key].toString()) return false
+                    } else if (key === 'etat') {
+                        let value = [];
+                        value = filterValues[key];
+                        if (value.length > 0) {
+                            if (value.indexOf(v[key]) === -1) return false;
+                        } else {
+                            return false;
+                        }
+                    } else if (key === 'n_Article') {
+                        if (v[key].indexOf(filterValues[key]) === -1) return false
+                    } else {
+                        return false
                     }
                 }
                 return v;
@@ -448,7 +449,10 @@ export default function Formation() {
 
     const handleCreateNewFormationFromThis = (k, v) => {
         setCreateNewFormationFromThis({ etat: true, idChange: updateFormation.id, fieldChange: k, valueChange: updateFormation[k], userChange: user.idgasi });
-        setupdateFormation({ ...updateFormation, id: '', [k]: v })
+        // Si commune ajouter le libelle de la commune
+        let commune = updateFormation.commune
+        if (k === 'id_commune') commune = v === 'all' ? '' : communeList.find((x) => x.id === v).libelle;
+        setupdateFormation({ ...updateFormation, id: '', [k]: v, commune: commune });
         setSollicitationList([])
     }
     const ChangeFormation = (k, v) => {
@@ -543,7 +547,6 @@ export default function Formation() {
                 break;
             case 'id_commune':
                 let commune = v === 'all' ? '' : communeList.find((x) => x.id === v).libelle;
-                console.log(updateFormation)
                 setupdateFormation({ ...updateFormation, [k]: v, commune: commune });
                 break;
             case 'agence_ref':
@@ -634,7 +637,6 @@ export default function Formation() {
     }
 
     const handleSaveFormation = (createNewFormationFromThis) => {
-        console.log(updateFormation)
         axios({
             method: 'PUT',
             url: 'formation/create',
@@ -672,20 +674,40 @@ export default function Formation() {
         });
     };
 
-    const handleEditFormation = () => {
+    const handleChangeNArticle = (new_n_Article) => {
+        let n_Article = new_n_Article.split('-')[0];
+        let nb = parseInt(new_n_Article.split('-')[1]);
+        axios({
+            method: 'put',
+            url: 'catalogue/updateCompteur',
+            data: { n_Article: n_Article, nb: nb },
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), },
+        }).then((response) => {
+            if (response.status === 200) {
+                setupdateFormation({ ...updateFormation, n_Article: n_Article + '-' + nb.toString().padStart(3, '0') })
+                handleEditFormation({ ...updateFormation, n_Article: n_Article + '-' + nb.toString().padStart(3, '0') })
+            } else {
+                setMessageSnackBar('Erreur lors de la mise à jour du compteur');
+                setSeverity('error');
+                setOpenSnackBar(true);
+            }
+        })
+        // 
+    }
+    const handleEditFormation = (newUpdateFormation = updateFormation) => {
         axios({
             method: 'PUT',
             url: 'formation/update',
-            data: updateFormation,
+            data: newUpdateFormation,
             headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), },
         }).then((response) => {
             if (response.status === 200) {
 
-                if ((updateFormation.etat === 9 || updateFormation.etat === 12) && updateFormation.etat < 20) {
+                if ((newUpdateFormation.etat === 9 || newUpdateFormation.etat === 12) && newUpdateFormation.etat < 20) {
                     // Modification sur BRS édité
                     handleChangeBRS();
                 } else {
-                    let newFormationList = formationList.map((v) => v.id === updateFormation.id ? updateFormation : v);
+                    let newFormationList = formationList.map((v) => v.id === newUpdateFormation.id ? newUpdateFormation : v);
                     setFormationList(newFormationList);
                     setMessageSnackBar('Formation modifié avec succès');
                     setSeverity('success');
@@ -870,7 +892,7 @@ export default function Formation() {
         axios({
             method: 'PUT',
             url: 'sollicitation/update',
-            data: { id_sol: sol.id_sol, etat: etat, dateTime: time, reason: txt === '' ? user.idgasi : txt },
+            data: { id_sol: sol.id_sol, etat: etat, dateTime: time, information: txt === '' ? user.idgasi : txt },
             headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => {
             if (response.status === 200) {
@@ -878,7 +900,7 @@ export default function Formation() {
                 // Met à jour le tableau des sollicitations actuelles.
                 let newSollArray = sollicitationList.map((v) => {
                     if (v.id_sol === sol.id_sol) {
-                        return { ...v, etat: etat, date_etat: newTime, reason: txt, dateRespOF: time }
+                        return { ...v, etat: etat, date_etat: newTime, information: txt, dateRespOF: time }
                     } else return v;
                 })
 
@@ -970,7 +992,8 @@ export default function Formation() {
             //     }
             // });
 
-        } else if (etat !== '') {
+            // } else if (etat !== '') {
+        } else {
 
             switch (valideType) {
                 case 'DT':
@@ -1010,7 +1033,7 @@ export default function Formation() {
                 url: 'sollicitation/save',
                 data: {
                     sollicitation: sol,
-                    reason: information,
+                    information: information,
                     dateTime: dateTime,
                     etat: etat,
                 },
@@ -1021,7 +1044,7 @@ export default function Formation() {
 
                     let newSollArray = sollicitationList.map((v) => {
                         if (v.id_sol === sol.id_sol) {
-                            return { ...v, etat: etat, date_etat: dateTime, reason: information }
+                            return { ...v, etat: etat, date_etat: dateTime, information: information }
                         } else return v;
                     })
                     // UpdateFotmation et etat de la formation
@@ -1057,7 +1080,7 @@ export default function Formation() {
     }
 
     const handleChangeAttribLotSelected = (id) => {
-        setFilterValues({ ...filterValues, id_attributaire: id, etat: id === 'all' ? [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] : [7, 8] })
+        setFilterValues({ ...filterValues, id_attributaire: id, etat: id === 'all' ? [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] : [7, 8, 10, 11] })
         setAttributaireLotSelected(id)
     }
     const handleEditionBRS = () => {
@@ -1069,18 +1092,31 @@ export default function Formation() {
         }).then((response) => {
             if (response.status === 200) {
                 if (response.data.length > 0) {
-
                     let time = getDateToday();
                     let lot = response.data[0].lot ? response.data[0].lot.split(' - ')[0].replace(' ', '') : 'LOT?';
+                    let formation_brs_existant = response.data.find((v) => v.filename !== null)
+                    let pos_version = 0;
                     let version = 0;
-                    let nb = (response.data[0].nb_brs + 1).toString().padStart(3, '0');
-                    let n_brs = `BRS2021 - AFC2019 - ACCORD CADRE - ${lot} - ${nb}`;
-                    let filename = `BRS${nb}-${lot}V${version}.xlsx`;
+                    let nb = 0;
+                    let filename = '';
+                    let n_brs = ''
+
+                    if (formation_brs_existant) {
+                        pos_version = formation_brs_existant.filename.indexOf('V')
+                        version = parseInt(formation_brs_existant.filename[pos_version + 1]) + 1
+                        n_brs = formation_brs_existant.n_brs + ' - V' + version;
+                        filename = formation_brs_existant.filename
+                            .replace('V' + formation_brs_existant.filename[pos_version + 1], 'V' + version)
+                    } else {
+                        nb = (response.data[0].nb_brs + 1).toString().padStart(3, '0');
+                        n_brs = `BRS2021 - AFC2019 - ACCORD CADRE - ${lot} - ${nb} - V${version}`;
+                        filename = `BRS${nb}-${lot}V${version}.xlsx`;
+                    }
 
                     const brs = {
                         lot: response.data[0].lot,
                         n_marche: response.data[0].n_marche,
-                        remplace: '',
+                        remplace: formation_brs_existant ? formation_brs_existant.n_brs : '',
                         n_brs: n_brs,
                     }
                     const attrib = {
@@ -1123,6 +1159,7 @@ export default function Formation() {
                         url: 'brs/create',
                         data: {
                             n_brs: n_brs,
+                            replace_brs: formation_brs_existant ? formation_brs_existant.id_brs : 0,
                             filename: filename,
                             id_lot: filterValues.id_lot,
                             id_attributaire: filterValues.id_attributaire,
@@ -1261,25 +1298,32 @@ export default function Formation() {
         axios({
             method: 'put',
             url: 'brs/edit',
-            data: { ...sollicitation },
+            data: { ...sollicitation, dateTime: dateTime, information: user.idgasi + ' : ' + information },
             headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => {
             console.log(response.data)
             if (response.status === 200) {
+
                 let newSollArray = sollicitationList.map((v) => {
                     if (v.id_sol === sol.id_sol) {
                         return { ...v, etat: etat, date_etat: dateTime, reason: information }
                     } else return v;
                 })
+
                 // UpdateFotmation et etat de la formation
                 let newUpdateFormation = { ...updateFormation, etat: etat, etat_libelle: etat_libelle }
                 setupdateFormation(newUpdateFormation)
-                setFormationList(formationList.map((v) => v.id === updateFormation.id ? newUpdateFormation : v))
+                setFormationList(
+                    formationList.map((v) => v.id === updateFormation.id
+                        ? newUpdateFormation
+                        : response.data.map((x) => x.id_formation).indexOf(v.id) > -1
+                            ? { ...v, etat: 11, etat_libelle: "En attente d'édition d'un nouveau BRS" }
+                            : v))
                 setSollicitation({ ...sol, etat: etat, etat_libelle: etat_libelle })
                 setSollicitationList(newSollArray)
             }
         })
-        
+
 
         // if (sollicitation.etat === 9) {
         //     // Change sollicitation souhaitée
@@ -1307,7 +1351,7 @@ export default function Formation() {
 
             <div className={classes.categorie} >
                 <div className={classes.categorieTitle} >
-                    <div className={classes.title} >Liste des formations</div>
+                    <div className={classes.title} >Liste des formations ({formationListDisplay.length})</div>
                     {IsPermitted(user, 'brs', 'create') &&
                         <div className={classes.blockBRS}>
 
@@ -1396,7 +1440,7 @@ export default function Formation() {
                             <TableBody>
                                 {formationList.length > 0
                                     ? formationListDisplay.map((row) => (
-                                        <TableRow key={row.id + '_' + row.n_Article}>
+                                        <TableRow key={row.id + '_' + row.n_Article} className={row.etat === 20 ? classes.error : ''}>
                                             <TableCell component="th" scope="row">
                                                 {codeToName('lot_' + row.id_lot)}
                                             </TableCell>
@@ -1411,9 +1455,12 @@ export default function Formation() {
                                             <TableCell>{dateFormat(row.date_entree_demandee)}</TableCell>
                                             <TableCell>{dateFormat(row.date_fin)}</TableCell>
                                             <TableCell>
-                                                <IconButton size="small" aria-label="Editer" color="secondary" onClick={(e) => handleClickOpenMenu(e, row.id)}>
-                                                    <MoreHorizIcon fontSize="small" />
-                                                </IconButton>
+                                                <div className={classes.flex}>
+                                                    <Commentaire user={user} id={row.id}/>
+                                                    <IconButton size="small" aria-label="Editer" color="secondary" onClick={(e) => handleClickOpenMenu(e, row.id)}>
+                                                        <MoreHorizIcon fontSize="small" />
+                                                    </IconButton>
+                                                </div>
                                             </TableCell>
                                         </TableRow>))
                                     : <TableRow>
@@ -1467,6 +1514,7 @@ export default function Formation() {
                     handleChangeFormation={handleChangeFormation}
                     handleSaveFormation={handleSaveFormation}
                     handleEditFormation={handleEditFormation}
+                    changeNArticle={handleChangeNArticle}
 
                     // Sollicitation
                     attributaireList={attributaireList}
@@ -1483,7 +1531,9 @@ export default function Formation() {
                     handleCancelSollicitation={handleCancelSollicitation}
                     handleSaveConv={handleSaveConv}
                 />}
-
+            <p>{"Si modif BRS = annul toute les soll, annulé le brs aussi"}</p>
+            <p>{"Gérer le temps de réponse de l'OF. Si > 5 jour ouvré passe à l'of suivant"}</p>
+            <p>{"Verifier tout les états 10 et 11 : 10 formation qu'on modifie, 11: Formation en attente de nouveau BRS"}</p>
 
         </>
     )

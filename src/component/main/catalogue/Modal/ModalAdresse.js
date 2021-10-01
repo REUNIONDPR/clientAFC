@@ -103,7 +103,6 @@ export default function ModalAdresse(props) {
 
     useEffect(() => {
         if (adresse.ville !== 'all') {
-            console.log(updateRow)
             axios({
                 method: 'GET',
                 url: 'adresse/findOuter?commune=' + adresse.ville + '&id_of_cata=' + updateRow.id_of_cata,

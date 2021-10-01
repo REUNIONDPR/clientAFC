@@ -94,7 +94,8 @@ export default function Formulaire(props) {
     }
 
     return (<div className={classes.main}>
-        <Confirm open={open} handleValide={handleValideDialog} handleClose={handleCloseDialog} value={value} />
+        <Confirm open={open} handleValide={handleValideDialog} handleClose={handleCloseDialog} value={value} 
+            messsage={"Les OF devront être à nouveau sollicités."}/>
 
         <form noValidate autoComplete="off">
             <div className={classes.blocForm}>

@@ -3,6 +3,7 @@ import Button from '@material-ui/core/Button';
 import { IsPermitted } from '../../../../../utilities/Function';
 import { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
+import Confirm from '../../../../global/Confirm';
 
 const useStyles = makeStyles((theme) => ({
     blockDDO: {
@@ -14,8 +15,9 @@ const useStyles = makeStyles((theme) => ({
     },
     blockAction: {
         display: 'flex',
-        '& > *':{
-            marginRight:theme.spacing(1)
+        alignItems:'center',
+        '& > *': {
+            marginRight: theme.spacing(1)
         }
     }
 }))
@@ -23,28 +25,43 @@ const useStyles = makeStyles((theme) => ({
 export default function PartieBRS(props) {
     const classes = useStyles();
     const isDisabled = !IsPermitted(props.user, 'sollicitation', 'updateDDO')
-    const [n_Article, setN_Article] = useState('')
+    const [n_Article, setN_Article] = useState(props.updateFormation.n_Article.split('-')[1])
+    const [openConfirm, setOpenConfirm] = useState(false)
+    const n_Article_base = props.updateFormation.n_Article.split('-')[0];
 
-    useEffect(() => {
-        setN_Article(props.updateFormation.n_Article)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    const handleClose = () => {
+        setOpenConfirm(false)
+    }
+    const handleValide = () => {
+        props.changeNArticle(n_Article_base+'-'+n_Article)
+        setOpenConfirm(false)
+    }
 
+    const handleChangeArticle = (value) => {
+        setN_Article(value)
+    }
+    
     return (
         <div className={classes.blockDDO}>
+            <Confirm open={openConfirm} value={{ key: 'n_Article', value_old: props.updateFormation.n_Article, value_new: n_Article_base+'-'+n_Article }}
+                message={"Le compteur pour la formation sera mis à jour."} 
+                handleClose={handleClose}
+                handleValide={handleValide} />
             <div>Cadre réservé à la DO</div>
 
-            <div className={classes.blockAction}>
-                <TextField disabled={isDisabled || props.updateFormation.date_ValidationDDO !== ''} required type="text" size="small" label="N° article" variant="outlined"
-                    value={props.updateFormation.n_Article}
-                    onChange={(e) => props.handleChangeFormation('n_Article', e.target.value)}
+            <div className={classes.blockAction || (props.sollicitation.date_ValidationDDO !== '')}>
+                <span>{n_Article_base}-</span>
+                <TextField disabled={isDisabled} required type="text" size="small" label="N° article" variant="outlined"
+                    value={n_Article}
+                    onChange={(e) => handleChangeArticle(e.target.value)}
                 />
-                <Button disabled={isDisabled || props.updateFormation.n_Article === n_Article} onClick={() => props.handleEditFormation('DDO', false)} variant="contained" color="primary">
+                <Button disabled={isDisabled || (props.sollicitation.date_ValidationDDO !== '')}
+                    onClick={() => setOpenConfirm(true)} variant="contained" color="primary">
                     Modifier
                 </Button>
             </div>
 
-            <div  className={classes.blockAction}>
+            <div className={classes.blockAction}>
                 <Button disabled={isDisabled} onClick={props.handleCancelSollicitation} variant="outlined" color="primary">
                     Annuler la formation
                 </Button>

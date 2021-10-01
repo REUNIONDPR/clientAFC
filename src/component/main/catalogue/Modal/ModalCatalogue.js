@@ -59,7 +59,7 @@ const useStyles = makeStyles((theme) => ({
     border: '2px solid',
     borderColor: theme.palette.primary.main,
     boxShadow: theme.shadows[5],
-    padding: theme.spacing(2, 4, 3),
+    padding: theme.spacing(2, 0, 3, 4),
     maxWidth: '80%',
   },
   btnActionModal: {
@@ -72,8 +72,17 @@ const useStyles = makeStyles((theme) => ({
   },
   titleModal: {
     display: 'flex',
+    borderBottom: '2px solid',
+    borderColor: theme.palette.primary.main,
+    height: '10vh',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom:theme.spacing(1)
+  },
+  body:{
+    maxHeight: '75vh',
+    overflowY: 'scroll',
+    paddingRight: theme.spacing(4)
   },
   msgAlert: {
     color: 'red',
@@ -207,11 +216,11 @@ export default function ModalCatalogue(props) {
     let libelle = OfSelected.length > 0 ? OfSelected[0].libelle : '';
     setListOf(listOf.map((v) => v.id === id ? { ...v, id_attr: value, libelle: libelle } : v))
   }
-  const handleChangeValueSelectCommune = (id, value) => {
-    let communeSelected = listCommuneSelect.filter((v) => v.id === value);
-    let libelle = communeSelected.length > 0 ? communeSelected[0].libelle : '';
-    setListOf(listOf.map((v) => v.id === id ? { ...v, id_commune: value, commune: libelle } : v))
-  }
+  // const handleChangeValueSelectCommune = (id, value) => {
+  //   let communeSelected = listCommuneSelect.filter((v) => v.id === value);
+  //   let libelle = communeSelected.length > 0 ? communeSelected[0].libelle : '';
+  //   setListOf(listOf.map((v) => v.id === id ? { ...v, id_commune: value, commune: libelle } : v))
+  // }
   const [addCommune, setAddCommune] = useState({ id_of_cata: '', id_commune: 'all', commune: '' })
   const handleChangeValueAddSelectCommune = (id, value) => {
     let communeSelected = listCommuneSelect.filter((v) => v.id === value);
@@ -283,182 +292,183 @@ export default function ModalCatalogue(props) {
                 }
               </div>
             </div>
-            <form className={classes.root} noValidate autoComplete="off">
-              <div className={classes.blocFormFullWidth}>
-                <SelectPersonnalize
-                  error={isSubmit && dataRow.id_lot === 'all' ? true : false}
-                  handleChangeValue={props.handleChangeUpdateRow}
-                  path={'global/findAll?table=lot'}
-                  rowKey='id_lot'
-                  value={dataRow.id_lot}
-                  displayvalue='libelle'
-                  label='Lot'
-                />
+            <div className={`${classes.body} scrollBar-personnalize`} >
+              <form className={classes.root} noValidate autoComplete="off">
+                <div className={classes.blocFormFullWidth}>
+                  <SelectPersonnalize
+                    error={isSubmit && dataRow.id_lot === 'all' ? true : false}
+                    handleChangeValue={props.handleChangeUpdateRow}
+                    path={'global/findAll?table=lot'}
+                    rowKey='id_lot'
+                    value={dataRow.id_lot}
+                    displayvalue='libelle'
+                    label='Lot'
+                  />
+                </div>
+
+                <div className={classes.blocForm}>
+                  <TextField size="small" required label="N° Article" variant="outlined"
+                    error={isSubmit && dataRow.n_Article === '' ? true : false} value={dataRow.n_Article}
+                    onChange={(e) => props.handleChangeUpdateRow('n_Article', e.target.value)} />
+
+                  <TextField size="small" required label="Intitulé base Form" variant="outlined"
+                    error={isSubmit && dataRow.intitule_form_marche === '' ? true : false} value={dataRow.intitule_form_marche}
+                    onChange={(e) => props.handleChangeUpdateRow('intitule_form_marche', e.target.value)} />
+
+                  <TextField size="small" required label="Intitulé base Art" variant="outlined"
+                    error={isSubmit && dataRow.intitule_form_base_article === '' ? true : false} value={dataRow.intitule_form_base_article}
+                    onChange={(e) => props.handleChangeUpdateRow('intitule_form_base_article', e.target.value)} />
+
+                </div>
+
+                <div className={classes.blocForm}>
+                  <TextField size="small" label="FormaCode" variant="outlined"
+                    error={isSubmit && dataRow.formacode === '' ? true : false} value={dataRow.formacode}
+                    onChange={(e) => props.handleChangeUpdateRow('formacode', e.target.value)} />
+
+                  <SelectPersonnalize
+                    error={isSubmit && dataRow.niveau_form === 'all' ? true : false}
+                    handleChangeValue={props.handleChangeUpdateRow}
+                    path={'global/findAll?table=niveau'}
+                    rowKey='niveau_form'
+                    value={dataRow.niveau_form}
+                    displayvalue='libelle'
+                    label='Niveau'
+                  />
+                  <SelectPersonnalize
+                    error={isSubmit && dataRow.objectif_form === 'all' ? true : false}
+                    handleChangeValue={props.handleChangeUpdateRow}
+                    path={'global/findAll?table=objectif'}
+                    rowKey='objectif_form'
+                    value={dataRow.objectif_form}
+                    displayvalue='libelle'
+                    label='Objectif'
+                  />
+                </div>
+
+                <div className={classes.blocForm}>
+                  <TextField required type="number" size="small" label="Heure socle" variant="outlined"
+                    error={isSubmit && dataRow.nb_heure_socle === '' ? true : false} value={dataRow.nb_heure_socle}
+                    onChange={(e) => props.handleChangeUpdateRow('nb_heure_socle', e.target.value)}
+                  />
+
+                  <TextField required type="text" size="small" label="Heure Ent" variant="outlined"
+                    error={isSubmit && dataRow.nb_heure_ent === '' ? true : false} value={dataRow.nb_heure_ent}
+                    onChange={(e) => props.handleChangeUpdateRow('nb_heure_ent', e.target.value)}
+                  />
+
+                  <TextField required type="number" size="small" label="Heure Appui" variant="outlined"
+                    error={isSubmit && dataRow.nb_heure_appui === '' ? true : false} value={dataRow.nb_heure_appui}
+                    onChange={(e) => props.handleChangeUpdateRow('nb_heure_appui', e.target.value)}
+                  />
+
+                  <TextField required type='text' size="small" label="Heure Soutien" variant="outlined"
+                    error={isSubmit && dataRow.nb_heure_soutien === '' ? true : false} value={dataRow.nb_heure_soutien}
+                    onChange={(e) => props.handleChangeUpdateRow('nb_heure_soutien', e.target.value)}
+                  />
+
+                  <TextField required type="number" size="small" label="Prix < 6 pers" variant="outlined"
+                    error={isSubmit && dataRow.prixTrancheA === '' ? true : false} value={dataRow.prixTrancheA}
+                    onChange={(e) => props.handleChangeUpdateRow('prixTrancheA', e.target.value)}
+                  />
+
+                  <TextField required type="number" size="small" label="Prix > 6 pers" variant="outlined"
+                    error={isSubmit && dataRow.prixTrancheB === '' ? true : false} value={dataRow.prixTrancheB}
+                    onChange={(e) => props.handleChangeUpdateRow('prixTrancheB', e.target.value)}
+                  />
+                </div>
+
+              </form>
+
+              <div className={classes.btnActionModal}>
+
+                <Button onClick={props.handleCloseModal} variant="outlined" color="primary">
+                  Annuler
+                </Button>
+                {clickHandleSubmit
+                  ? <Button variant="contained" color="primary"
+                    endIcon={<CircularProgress size={20} className={classes.spinnerBtn} />}>
+                    Enregistrer
+                  </Button> :
+                  <Button onClick={() => { setClickHandleSubmit(true); handleSubmit() }}
+                    variant="contained" color="primary" >
+                    Enregistrer
+                  </Button>}
+
+
               </div>
 
-              <div className={classes.blocForm}>
-                <TextField size="small" required label="N° Article" variant="outlined"
-                  error={isSubmit && dataRow.n_Article === '' ? true : false} value={dataRow.n_Article}
-                  onChange={(e) => props.handleChangeUpdateRow('n_Article', e.target.value)} />
+              <Divider className={classes.dividerTop} />
+              <Typography className={classes.OFTitle}>OF Dispensateur</Typography>
 
-                <TextField size="small" required label="Intitulé base Form" variant="outlined"
-                  error={isSubmit && dataRow.intitule_form_marche === '' ? true : false} value={dataRow.intitule_form_marche}
-                  onChange={(e) => props.handleChangeUpdateRow('intitule_form_marche', e.target.value)} />
+              <TableContainer className={`${classes.table} scrollBar-personnalize`}>
+                <Table aria-label="collapsible table" size="small" stickyHeader>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell style={{ width: 100, }}></TableCell>
+                      <TableCell style={{ width: 180, }}>Priorité</TableCell>
+                      <TableCell>Attributaires</TableCell>
+                      <TableCell style={{ width: 250, }}>Communes</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {listOf && listOf.map((v) => (
+                      v.id.toString().includes('new_')
+                        ? <TableRow key={'OF_' + v.id} >
+                          <TableCell>
 
-                <TextField size="small" required label="Intitulé base Art" variant="outlined"
-                  error={isSubmit && dataRow.intitule_form_base_article === '' ? true : false} value={dataRow.intitule_form_base_article}
-                  onChange={(e) => props.handleChangeUpdateRow('intitule_form_base_article', e.target.value)} />
-
-              </div>
-
-              <div className={classes.blocForm}>
-                <TextField size="small" label="FormaCode" variant="outlined"
-                  error={isSubmit && dataRow.formacode === '' ? true : false} value={dataRow.formacode}
-                  onChange={(e) => props.handleChangeUpdateRow('formacode', e.target.value)} />
-
-                <SelectPersonnalize
-                  error={isSubmit && dataRow.niveau_form === 'all' ? true : false}
-                  handleChangeValue={props.handleChangeUpdateRow}
-                  path={'global/findAll?table=niveau'}
-                  rowKey='niveau_form'
-                  value={dataRow.niveau_form}
-                  displayvalue='libelle'
-                  label='Niveau'
-                />
-                <SelectPersonnalize
-                  error={isSubmit && dataRow.objectif_form === 'all' ? true : false}
-                  handleChangeValue={props.handleChangeUpdateRow}
-                  path={'global/findAll?table=objectif'}
-                  rowKey='objectif_form'
-                  value={dataRow.objectif_form}
-                  displayvalue='libelle'
-                  label='Objectif'
-                />
-              </div>
-
-              <div className={classes.blocForm}>
-                <TextField required type="number" size="small" label="Heure socle" variant="outlined"
-                  error={isSubmit && dataRow.nb_heure_socle === '' ? true : false} value={dataRow.nb_heure_socle}
-                  onChange={(e) => props.handleChangeUpdateRow('nb_heure_socle', e.target.value)}
-                />
-
-                <TextField required type="text" size="small" label="Heure Ent" variant="outlined"
-                  error={isSubmit && dataRow.nb_heure_ent === '' ? true : false} value={dataRow.nb_heure_ent}
-                  onChange={(e) => props.handleChangeUpdateRow('nb_heure_ent', e.target.value)}
-                />
-
-                <TextField required type="number" size="small" label="Heure Appui" variant="outlined"
-                  error={isSubmit && dataRow.nb_heure_appui === '' ? true : false} value={dataRow.nb_heure_appui}
-                  onChange={(e) => props.handleChangeUpdateRow('nb_heure_appui', e.target.value)}
-                />
-
-                <TextField required type='text' size="small" label="Heure Soutien" variant="outlined"
-                  error={isSubmit && dataRow.nb_heure_soutien === '' ? true : false} value={dataRow.nb_heure_soutien}
-                  onChange={(e) => props.handleChangeUpdateRow('nb_heure_soutien', e.target.value)}
-                />
-
-                <TextField required type="number" size="small" label="Prix < 6 pers" variant="outlined"
-                  error={isSubmit && dataRow.prixTrancheA === '' ? true : false} value={dataRow.prixTrancheA}
-                  onChange={(e) => props.handleChangeUpdateRow('prixTrancheA', e.target.value)}
-                />
-
-                <TextField required type="number" size="small" label="Prix > 6 pers" variant="outlined"
-                  error={isSubmit && dataRow.prixTrancheB === '' ? true : false} value={dataRow.prixTrancheB}
-                  onChange={(e) => props.handleChangeUpdateRow('prixTrancheB', e.target.value)}
-                />
-              </div>
-
-            </form>
-
-            <div className={classes.btnActionModal}>
-
-              <Button onClick={props.handleCloseModal} variant="outlined" color="primary">
-                Annuler
-              </Button>
-              {clickHandleSubmit
-                ? <Button variant="contained" color="primary"
-                  endIcon={<CircularProgress size={20} className={classes.spinnerBtn} />}>
-                  Enregistrer
-                </Button> :
-                <Button onClick={() => { setClickHandleSubmit(true); handleSubmit() }}
-                  variant="contained" color="primary" >
-                  Enregistrer
-                </Button>}
-
-
-            </div>
-
-            <Divider className={classes.dividerTop} />
-            <Typography className={classes.OFTitle}>OF Dispensateur</Typography>
-
-            <TableContainer className={`${classes.table} scrollBar-personnalize`}>
-              <Table aria-label="collapsible table" size="small" stickyHeader>
-                <TableHead>
-                  <TableRow>
-                    <TableCell style={{ width: 100, }}></TableCell>
-                    <TableCell style={{ width: 180, }}>Priorité</TableCell>
-                    <TableCell>Attributaires</TableCell>
-                    <TableCell style={{ width: 250, }}>Communes</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {listOf && listOf.map((v) => (
-                    v.id.toString().includes('new_')
-                      ? <TableRow key={'OF_' + v.id} >
-                        <TableCell>
-
-                          <Tooltip title="Annuler" aria-label="cancel" classes={{ tooltip: classes.tooltip }}>
-                            <IconButton aria-label="cancel" color="primary" onClick={() => {
-                              setCreatingPossible(true);
-                              handleDeleteNewOf(v.id)
-                            }}>
-                              <CancelOutlinedIcon />
-                            </IconButton>
-                          </Tooltip>
-
-                          {v.priorite && v.id_attr && !v.error
-                            ? <Tooltip title="Enregistrer" aria-label="save" classes={{ tooltip: classes.tooltip }}>
-                              <IconButton aria-label="save" color="primary" onClick={() => {
+                            <Tooltip title="Annuler" aria-label="cancel" classes={{ tooltip: classes.tooltip }}>
+                              <IconButton aria-label="cancel" color="primary" onClick={() => {
                                 setCreatingPossible(true);
-                                props.handleSaveNewOf(dataRow, v)
+                                handleDeleteNewOf(v.id)
                               }}>
-                                <SaveIcon />
+                                <CancelOutlinedIcon />
                               </IconButton>
                             </Tooltip>
-                            : <IconButton disabled aria-label="save" color="primary">
-                              <SaveIcon />
-                            </IconButton>
-                          }
-                        </TableCell>
-                        <TableCell>
-                          <TextField error={v.error}
-                            label="Priorité" type="number" size="small" className={classes.inputNumber}
-                            value={v.priorite} variant="outlined" onChange={(e) => handleChangePriorite(e.target.value, v.id)}
-                          />
-                        </TableCell>
-                        <TableCell style={{ maxWidth: 600 }}>
-                          <FormControl size="small" variant="outlined" className={classes.selectOf} error={!v.id_attr || v.id_attr === 'all'}>
-                            <InputLabel id="demo-simple-select-outlined-label">Attributaire</InputLabel>
-                            {listOfSelect.length > 0 &&
-                              <Select
-                                value={v.id_attr ? v.id_attr : 'all'}
-                                onChange={(e) => handleChangeValueSelectOF(e.target.name, e.target.value)}
-                                name={v.id.toString()}
-                                label='Attributaire'
-                              >
-                                <MenuItem value="all">
-                                  <em>Choisir</em>
-                                </MenuItem>
-                                {listOfSelect.map((v) => (
-                                  <MenuItem key={v.id + '_' + v.libelle} value={v.id}>{v.libelle}</MenuItem>
-                                ))}
-                              </Select>
+
+                            {v.priorite && v.id_attr && !v.error
+                              ? <Tooltip title="Enregistrer" aria-label="save" classes={{ tooltip: classes.tooltip }}>
+                                <IconButton aria-label="save" color="primary" onClick={() => {
+                                  setCreatingPossible(true);
+                                  props.handleSaveNewOf(dataRow, v)
+                                }}>
+                                  <SaveIcon />
+                                </IconButton>
+                              </Tooltip>
+                              : <IconButton disabled aria-label="save" color="primary">
+                                <SaveIcon />
+                              </IconButton>
                             }
-                          </FormControl>
-                        </TableCell>
-                        <TableCell>
-                          <p>Créer d'abord l'OF pour lui attribuer une commune</p>
-                          {/* <FormControl size="small" variant="outlined" className={classes.selectCommune} error={!v.id_commune || v.id_commune === 'all'}>
+                          </TableCell>
+                          <TableCell>
+                            <TextField error={v.error}
+                              label="Priorité" type="number" size="small" className={classes.inputNumber}
+                              value={v.priorite} variant="outlined" onChange={(e) => handleChangePriorite(e.target.value, v.id)}
+                            />
+                          </TableCell>
+                          <TableCell style={{ maxWidth: 600 }}>
+                            <FormControl size="small" variant="outlined" className={classes.selectOf} error={!v.id_attr || v.id_attr === 'all'}>
+                              <InputLabel id="demo-simple-select-outlined-label">Attributaire</InputLabel>
+                              {listOfSelect.length > 0 &&
+                                <Select
+                                  value={v.id_attr ? v.id_attr : 'all'}
+                                  onChange={(e) => handleChangeValueSelectOF(e.target.name, e.target.value)}
+                                  name={v.id.toString()}
+                                  label='Attributaire'
+                                >
+                                  <MenuItem value="all">
+                                    <em>Choisir</em>
+                                  </MenuItem>
+                                  {listOfSelect.map((v) => (
+                                    <MenuItem key={v.id + '_' + v.libelle} value={v.id}>{v.libelle}</MenuItem>
+                                  ))}
+                                </Select>
+                              }
+                            </FormControl>
+                          </TableCell>
+                          <TableCell>
+                            <p>Créer d'abord l'OF pour lui attribuer une commune</p>
+                            {/* <FormControl size="small" variant="outlined" className={classes.selectCommune} error={!v.id_commune || v.id_commune === 'all'}>
                             <InputLabel id="demo-simple-select-outlined-label">Commune</InputLabel>
                             {listCommuneSelect.length > 0 &&
                               <Select
@@ -475,110 +485,110 @@ export default function ModalCatalogue(props) {
                                 ))}
                               </Select>}
                           </FormControl> */}
-                        </TableCell>
-                      </TableRow>
+                          </TableCell>
+                        </TableRow>
 
 
-                      : <TableRow key={'OF_' + v.id} >
-                        <TableCell>
-                          <Tooltip title="Supprimer l'OF" aria-label="delete" classes={{ tooltip: classes.tooltip }}>
-                            <IconButton aria-label="delete" color="primary" onClick={() => props.handleDeleteOf(v.id, dataRow.id)}>
-                              <DeleteIcon />
-                            </IconButton>
-                          </Tooltip>
-                        </TableCell>
-                        <TableCell>
-                          <TextField error={v.error}
-                            label="Priorité" type="number" size="small" className={classes.inputNumber}
-                            value={v.priorite} variant="outlined" onChange={(e) => handleChangePriorite(e.target.value, v.id)}
-                          />
-                          {v.priorite && !v.error
-                            ? <Tooltip title="Enregistrer" aria-label="save" classes={{ tooltip: classes.tooltip }}>
-                              <IconButton aria-label="save" color="secondary" onClick={() => props.handleUpdateOf(v.id, dataRow.id, v.priorite)}>
-                                <SaveIcon />
+                        : <TableRow key={'OF_' + v.id} >
+                          <TableCell>
+                            <Tooltip title="Supprimer l'OF" aria-label="delete" classes={{ tooltip: classes.tooltip }}>
+                              <IconButton aria-label="delete" color="primary" onClick={() => props.handleDeleteOf(v.id, dataRow.id)}>
+                                <DeleteIcon />
                               </IconButton>
                             </Tooltip>
-                            : <IconButton disabled aria-label="save" color="secondary">
-                              <SaveIcon />
-                            </IconButton>
-                          }
+                          </TableCell>
+                          <TableCell>
+                            <TextField error={v.error}
+                              label="Priorité" type="number" size="small" className={classes.inputNumber}
+                              value={v.priorite} variant="outlined" onChange={(e) => handleChangePriorite(e.target.value, v.id)}
+                            />
+                            {v.priorite && !v.error
+                              ? <Tooltip title="Enregistrer" aria-label="save" classes={{ tooltip: classes.tooltip }}>
+                                <IconButton aria-label="save" color="secondary" onClick={() => props.handleUpdateOf(v.id, dataRow.id, v.priorite)}>
+                                  <SaveIcon />
+                                </IconButton>
+                              </Tooltip>
+                              : <IconButton disabled aria-label="save" color="secondary">
+                                <SaveIcon />
+                              </IconButton>
+                            }
 
-                        </TableCell>
-                        <TableCell>
-                          {v.libelle}
-                        </TableCell>
-                        <TableCell>
-                          <div>
-                            {v.commune && v.commune.includes('|')
-                              ? v.commune.split('|').map((x) => <Chip
-                                key={'chip_' + dataRow.id_of_cata + x.split(':')[0]}
-                                label={x.split(':')[1]}
-                                onDelete={() => props.handleDeleteCommune(dataRow, v.id, x.split(':')[0])}
-                                color="secondary"
-                                variant="outlined"
-                              />)
-                              : v.commune && v.commune.includes(':') && <Chip
-                                key={'chip_' + dataRow.id_of_cata + v.commune.split(':')[0]}
-                                label={v.commune.split(':')[1]}
-                                onDelete={() => props.handleDeleteCommune(dataRow, v.id, v.commune.split(':')[0])}
-                                color="secondary"
-                                variant="outlined"
-                              />}
-                          </div>
-                          <div>
-                            {v.id === dataRow.id_of_cata && (
-                              addCommune.id_of_cata === v.id
-                                ? <>
-                                  <FormControl size="small" variant="outlined" className={classes.selectCommune} error={!v.id_commune || v.id_commune === 'all'}>
-                                    <InputLabel id="demo-simple-select-outlined-label">Commune</InputLabel>
-                                    {listCommuneSelect.length > 0 &&
-                                      <Select
-                                        value={addCommune.id_of_cata === v.id ? addCommune.id_commune : 'all'}
-                                        onChange={(e) => handleChangeValueAddSelectCommune(e.target.name, e.target.value)}
-                                        name={v.id.toString()}
-                                        label='Commune' >
-                                        <MenuItem value="all">
-                                          <em>Choisir</em>
-                                        </MenuItem>
-                                        {listCommuneSelect.map((v) => (
-                                          <MenuItem key={v.id + '_' + v.libelle} value={v.id}>{v.libelle}</MenuItem>
-                                        ))}
-                                      </Select>}
-                                  </FormControl>
-                                  <Tooltip title="Enregistrer" aria-label="save" classes={{ tooltip: classes.tooltip }}>
-                                    <IconButton aria-label="save" color="secondary" onClick={() => handleSaveAddNewCommune(dataRow, addCommune)}>
-                                      <SaveIcon />
+                          </TableCell>
+                          <TableCell>
+                            {v.libelle}
+                          </TableCell>
+                          <TableCell>
+                            <div>
+                              {v.commune && v.commune.includes('|')
+                                ? v.commune.split('|').map((x) => <Chip
+                                  key={'chip_' + dataRow.id_of_cata + x.split(':')[0]}
+                                  label={x.split(':')[1]}
+                                  onDelete={() => props.handleDeleteCommune(dataRow, v.id, x.split(':')[0])}
+                                  color="secondary"
+                                  variant="outlined"
+                                />)
+                                : v.commune && v.commune.includes(':') && <Chip
+                                  key={'chip_' + dataRow.id_of_cata + v.commune.split(':')[0]}
+                                  label={v.commune.split(':')[1]}
+                                  onDelete={() => props.handleDeleteCommune(dataRow, v.id, v.commune.split(':')[0])}
+                                  color="secondary"
+                                  variant="outlined"
+                                />}
+                            </div>
+                            <div>
+                              {v.id === dataRow.id_of_cata && (
+                                addCommune.id_of_cata === v.id
+                                  ? <>
+                                    <FormControl size="small" variant="outlined" className={classes.selectCommune} error={!v.id_commune || v.id_commune === 'all'}>
+                                      <InputLabel id="demo-simple-select-outlined-label">Commune</InputLabel>
+                                      {listCommuneSelect.length > 0 &&
+                                        <Select
+                                          value={addCommune.id_of_cata === v.id ? addCommune.id_commune : 'all'}
+                                          onChange={(e) => handleChangeValueAddSelectCommune(e.target.name, e.target.value)}
+                                          name={v.id.toString()}
+                                          label='Commune' >
+                                          <MenuItem value="all">
+                                            <em>Choisir</em>
+                                          </MenuItem>
+                                          {listCommuneSelect.map((v) => (
+                                            <MenuItem key={v.id + '_' + v.libelle} value={v.id}>{v.libelle}</MenuItem>
+                                          ))}
+                                        </Select>}
+                                    </FormControl>
+                                    <Tooltip title="Enregistrer" aria-label="save" classes={{ tooltip: classes.tooltip }}>
+                                      <IconButton aria-label="save" color="secondary" onClick={() => handleSaveAddNewCommune(dataRow, addCommune)}>
+                                        <SaveIcon />
+                                      </IconButton>
+                                    </Tooltip>
+                                  </>
+                                  : <Tooltip title="Ajouter une commune" aria-label="add" classes={{ tooltip: classes.tooltip }}>
+                                    <IconButton aria-label="add" color="secondary" onClick={() => handleAddNewCommune(v.id)}>
+                                      <AddCircleOutlineIcon />
                                     </IconButton>
                                   </Tooltip>
-                                </>
-                                : <Tooltip title="Ajouter une commune" aria-label="add" classes={{ tooltip: classes.tooltip }}>
-                                  <IconButton aria-label="add" color="secondary" onClick={() => handleAddNewCommune(v.id)}>
-                                    <AddCircleOutlineIcon />
-                                  </IconButton>
-                                </Tooltip>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                  ))}
-                  <TableRow className={creatingPossible ? classes.lastRow : classes.lastRowDisabled} onClick={handleCreateNewOF}>
-                    <TableCell colSpan={4}>
-                      {creatingPossible
-                        ? <Tooltip title="Ajouter un OF" aria-label="add" classes={{ tooltip: classes.tooltip }}>
-                          <IconButton aria-label="add" color="primary">
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                    ))}
+                    <TableRow className={creatingPossible ? classes.lastRow : classes.lastRowDisabled} onClick={handleCreateNewOF}>
+                      <TableCell colSpan={4}>
+                        {creatingPossible
+                          ? <Tooltip title="Ajouter un OF" aria-label="add" classes={{ tooltip: classes.tooltip }}>
+                            <IconButton aria-label="add" color="primary">
+                              <AddCircleOutlineIcon />
+                            </IconButton>
+                          </Tooltip>
+                          : <IconButton disabled aria-label="add" color="primary">
                             <AddCircleOutlineIcon />
                           </IconButton>
-                        </Tooltip>
-                        : <IconButton disabled aria-label="add" color="primary">
-                          <AddCircleOutlineIcon />
-                        </IconButton>
-                      } Ajouter un OF
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </TableContainer>
-
+                        } Ajouter un OF
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </div>
           </div>
         </Fade>
       </Modal>
