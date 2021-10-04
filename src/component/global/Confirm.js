@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Confirm(props) {
     const classes = useStyles();
-    const { handleClose, handleValide, open } = props;
+    const { handleClose, handleValide, open, message } = props;
     
     const handleCancel = () => {
         handleClose();
@@ -49,7 +49,7 @@ export default function Confirm(props) {
                         ? props.value.value_new ? dateFormat(props.value.value_new) : 'Aucune date' 
                         : props.value.value_new }</div>
                 </div>
-                <p>Les OF devront être à nouveau sollicités. </p>
+                <p>{message}</p>
             </DialogContent>
             <DialogActions>
                 <Button autoFocus onClick={handleCancel} color="primary">

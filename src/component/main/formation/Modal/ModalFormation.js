@@ -4,13 +4,15 @@ import Modal from '@material-ui/core/Modal';
 import Backdrop from '@material-ui/core/Backdrop';
 import Fade from '@material-ui/core/Fade';
 import IconButton from '@material-ui/core/IconButton';
-import { Tooltip } from '@material-ui/core';
+import { Tooltip, Typography } from '@material-ui/core';
 import CloseRoundedIcon from '@material-ui/icons/CloseRounded';
 // import Stepper from './Stepper';
-import Formulaire from './children/formation/Formulaire';
+import Formulaire from './children/Formulaire';
 import Sollicitation from './children/sollicitation/Sollicitation';
-import PartieBRS from './children/brs/PartieBRS';
+import PartieBRS from './children/PartieBRS';
+import PartieDPSR from './children/PartieDPSR';
 import CommentIcon from '@material-ui/icons/Comment';
+import Commentaire from '../../../global/commentaire/Commentaire';
 // import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles((theme) => ({
@@ -44,6 +46,7 @@ const useStyles = makeStyles((theme) => ({
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
+        marginBottom: theme.spacing(1)
     },
     titleModalBtn: {
         display: 'flex',
@@ -53,11 +56,29 @@ const useStyles = makeStyles((theme) => ({
         color: "#fff",
     },
     body: {
-        maxHeight: '80vh',
+        maxHeight: '75vh',
         overflowY: 'scroll',
     },
     bodyMain: {
         padding: theme.spacing(2, 1, 2, 0),
+    },
+    formCancel: {
+        color: 'red',
+        position: 'absolute',
+        top: '40%',
+        left: '30%',
+        transform: 'rotate(-15deg)',
+        fontSize: 35,
+        border: '1px solid',
+        padding: theme.spacing(2),
+        backgroundColor: '#fff',
+        zIndex: 999,
+    },
+    flexCadre: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingTop: theme.spacing(2)
     }
 }));
 
@@ -71,9 +92,12 @@ export default function ModalCreateSol(props) {
 
     const handleSubmit = (newFormFromOther) => {
         setIsSubmit(true)
+
         props.updateFormation.id === ''
             ? props.handleSaveFormation(newFormFromOther)
             : props.handleEditFormation();
+
+
         //   let action = dataRow.id === '' || dataRow.id === 0 ? 'create' : 'update';
 
         //   switch (action) {
@@ -87,7 +111,7 @@ export default function ModalCreateSol(props) {
     const handleIsSubmitting = () => {
         setIsSubmit(!isSubmit)
     }
-    console.log(props.sollicitation)
+
     return (
         <div>
             <Modal
@@ -115,12 +139,7 @@ export default function ModalCreateSol(props) {
                             </div>
                             {/* {(props.updateFormation.id !== '') && <Stepper />} */}
                             <div className={classes.titleModalBtn}>
-
-                                {/* <Tooltip title="Ajouter un commentaire" aria-label="comm" classes={{ tooltip: classes.tooltip }}> */}
-                                    <IconButton disabled aria-label="close" color="primary" onClick={() => console.log('Créer un comm')}>
-                                        <CommentIcon />
-                                    </IconButton>
-                                {/* </Tooltip> */}
+                                <Commentaire user={props.user} formation={props.updateFormation} />
                                 <Tooltip title="Fermer" aria-label="close" classes={{ tooltip: classes.tooltip }}>
                                     <IconButton aria-label="close" color="primary" onClick={props.handleCloseModal}>
                                         <CloseRoundedIcon />
@@ -164,18 +183,34 @@ export default function ModalCreateSol(props) {
                                             handleValideSollicitation={props.handleValideSollicitation}
                                             user={props.user}
                                         />
-                                        {props.sollicitation.dateValidationDT &&
-                                            <PartieBRS
-                                                updateFormation={props.updateFormation}
-                                                handleChangeFormation={props.handleChangeFormation}
-                                                handleCancelSollicitation={props.handleCancelSollicitation}
-                                                handleValideSollicitation={props.handleValideSollicitation}
-                                                sollicitation={props.sollicitation}
-                                                handleEditFormation={props.handleEditFormation}
-                                                user={props.user}
-                                            />}
+                                        <div className={classes.flexCadre}>
+                                            {props.sollicitation.date_ValidationDT &&
+                                                <PartieBRS
+                                                    updateFormation={props.updateFormation}
+                                                    handleChangeFormation={props.handleChangeFormation}
+                                                    handleCancelSollicitation={props.handleCancelSollicitation}
+                                                    handleValideSollicitation={props.handleValideSollicitation}
+                                                    sollicitation={props.sollicitation}
+                                                    changeNArticle={props.changeNArticle}
+                                                    user={props.user}
+                                                />}
+                                            {props.sollicitation.date_EditBRS &&
+                                                <PartieDPSR
+                                                    updateFormation={props.updateFormation}
+                                                    handleChangeFormation={props.handleChangeFormation}
+                                                    handleCancelSollicitation={props.handleCancelSollicitation}
+                                                    handleValideSollicitation={props.handleValideSollicitation}
+                                                    sollicitation={props.sollicitation}
+                                                    handleEditFormation={props.handleEditFormation}
+                                                    handleSaveConv={props.handleSaveConv}
+                                                    user={props.user}
+                                                />}
+                                        </div>
+                                        {props.updateFormation.etat === 20 &&
+                                            <Typography className={classes.formCancel}>{"Formation annulée".toUpperCase()}</Typography>
+                                        }
                                     </>
-                                    : <p>Pas d'OF attaché à la formation</p>
+                                    : props.updateFormation.id !== '' && <p>Pas d'OF attaché à la formation</p>
                                 }
                             </div>
                         </div>

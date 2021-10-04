@@ -17,6 +17,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import { IsPermitted } from '../../../../../../../utilities/Function';
 import Stepper from '../../../Stepper';
+import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 
 const useStyles = makeStyles((theme) => ({
     blockIcop: {
@@ -68,19 +69,33 @@ export default function CardValide(props) {
     const handleChangeDateicop = (e) => {
         setDateIcop(e.target.value)
     }
-
+    
     const isDisabled = !IsPermitted(props.user, 'sollicitation', 'updateDT')
-
     return (
         <>
-            <Stepper step={props.stepper === 6
+            <Stepper steps={[
+                { libelle: 'Validée DT', date: props.sollicitation.date_ValidationDT },
+                { libelle: 'Validée DDO', date: props.sollicitation.date_ValidationDDO },
+                { libelle: 'BRS édité', date: props.sollicitation.date_EditBRS },
+                { libelle: 'Conventionné', date: props.sollicitation.date_nConv },
+            ]} 
+            /*
+            6: Validation DT
+            7: Modification DDO
+            8: Validation DDO
+            9: BRS Edité
+            10: Modification en cours
+            11: Attente de re validation
+            12: Conventionné
+            */
+            step={(props.stepper === 6 || props.stepper === 7 || props.stepper === 10)
                 ? 1
-                : props.stepper === 7
-                    ? 1
-                    : props.stepper === 8
-                        ? 2
-                        : props.stepper === 9
-                            ? 3
+                : (props.stepper === 8 )
+                    ? 2
+                    : props.stepper === 9
+                        ? 3
+                        : props.stepper === 12
+                            ? 4
                             : 0} />
             <div className={classes.blockIcop}>
                 <form>
@@ -93,9 +108,8 @@ export default function CardValide(props) {
                         variant="outlined"
                         label="Date d'icop"
                         type="date"
-                        InputLabelProps={{
-                            shrink: true,
-                        }} />
+                        InputProps={{ inputProps: { max: props.updateFormation.date_entree_demandee } }}
+                        InputLabelProps={{ shrink: true }} />
                 </form>
 
                 <Button disabled={isDisabled || dateicop === ''} onClick={() => { props.handlAddIcop(dateicop); setDateIcop('') }} variant="contained" color="secondary"
@@ -145,21 +159,42 @@ export default function CardValide(props) {
                         </Select>
                     }
                 </FormControl>
-                <Button disabled={
-                    !props.sollicitation.lieu_execution ||
-                    props.sollicitation.id_dateIcop === '' ||
-                    props.sollicitation.dateValidationDT === '' ||
-                    isDisabled} onClick={() => props.handleValideSollicitation('DT')} variant="contained" color="secondary" >
-                    Modifier
-                </Button>
-                <Button disabled={
-                    !props.sollicitation.lieu_execution ||
-                    props.sollicitation.id_dateIcop === '' ||
-                    props.sollicitation.dateValidationDT !== '' ||
-                    isDisabled} onClick={() => props.handleValideSollicitation('DT')} variant="contained" color="secondary" >
-                    Valider
-                </Button>
-                
+
+                {(props.sollicitation.etat === 9 || props.sollicitation.etat === 12)
+                    ? props.sollicitation.date_ValidationDT
+                        ? <Button startIcon={<ErrorOutlineIcon />}
+                            disabled={
+                                (props.sollicitation.lieu_execution === null || props.sollicitation.lieu_execution === 'all' || props.sollicitation.lieu_execution === null) ||
+                                props.sollicitation.id_dateIcop === null ||
+                                (props.sollicitation.date_ValidationDT === '' || props.sollicitation.date_ValidationDT === null) ||
+                                isDisabled} onClick={() => props.handleValideSollicitation('DT')} variant="contained" color="secondary" >
+                            Modifier
+                        </Button>
+                        : <Button startIcon={<ErrorOutlineIcon />}
+                            disabled={
+                                props.sollicitation.lieu_execution === null || props.sollicitation.lieu_execution === 'all' ||
+                                props.sollicitation.id_dateIcop === null ||
+                                (props.sollicitation.date_ValidationDT !== '' && props.sollicitation.date_ValidationDT !== null) ||
+                                isDisabled} onClick={() => props.handleValideSollicitation('DT')} variant="contained" color="secondary" >
+                            Valider
+                        </Button>
+                    : props.sollicitation.date_ValidationDT
+                        ? <Button disabled={
+                            (props.sollicitation.lieu_execution === null || props.sollicitation.lieu_execution === 'all' || props.sollicitation.lieu_execution === null) ||
+                            props.sollicitation.id_dateIcop === null ||
+                            (props.sollicitation.date_ValidationDT === '' || props.sollicitation.date_ValidationDT === null) ||
+                            isDisabled} onClick={() => props.handleValideSollicitation('DT')} variant="contained" color="secondary" >
+                            Modifier
+                        </Button>
+                        : <Button disabled={
+                            (props.sollicitation.lieu_execution === null || props.sollicitation.lieu_execution === 'all') ||
+                            props.sollicitation.id_dateIcop === null ||
+                            (props.sollicitation.date_ValidationDT !== '' && props.sollicitation.date_ValidationDT !== null) ||
+                            isDisabled} onClick={() => props.handleValideSollicitation('DT')} variant="contained" color="secondary" >
+                            Valider
+                        </Button>
+                }
+
             </div>
         </>
     )

@@ -151,29 +151,22 @@ export default function PermanentDrawerLeft() {
           </ListItem>}
 
         {IsPermitted(user, 'brs', 'view') &&
-          <ListItem button className='primary-h-color' component={Link} to="#" selected={selectedIndex === 3}
+          <ListItem button className='primary-h-color' component={Link} to="brs" selected={selectedIndex === 3}
             onClick={(event) => handleListItemClick(event, 3)}>
             <ListItemIcon><FileCopyIcon /></ListItemIcon>
             <ListItemText secondary='BRS' />
           </ListItem>}
 
-        {IsPermitted(user, 'dashboard', 'view') &&
-          <ListItem button className='primary-h-color' component={Link} to="#" selected={selectedIndex === 4}
-            onClick={(event) => handleListItemClick(event, 4)}>
-            <ListItemIcon><DashboardIcon /></ListItemIcon>
-            <ListItemText secondary='Tableau de bord' />
-          </ListItem>}
-
         {IsPermitted(user, 'bdd', 'view') &&
-          <ListItem button className='primary-h-color' component={Link} to="bdd" selected={selectedIndex === 5}
-            onClick={(event) => handleListItemClick(event, 5)}>
+          <ListItem button className='primary-h-color' component={Link} to="bdd" selected={selectedIndex === 4}
+            onClick={(event) => handleListItemClick(event, 4)}>
             <ListItemIcon><StorageIcon /></ListItemIcon>
             <ListItemText secondary='Base de donnée' />
           </ListItem>}
 
         {IsPermitted(user, 'admin', 'view') &&
-          <ListItem button className='primary-h-color' component={Link} to="admin" selected={selectedIndex === 6}
-            onClick={(event) => handleListItemClick(event, 6)}>
+          <ListItem button className='primary-h-color' component={Link} to="admin" selected={selectedIndex === 5}
+            onClick={(event) => handleListItemClick(event, 5)}>
             <ListItemIcon><DashboardIcon /></ListItemIcon>
             <ListItemText secondary='Admin' />
           </ListItem>}

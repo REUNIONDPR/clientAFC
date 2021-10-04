@@ -13,6 +13,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import Cookie from 'js-cookie';
 import { frFR } from '@material-ui/core/locale';
 import Juridique from './component/main/juridique/Juridique';
+import Brs from './component/main/brs/Brs';
+
 function App() {
 
   const theme = createMuiTheme({
@@ -104,6 +106,7 @@ function App() {
                   <PrivateRoute path='/catalogue' component={Catalogue} />
                   <PrivateRoute path='/admin' component={Admin} />
                   <PrivateRoute path='/bdd' component={Juridique} />
+                  <PrivateRoute path='/brs' component={Brs} />
                   <PrivateRoute path='/home' component={home} /> </>
                 )} />
               </Main>

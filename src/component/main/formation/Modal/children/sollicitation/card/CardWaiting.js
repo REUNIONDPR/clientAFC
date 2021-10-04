@@ -20,14 +20,17 @@ export default function CardWaiting(props) {
         <>
             <div className={classes.blockCenter}>
                 <FormControl component="fieldset">
-                    <RadioGroup row aria-label="responseOF" className={classes.radioGrp} name="responseOF" onChange={props.handleChangeRadioResp}>
+                    <RadioGroup row aria-label="responseOF" className={classes.radioGrp} name="responseOF" 
+                        onChange={props.handleChangeRadioResp}>
                         <FormControlLabel
                             value="refus"
+                            disabled={props.updateFormation.etat === 20}
                             control={<Radio color="secondary" />}
                             label="Refusé"
                         />
                         <FormControlLabel
                             value="accept"
+                            disabled={props.updateFormation.etat === 20}
                             control={<Radio color="secondary" />}
                             label="Accepté"
                         />
@@ -48,7 +51,7 @@ export default function CardWaiting(props) {
                 />
             </div>
             <div className={classes.blockCenter}>
-                {props.radioSelected === ''
+                {(props.radioSelected === '' || props.updateFormation.etat === 20)
                     ? <Button disabled variant="contained" color="secondary">
                         Enregistrer
                     </Button>
