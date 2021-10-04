@@ -26,6 +26,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import { getDateToday } from "../../../utilities/Function";
 import { UserContext } from '../../../context/user.context';
 import SnackBar from '../../global/SnackBar/SnackBar';
+import UpdateIcon from '@material-ui/icons/Update';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -62,6 +63,10 @@ const useStyles = makeStyles((theme) => ({
         fontSize: '15px',
         maxWidth: 'none',
     },
+    invalide: {
+        fontStyle: 'italic',
+        textDecoration: 'line-through',
+    }
 }));
 
 export default function Brs() {
@@ -74,7 +79,7 @@ export default function Brs() {
     const [open, setOpen] = useState(0);
     const [loading, setLoading] = useState(0);
     const [lotList, setLotList] = useState([]);
-    const [filterValues, setFilterValues] = useState({ id_lot: 'all' });
+    const [filterValues, setFilterValues] = useState({ id_lot: 'all', etat: 0 });
 
     const [openSnackBar, setOpenSnackBar] = useState(false);
     const [messageSnackBar, setMessageSnackBar] = useState('');
@@ -105,6 +110,7 @@ export default function Brs() {
     useEffect(() => {
         if (BrsList.length > 0) {
             let array = [];
+            
             array = BrsList.filter((v) => {
 
                 for (let key in filterValues) {
@@ -112,6 +118,23 @@ export default function Brs() {
                     switch (key) {
                         case 'id_lot':
                             if ((v[key] && v[key].toString()) !== filterValues[key].toString()) return false
+                            break;
+                        case 'etat':
+                            let value = filterValues[key];
+                            if (value === 0) {
+                                if (v['modifie_brs'] === 1) return false;
+                            } else if (value === 1) {
+                                console.log(v['modifie_brs'] !== 1 && v['nouveauBRS'] !== 0)
+                                if (v['modifie_brs'] === 1) {
+                                    if (v['nouveauBRS'] !== 0){
+                                        return false;
+                                    }
+                                }else{
+                                    return false
+                                }
+                            } else if (value === 2) {
+                                if (v['nouveauBRS'] === 0) return false;
+                            }
                             break;
                         default: break;
                     }
@@ -182,12 +205,12 @@ export default function Brs() {
                 data: { ...sollicitation, nConv: sollicitation.nConv_tmp, date_nConv: dateTime, user: user.idgasi },
                 headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
             }).then((response) => {
-                if(response.status === 200){
+                if (response.status === 200) {
                     setSollicitationList([...sollicitationList.map((v) =>
                         v.id_formation === id ? { ...sollicitation, nConv: sollicitation.nConv_tmp } : v)]);
                     setMessageSnackBar('N° conventionnement enregistré!');
                     setSeverity('success');
-                }else{
+                } else {
                     setMessageSnackBar('Erreur d\'enregistrement du N° conventionnement.');
                     setSeverity('error');
                 }
@@ -196,7 +219,7 @@ export default function Brs() {
         }
     }
 
-
+    const etatList = [{ id: 0, libelle: 'Valide' }, { id: 1, libelle: 'En cours de réédition' }, { id: 2, libelle: 'Remplacé' }]
     // console.log(sollicitationList)
 
     return (
@@ -229,6 +252,24 @@ export default function Brs() {
                         ))}
                     </Select>
                 </FormControl>
+
+                <FormControl size="small" variant="outlined" className={classes.formControl}>
+                    <div className={classes.flex}>
+                        <InputLabel>Etat</InputLabel>
+                        <Select className={classes.selectField}
+                            name='etat'
+                            label='etat'
+                            value={filterValues.etat}
+                            onChange={(e) => handleChangeFilter(e.target.name, e.target.value)} >
+                            <MenuItem value="all"><em>Tous</em></MenuItem>
+                            {etatList.map((v) => (
+                                <MenuItem key={v.id} value={v.id}>
+                                    {v.libelle}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </div>
+                </FormControl>
             </div>
             <List
                 component={"nav"}
@@ -238,22 +279,42 @@ export default function Brs() {
                 {displayBrsList.length > 0
                     ? displayBrsList.map((b) => (
                         <div key={b.filename} className={classes.listItem}>
-
-                            <ListItem>
-                                <ListItemText primary={b.n_brs} />
-                                <Tooltip title="Télécharger le BRS" aria-label="cancel" classes={{ tooltip: classes.tooltip }}>
-                                    <IconButton color="primary" onClick={() => downloadBRS(b.id, b.libelle.split('-')[0].replaceAll(' ', ''), b.filename)}>
+                            {(b.modifie_brs === 1 && b.nouveauBRS === 0)
+                                // Si le BRS est en attente de réédition
+                                ? <ListItem>
+                                    <ListItemText primary={b.n_brs} />
+                                    <Tooltip title="BRS En attente de réédition" aria-label="canceled" classes={{ tooltip: classes.tooltip }}>
+                                        <UpdateIcon style={{ fill: 'orange' }} />
+                                    </Tooltip>
+                                    <IconButton color="primary" disabled>
                                         <InboxIcon />
                                     </IconButton>
-                                </Tooltip>
-
-                                <Tooltip title={open === b.id ? "Fermer" : "Ouvrir"} aria-label="cancel" classes={{ tooltip: classes.tooltip }}>
-                                    <IconButton color="secondary" onClick={() => { open !== b.id && setLoading(b.id); handleOpenBRS(b.id) }} >
-                                        {loading === b.id ? <CircularProgress size={20} /> : open === b.id ? <ExpandLess /> : <ExpandMore />}
+                                    <IconButton color="secondary" disabled >
+                                        <ExpandMore />
                                     </IconButton>
-                                </Tooltip>
+                                </ListItem>
+                                : (b.modifie_brs === 1 && b.nouveauBRS !== 0)
+                                    // Si le BRS est nul et non avenue
+                                    ? <ListItem>
+                                        <ListItemText className={classes.invalide} primary={b.n_brs} />
+                                    </ListItem>
 
-                            </ListItem>
+                                    // BRS valide
+                                    : <ListItem>
+                                        <ListItemText primary={b.n_brs} />
+                                        <Tooltip title="Télécharger le BRS" aria-label="cancel" classes={{ tooltip: classes.tooltip }}>
+                                            <IconButton color="primary" onClick={() => downloadBRS(b.id, b.libelle.split('-')[0].replaceAll(' ', ''), b.filename)}>
+                                                <InboxIcon />
+                                            </IconButton>
+                                        </Tooltip>
+
+                                        <Tooltip title={open === b.id ? "Fermer" : "Ouvrir"} aria-label="cancel" classes={{ tooltip: classes.tooltip }}>
+                                            <IconButton color="secondary" onClick={() => { open !== b.id && setLoading(b.id); handleOpenBRS(b.id) }} >
+                                                {loading === b.id ? <CircularProgress size={20} /> : open === b.id ? <ExpandLess /> : <ExpandMore />}
+                                            </IconButton>
+                                        </Tooltip>
+                                    </ListItem>
+                            }
                             <Collapse in={open === b.id} timeout="auto" unmountOnExit>
                                 <Table>
                                     <TableBody>

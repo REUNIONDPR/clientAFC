@@ -131,7 +131,7 @@ export default function Sollicitation(props) {
                     isSolValidate = false;
                     Obj = { etat: false, error: undefined, text: `Sollicité le ${myDate.date} à ${myDate.time}`, finDeSollicitation: false }
                 }
-            } else if(arrayCommunes.indexOf(props.updateFormation.id_commune) === -1){
+            } else if (arrayCommunes.indexOf(props.updateFormation.id_commune) === -1) {
                 Obj = { ...Obj, etat: true, error: true, text: 'Commune indisponible', finDeSollicitation: true };
             } else {
                 Obj = { etat: !firstSol, error: undefined, text: `Aucune sollicitation`, finDeSollicitation: false };
@@ -209,7 +209,7 @@ export default function Sollicitation(props) {
 
             </div>
             <div className={classes.blockSollicitation}>
-                {sollicitationVisible &&
+                {sollicitationVisible ?
                     <div className={classes.block} >
                         <div className={classes.blockTitle}>
                             {sollicitationVisible.libelle} {sollicitationVisible.date_ValidationDT && <CheckCircleOutlineIcon />}
@@ -227,7 +227,7 @@ export default function Sollicitation(props) {
                                     Solliciter l'OF
                                 </Button>}
                             </div>
-                            : !sollicitationVisible.dateRespOF  // Si pas encore de réponse de l'OF 
+                            : (!sollicitationVisible.dateRespOF && sollicitationVisible.etat === 1)// Si pas encore de réponse de l'OF 
                                 ? <CardWaiting
                                     OF={sollicitationVisible.libelle}
                                     updateFormation={props.updateFormation}
@@ -237,6 +237,7 @@ export default function Sollicitation(props) {
                                     handleChangeRefusReason={handleChangeRefusReason}
                                     showDetailRefus={showDetailRefus}
                                     radioSelected={radioSelected}
+                                    user={props.user}
                                     handleClickValide={() => props.handleResponseSollicitation(radioSelected, sollicitationVisible, refusReason)}
                                 />
                                 : sollicitationVisible.isSolValidate // Si sollicitation validée
@@ -251,8 +252,10 @@ export default function Sollicitation(props) {
                                         handleValideSollicitation={props.handleValideSollicitation}
                                         user={props.user}
                                     />
-                                    : <CardHisto data={historicList} />}
-                    </div>}
+                                    : <CardHisto data={historicList} />
+                        }
+                    </div>
+                : <span>Aucun OF n'a accpété de sollicitation sur la formation</span> }
             </div>
         </div>
     )

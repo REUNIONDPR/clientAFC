@@ -1,19 +1,22 @@
 import { getDateTime } from "../../../../../../../utilities/Function"
 
 export default function CardHisto(props) {
-    
+
     const getText = (i, info) => {
         let result = '';
         switch (i) {
             case 1:
                 result = 'Contact de l\'OF';
                 break;
+            case 3:
+                result = 'Sollicitation refusé';
+                break;
             case 8:
                 result = 'L\'OF à refusé la sollicitation.';
                 break;
             default: result = i; break
         }
-        result = info ? result + ' ( ' + info + ' )' : result;
+        result = info ? result + ' - ' + info : result;
         return result;
     }
     return (
