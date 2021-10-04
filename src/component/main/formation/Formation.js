@@ -1456,7 +1456,7 @@ export default function Formation() {
                                             <TableCell>{dateFormat(row.date_fin)}</TableCell>
                                             <TableCell>
                                                 <div className={classes.flex}>
-                                                    <Commentaire user={user} id={row.id}/>
+                                                    <Commentaire user={user} formation={row}/>
                                                     <IconButton size="small" aria-label="Editer" color="secondary" onClick={(e) => handleClickOpenMenu(e, row.id)}>
                                                         <MoreHorizIcon fontSize="small" />
                                                     </IconButton>

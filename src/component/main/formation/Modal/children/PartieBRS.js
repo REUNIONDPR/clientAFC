@@ -1,7 +1,7 @@
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import { IsPermitted } from '../../../../../utilities/Function';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Confirm from '../../../../global/Confirm';
 

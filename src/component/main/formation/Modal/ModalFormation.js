@@ -12,6 +12,7 @@ import Sollicitation from './children/sollicitation/Sollicitation';
 import PartieBRS from './children/PartieBRS';
 import PartieDPSR from './children/PartieDPSR';
 import CommentIcon from '@material-ui/icons/Comment';
+import Commentaire from '../../../global/commentaire/Commentaire';
 // import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles((theme) => ({
@@ -45,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom:theme.spacing(1)
+        marginBottom: theme.spacing(1)
     },
     titleModalBtn: {
         display: 'flex',
@@ -91,7 +92,7 @@ export default function ModalCreateSol(props) {
 
     const handleSubmit = (newFormFromOther) => {
         setIsSubmit(true)
-        
+
         props.updateFormation.id === ''
             ? props.handleSaveFormation(newFormFromOther)
             : props.handleEditFormation();
@@ -110,7 +111,7 @@ export default function ModalCreateSol(props) {
     const handleIsSubmitting = () => {
         setIsSubmit(!isSubmit)
     }
-    
+
     return (
         <div>
             <Modal
@@ -138,12 +139,7 @@ export default function ModalCreateSol(props) {
                             </div>
                             {/* {(props.updateFormation.id !== '') && <Stepper />} */}
                             <div className={classes.titleModalBtn}>
-
-                                {/* <Tooltip title="Ajouter un commentaire" aria-label="comm" classes={{ tooltip: classes.tooltip }}> */}
-                                <IconButton disabled aria-label="close" color="primary" onClick={() => console.log('Créer un comm')}>
-                                    <CommentIcon />
-                                </IconButton>
-                                {/* </Tooltip> */}
+                                <Commentaire user={props.user} formation={props.updateFormation} />
                                 <Tooltip title="Fermer" aria-label="close" classes={{ tooltip: classes.tooltip }}>
                                     <IconButton aria-label="close" color="primary" onClick={props.handleCloseModal}>
                                         <CloseRoundedIcon />
