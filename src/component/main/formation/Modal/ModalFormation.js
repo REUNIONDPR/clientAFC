@@ -11,7 +11,6 @@ import Formulaire from './children/Formulaire';
 import Sollicitation from './children/sollicitation/Sollicitation';
 import PartieBRS from './children/PartieBRS';
 import PartieDPSR from './children/PartieDPSR';
-import CommentIcon from '@material-ui/icons/Comment';
 import Commentaire from '../../../global/commentaire/Commentaire';
 // import Typography from '@material-ui/core/Typography';
 
@@ -150,6 +149,7 @@ export default function ModalCreateSol(props) {
                         <div className={`${classes.body} scrollBar-personnalize`}>
                             <div className={classes.bodyMain}>
                                 <Formulaire
+                                    user={props.user}
                                     isSubmit={isSubmit}
                                     handleIsSubmitting={handleIsSubmitting}
                                     updateFormation={props.updateFormation}
@@ -159,6 +159,7 @@ export default function ModalCreateSol(props) {
                                     agence_refList={props.agence_refList}
                                     catalogueList={props.catalogueList}
                                     communeList={props.communeList}
+                                    handleCancelFormation={props.handleCancelFormation}
                                     handleSubmit={handleSubmit}
                                     sollicitation={props.sollicitation}
                                     createNewFormationFromThis={props.createNewFormationFromThis}
@@ -188,17 +189,15 @@ export default function ModalCreateSol(props) {
                                                 <PartieBRS
                                                     updateFormation={props.updateFormation}
                                                     handleChangeFormation={props.handleChangeFormation}
-                                                    handleCancelSollicitation={props.handleCancelSollicitation}
                                                     handleValideSollicitation={props.handleValideSollicitation}
                                                     sollicitation={props.sollicitation}
                                                     changeNArticle={props.changeNArticle}
                                                     user={props.user}
                                                 />}
-                                            {props.sollicitation.date_EditBRS &&
+                                            {(props.sollicitation.date_EditBRS && props.sollicitation.etat !== 10) &&
                                                 <PartieDPSR
                                                     updateFormation={props.updateFormation}
                                                     handleChangeFormation={props.handleChangeFormation}
-                                                    handleCancelSollicitation={props.handleCancelSollicitation}
                                                     handleValideSollicitation={props.handleValideSollicitation}
                                                     sollicitation={props.sollicitation}
                                                     handleEditFormation={props.handleEditFormation}

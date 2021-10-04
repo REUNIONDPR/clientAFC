@@ -69,8 +69,9 @@ export default function CardValide(props) {
     const handleChangeDateicop = (e) => {
         setDateIcop(e.target.value)
     }
-    
-    const isDisabled = !IsPermitted(props.user, 'sollicitation', 'updateDT')
+
+    const isDisabled = !(IsPermitted(props.user, 'sollicitation', 'updateDT') && props.user.fonction === props.updateFormation.userFct)
+  
     return (
         <>
             <Stepper steps={[
@@ -78,25 +79,25 @@ export default function CardValide(props) {
                 { libelle: 'Validée DDO', date: props.sollicitation.date_ValidationDDO },
                 { libelle: 'BRS édité', date: props.sollicitation.date_EditBRS },
                 { libelle: 'Conventionné', date: props.sollicitation.date_nConv },
-            ]} 
-            /*
-            6: Validation DT
-            7: Modification DDO
-            8: Validation DDO
-            9: BRS Edité
-            10: Modification en cours
-            11: Attente de re validation
-            12: Conventionné
-            */
-            step={(props.stepper === 6 || props.stepper === 7 || props.stepper === 10)
-                ? 1
-                : (props.stepper === 8 )
-                    ? 2
-                    : props.stepper === 9
-                        ? 3
-                        : props.stepper === 12
-                            ? 4
-                            : 0} />
+            ]}
+                /*
+                6: Validation DT
+                7: Modification DDO
+                8: Validation DDO
+                9: BRS Edité
+                10: Modification en cours
+                11: Attente de re validation
+                12: Conventionné
+                */
+                step={(props.stepper === 6 || props.stepper === 7 || props.stepper === 10)
+                    ? 1
+                    : (props.stepper === 8)
+                        ? 2
+                        : props.stepper === 9
+                            ? 3
+                            : props.stepper === 12
+                                ? 4
+                                : 0} />
             <div className={classes.blockIcop}>
                 <form>
                     <TextField
@@ -189,7 +190,6 @@ export default function CardValide(props) {
                         : <Button disabled={
                             (props.sollicitation.lieu_execution === null || props.sollicitation.lieu_execution === 'all') ||
                             props.sollicitation.id_dateIcop === null ||
-                            (props.sollicitation.date_ValidationDT !== '' && props.sollicitation.date_ValidationDT !== null) ||
                             isDisabled} onClick={() => props.handleValideSollicitation('DT')} variant="contained" color="secondary" >
                             Valider
                         </Button>

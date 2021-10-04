@@ -5,6 +5,7 @@ import FormControl from '@material-ui/core/FormControl';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
+import { IsPermitted } from '../../../../../../../utilities/Function';
 
 const useStyles = makeStyles((theme) => ({
     blockCenter: {
@@ -15,7 +16,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 export default function CardWaiting(props) {
     const classes = useStyles();
-    
+    const isDisabled = !(IsPermitted(props.user, 'sollicitation', 'updateDT') && props.user.fonction === props.updateFormation.userFct)
+
     return (
         <>
             <div className={classes.blockCenter}>
@@ -24,13 +26,13 @@ export default function CardWaiting(props) {
                         onChange={props.handleChangeRadioResp}>
                         <FormControlLabel
                             value="refus"
-                            disabled={props.updateFormation.etat === 20}
+                            disabled={props.updateFormation.etat === 20 || isDisabled}
                             control={<Radio color="secondary" />}
                             label="Refusé"
                         />
                         <FormControlLabel
                             value="accept"
-                            disabled={props.updateFormation.etat === 20}
+                            disabled={props.updateFormation.etat === 20 || isDisabled}
                             control={<Radio color="secondary" />}
                             label="Accepté"
                         />
@@ -41,7 +43,7 @@ export default function CardWaiting(props) {
                 <TextField
                     label="Détail si refus"
                     fullWidth
-                    disabled={!props.showDetailRefus}
+                    disabled={!props.showDetailRefus || isDisabled}
                     multiline
                     rows={4}
                     value={props.refusReason}
@@ -55,7 +57,7 @@ export default function CardWaiting(props) {
                     ? <Button disabled variant="contained" color="secondary">
                         Enregistrer
                     </Button>
-                    : <Button onClick={props.handleClickValide} variant="contained" color="secondary">
+                    : <Button disabled={isDisabled} onClick={props.handleClickValide} variant="contained" color="secondary">
                         Enregistrer
                     </Button>
                 }

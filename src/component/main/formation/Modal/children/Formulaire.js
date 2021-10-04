@@ -10,6 +10,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 import { InputAdornment, Tooltip } from '@material-ui/core';
 import Confirm from '../../../../global/Confirm';
+import { IsPermitted } from '../../../../../utilities/Function';
 
 const useStyles = makeStyles((theme) => ({
     main: {
@@ -80,6 +81,9 @@ export default function Formulaire(props) {
         setValue({ key: k, value_old: older, value_new: newer })
         setOpen(true);
     };
+    
+    // Disabled les champs du formulaires + btn validation si user pas habilité ou si user pas la meme fonction que le création de l'action
+    const isDisabled = !(IsPermitted(props.user, 'formation', 'update') && props.user.fonction === props.updateFormation.userFct)
 
     const handleCloseDialog = () => {
         setValue({})
@@ -145,7 +149,7 @@ export default function Formulaire(props) {
 
             {(props.updateFormation.id_lot !== 'all' && props.updateFormation.id_cata !== 'all') && <> <div className={classes.blocForm}>
                 <FormControl size="small" variant="outlined" error={props.updateFormation.id_commune === 'all' ? true : false}
-                    disabled={props.updateFormation.id_cata === 'all' ? true : false}>
+                    disabled={props.updateFormation.id_cata === 'all' ? true : false || isDisabled}>
                     <InputLabel>Commune *</InputLabel>
                     {props.communeList &&
                         <Select
@@ -177,7 +181,7 @@ export default function Formulaire(props) {
                 </FormControl>
 
                 <FormControl size="small" variant="outlined" error={props.updateFormation.agence_ref === 'all' ? true : false}
-                    disabled={props.updateFormation.id_cata === 'all' ? true : false}>
+                    disabled={props.updateFormation.id_cata === 'all' ? true : false || isDisabled}>
                     <InputLabel>Agence REF *</InputLabel>
                     {props.agence_refList &&
                         <Select
@@ -198,7 +202,7 @@ export default function Formulaire(props) {
                 </FormControl>
 
                 <TextField required type="number" size="small" label="Nombre de place" variant="outlined"
-                    disabled={props.updateFormation.id_commune === 'all'}
+                    disabled={props.updateFormation.id_commune === 'all' || isDisabled}
                     error={props.updateFormation.nb_place === '' ? true : false}
                     value={props.updateFormation.nb_place}
                     onChange={(e) => (props.updateFormation.id !== '' && props.updateFormation.id_sol !== '' && props.updateFormation.id_sol !== null)
@@ -215,7 +219,7 @@ export default function Formulaire(props) {
                             : { 'aria-label': 'description' }}
                 />
                 <TextField required type="number" size="small" label="Vague" variant="outlined"
-                    disabled={props.updateFormation.id_commune === 'all'}
+                    disabled={props.updateFormation.id_commune === 'all' || isDisabled}
                     error={props.updateFormation.vague === '' ? true : false}
                     value={props.updateFormation.vague}
                     onChange={(e) => props.handleChangeFormation('vague', e.target.value)} />
@@ -224,7 +228,7 @@ export default function Formulaire(props) {
                 <div className={classes.blocForm}>
 
                     <FormControl size="small" variant="outlined"
-                        disabled={props.updateFormation.id_commune === 'all'}>
+                        disabled={props.updateFormation.id_commune === 'all' || isDisabled}>
                         <InputLabel>Dispositif</InputLabel>
                         {props.dispositifList &&
                             <Select
@@ -246,7 +250,7 @@ export default function Formulaire(props) {
 
                     <TextField
                         id="dateEntree"
-                        disabled={props.updateFormation.id_commune === 'all'}
+                        disabled={props.updateFormation.id_commune === 'all' || isDisabled}
                         error={props.updateFormation.date_entree_demandee === '' ? true : false}
                         value={props.updateFormation.date_entree_demandee}
                         size="small"
@@ -291,7 +295,7 @@ export default function Formulaire(props) {
                             <TextField
                                 id="DDINT1"
                                 error={props.updateFormation.interruption_1 > 15}
-                                disabled={props.updateFormation.id_commune === 'all'}
+                                disabled={props.updateFormation.id_commune === 'all' || isDisabled}
                                 value={props.updateFormation.date_DDINT1}
                                 size="small"
                                 variant="outlined"
@@ -319,7 +323,7 @@ export default function Formulaire(props) {
                             <TextField
                                 id="DFINT1"
                                 error={props.updateFormation.interruption_1 > 15}
-                                disabled={props.updateFormation.id_commune === 'all' || props.updateFormation.date_DDINT1 === ''}
+                                disabled={props.updateFormation.id_commune === 'all' || props.updateFormation.date_DDINT1 === '' || isDisabled}
                                 value={props.updateFormation.date_DFINT1}
                                 size="small"
                                 variant="outlined"
@@ -353,7 +357,7 @@ export default function Formulaire(props) {
                             <TextField
                                 id="DDINT2"
                                 error={props.updateFormation.interruption_2 > 15}
-                                disabled={props.updateFormation.id_commune === 'all' || props.updateFormation.date_DFINT1 === ''}
+                                disabled={props.updateFormation.id_commune === 'all' || props.updateFormation.date_DFINT1 === '' || isDisabled}
                                 value={props.updateFormation.date_DDINT2}
                                 size="small"
                                 variant="outlined"
@@ -381,7 +385,7 @@ export default function Formulaire(props) {
                             <TextField
                                 id="DFINT2"
                                 error={props.updateFormation.interruption_2 > 15}
-                                disabled={props.updateFormation.id_commune === 'all' || props.updateFormation.date_DDINT2 === ''}
+                                disabled={props.updateFormation.id_commune === 'all' || props.updateFormation.date_DDINT2 === '' || isDisabled}
                                 value={props.updateFormation.date_DFINT2}
                                 size="small"
                                 variant="outlined"
@@ -422,8 +426,8 @@ export default function Formulaire(props) {
                 </>}
             </div>
             <div className={classes.btnActionModal}>
-                <Button onClick={props.handleCloseModal} variant="outlined" color="primary">
-                    Annuler
+                <Button onClick={props.handleCancelFormation} variant="outlined" color="primary">
+                    Annuler la formation
                 </Button>
                 {props.updateFormation.interruption_1 > 15 ||
                     props.updateFormation.interruption_2 > 15 ||
@@ -442,7 +446,7 @@ export default function Formulaire(props) {
                                 variant="contained" color="primary" endIcon={<CircularProgress size={20} className={classes.spinnerBtn} />}>
                                 Enregistrer
                             </Button>
-                            : <Button onClick={() => props.handleSubmit(props.createNewFormationFromThis)} variant="contained" color="primary">
+                            : <Button disabled={isDisabled} onClick={() => props.handleSubmit(props.createNewFormationFromThis)} variant="contained" color="primary">
                                 Enregistrer
                             </Button>
                         // Modifier une action de formation
@@ -453,12 +457,12 @@ export default function Formulaire(props) {
                             </Button>
                             : (props.updateFormation.etat === 9 || props.updateFormation.etat === 12)
                                 ? <Tooltip title="Cette action annulera le BRS édité" aria-label="cancel" classes={{ tooltip: classes.tooltip }}>
-                                    <Button disabled={props.updateFormation.etat === 20} onClick={props.handleSubmit}
+                                    <Button disabled={props.updateFormation.etat === 20 || isDisabled} onClick={props.handleSubmit}
                                         variant="contained" color="primary" startIcon={<ErrorOutlineIcon />}>
                                         Modifier
                                     </Button>
                                 </Tooltip>
-                                : <Button disabled={props.updateFormation.etat === 20} onClick={props.handleSubmit} variant="contained" color="primary">
+                                : <Button disabled={props.updateFormation.etat === 20 || isDisabled} onClick={props.handleSubmit} variant="contained" color="primary">
                                     Modifier
                                 </Button>
                 }

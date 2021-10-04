@@ -28,6 +28,7 @@ export default function PartieBRS(props) {
     const [n_Article, setN_Article] = useState(props.updateFormation.n_Article.split('-')[1])
     const [openConfirm, setOpenConfirm] = useState(false)
     const n_Article_base = props.updateFormation.n_Article.split('-')[0];
+    const [error, setError] = useState(false)
 
     const handleClose = () => {
         setOpenConfirm(false)
@@ -38,6 +39,8 @@ export default function PartieBRS(props) {
     }
 
     const handleChangeArticle = (value) => {
+        let regex = new RegExp("[a-z]|[A-Z]");
+        setError(regex.test(value) || isNaN(parseInt(value))) 
         setN_Article(value)
     }
     
@@ -51,21 +54,18 @@ export default function PartieBRS(props) {
 
             <div className={classes.blockAction || (props.sollicitation.date_ValidationDDO !== '')}>
                 <span>{n_Article_base}-</span>
-                <TextField disabled={isDisabled} required type="text" size="small" label="N° article" variant="outlined"
+                <TextField disabled={isDisabled} error={error} required type="text" size="small" label="N° article" variant="outlined"
                     value={n_Article}
                     onChange={(e) => handleChangeArticle(e.target.value)}
                 />
-                <Button disabled={isDisabled || (props.sollicitation.date_ValidationDDO !== '')}
+                <Button disabled={isDisabled || props.sollicitation.date_ValidationDDO ? true : false || error}
                     onClick={() => setOpenConfirm(true)} variant="contained" color="primary">
                     Modifier
                 </Button>
             </div>
 
             <div className={classes.blockAction}>
-                <Button disabled={isDisabled} onClick={props.handleCancelSollicitation} variant="outlined" color="primary">
-                    Annuler la formation
-                </Button>
-                <Button disabled={isDisabled || props.sollicitation.date_ValidationDDO ? true : false} onClick={() => props.handleValideSollicitation('DDO')} variant="contained" color="primary">
+                <Button disabled={isDisabled || props.sollicitation.etat === 10 ? false : props.sollicitation.date_ValidationDDO ? true : false} onClick={() => props.handleValideSollicitation('DDO')} variant="contained" color="primary">
                     Valider
                 </Button>
             </div>

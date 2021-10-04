@@ -12,7 +12,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Button from '@material-ui/core/Button';
 import ModalFormation from './Modal/ModalFormation';
-import { codeToName, dateFormat, calculDateFin, getDateToday, getDateTime } from '../../../utilities/Function';
+import { codeToName, dateFormat, calculDateFin, getDateToday, getDateTime, dateCount } from '../../../utilities/Function';
 import SnackBar from '../../global/SnackBar/SnackBar';
 import './sollicitation.css';
 import { IsPermitted } from '../../../utilities/Function';
@@ -29,6 +29,9 @@ import Select from '@material-ui/core/Select';
 import Switch from '@material-ui/core/Switch';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Commentaire from '../../global/commentaire/Commentaire';
+import NotificationImportantIcon from '@material-ui/icons/NotificationImportant';
+import { Tooltip } from '@material-ui/core';
+import ModalActionAuto from './ModalActionAuto/ModalActionAuto';
 
 // import { title } from 'process';
 // import Cards from './Card/Cards';
@@ -54,6 +57,9 @@ const useStyles = makeStyles((theme) => ({
     },
     error: {
         backgroundColor: theme.palette.warning.main
+    },
+    iconError: {
+        fill: 'red'
     },
     cellHead: {
         cursor: 'pointer',
@@ -96,7 +102,8 @@ const useStyles = makeStyles((theme) => ({
     },
     btn: {
         marginRight: 20,
-    }, listOptions: {
+    },
+    listOptions: {
         padding: 0,
         position: 'absolute',
         right: 50,
@@ -142,25 +149,32 @@ export default function Formation() {
         id_lot: 'all',
         etat: [],
     });
+    ;
+    // 'Ouvrir' le menu d'édition de BRS (pour la DDO)
+    const [editionBRS, setEditionBRS] = useState(false)
 
+    // Annule les sollicitation sans réponse > 5 jrs
+    const [formationListToCancel, setFormationListToCancel] = useState([]);
+    const [openModalAuto, setOpenModalAuto] = useState(false);
+
+    // Differentes listes
     const [lotList, setLotList] = useState([]);
     const [etatList, setEtatList] = useState([]);
     const [dispositifList, setDispositifList] = useState([]);
     const [catalogueList, setCatalogueList] = useState([]);
-    const [agence_refList, setAgence_refList] = useState([]);
+    const [agence_refList, setAgence_refList] = useState([])
     const [communeList, setCommuneList] = useState([]);
-
-    const [editionBRS, setEditionBRS] = useState(false)
-
     const [icopList, setIcopList] = useState([]);
     const [lieuExecutionList, setLieuExecutionList] = useState([])
-
     const [sollicitationList, setSollicitationList] = useState([]);
     const [attributaireList, setAttributaireList] = useState([]);
 
+    // openMoreOptions = id de la formation à ouvrir dans le modal
+    // moreOptionsList = liste des options à afficher
     const [openMoreOptions, setOpenMoreOptions] = useState('');
     const [moreOptionsList, setMoreOptionsList] = useState([]);
-    const [openModalCreateSol, setOpenModalCreateSol] = useState(false)
+
+    // Objet formation pour le modal
     const [updateFormation, setupdateFormation] = useState({
         id: '',
         id_lot: 'all',
@@ -197,6 +211,8 @@ export default function Formation() {
         vague: '',
         id_sol: '',
         id_attributaire: '',
+        dateMailOF: null,
+        dateRespOF: null,
     });
 
     // Utiliser pour suivre la sollicitation une fois celle ci validée (etat = 3)
@@ -213,6 +229,8 @@ export default function Formation() {
         date_ValidationDT: '',
         date_ValidationDDO: '',
     })
+
+    const [openModalCreateSol, setOpenModalCreateSol] = useState(false)
 
     // --------------- SnackBar
     const [openSnackBar, setOpenSnackBar] = useState(false);
@@ -249,12 +267,11 @@ export default function Formation() {
             case 1: setMoreOptionsList(['show', 'contact', 'cancel']); break;
             case 2: setMoreOptionsList(['show', 'contact', 'cancel']); break;
             case 6: setMoreOptionsList(['show', 'contact', 'cancel']); break;
-            default: setMoreOptionsList(['show']); break;
+            default: setMoreOptionsList(['show', 'cancel']); break;
 
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user])
-
 
     useEffect(() => {
         axios({
@@ -276,6 +293,17 @@ export default function Formation() {
                     date_nconv: v.date_nconv ? dateFormat(v.date_nconv, 'ANG') : '',
                 };
             });
+            let solToCancel = formList.filter((v) =>
+                v.dateMailOF !== null &&
+                v.dateRespOF === null &&
+                dateCount(new Date(v.dateMailOF), new Date(), true) > 5 &&
+                v.userFct === user.fonction &&
+                v.etat === 1);
+
+            if (solToCancel.length > 0) {
+                setOpenModalAuto(true);
+                setFormationListToCancel(solToCancel);
+            }
             setFormationList(formList);
         });
 
@@ -377,7 +405,7 @@ export default function Formation() {
             formation = formationList.find((v) => v.id === openMoreOptions);
             setupdateFormation({ ...updateFormation, ...formation });
             // Si un OF à accepté une sollicitation -> formation validé (etat = 5)
-            console.log(formation)
+
             if (formation.etat > 2 && formation.etat < 20) {
                 axios({
                     method: 'GET',
@@ -709,9 +737,9 @@ export default function Formation() {
                 } else {
                     let newFormationList = formationList.map((v) => v.id === newUpdateFormation.id ? newUpdateFormation : v);
                     setFormationList(newFormationList);
-                    setMessageSnackBar('Formation modifié avec succès');
-                    setSeverity('success');
                 }
+                setMessageSnackBar('Formation modifié avec succès');
+                setSeverity('success');
 
                 // handleCloseModal();
             } else {
@@ -728,7 +756,7 @@ export default function Formation() {
     }
 
     const handleCancelFormation = () => {
-        console.log('Annuler ?', openMoreOptions)
+        console.log('Annuler ?', updateFormation)
     }
 
     const handleCloseModal = () => {
@@ -784,6 +812,8 @@ export default function Formation() {
             nConv_tmp: '',
             vague: '',
             id_attributaire: '',
+            dateMailOF: null,
+            dateRespOF: null,
         });
     };
 
@@ -808,7 +838,7 @@ export default function Formation() {
         axios({
             method: 'PUT',
             url: '/sollicitation/create',
-            data: { ...updateFormation, attributaire: sollicitation.id },
+            data: { ...updateFormation, attributaire: sollicitation.id, information:user.nom },
             headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => {
 
@@ -892,7 +922,7 @@ export default function Formation() {
         axios({
             method: 'PUT',
             url: 'sollicitation/update',
-            data: { id_sol: sol.id_sol, etat: etat, dateTime: time, information: txt === '' ? user.idgasi : txt },
+            data: { id_sol: sol.id_sol, etat: etat, dateRespOF: time, dateTime: time, information: txt === '' ? user.idgasi : txt },
             headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => {
             if (response.status === 200) {
@@ -907,7 +937,6 @@ export default function Formation() {
                 let newSol = {}
                 // Si l'OF accepte, met à jour l'état de la formation.
                 if (etat === 4) {
-                    console.log('soll actpé', sol)
                     // Mettre à jour le hook sollicitation
                     newSol = {
                         ...sollicitation,
@@ -930,7 +959,7 @@ export default function Formation() {
 
                 // UpdateFotmation et etat de la formation
                 let newUpdateFormation = {
-                    ...updateFormation, etat: etat, etat_libelle: text,
+                    ...updateFormation, etat: etat, etat_libelle: text, dateRespOF: time,
                     id_attributaire: sol.attributaire
                 }
 
@@ -969,10 +998,6 @@ export default function Formation() {
             setSeverity('error');
             setOpenSnackBar(true);
         }
-    }
-
-    const handleCancelSollicitation = () => {
-        console.log('Annule la sollicitation')
     }
 
     const handleValideSollicitation = (valideType) => {
@@ -1104,7 +1129,7 @@ export default function Formation() {
                     if (formation_brs_existant) {
                         pos_version = formation_brs_existant.filename.indexOf('V')
                         version = parseInt(formation_brs_existant.filename[pos_version + 1]) + 1
-                        n_brs = formation_brs_existant.n_brs + ' - V' + version;
+                        n_brs = formation_brs_existant.n_brs.replace('V' + formation_brs_existant.filename[pos_version + 1], 'V' + version)
                         filename = formation_brs_existant.filename
                             .replace('V' + formation_brs_existant.filename[pos_version + 1], 'V' + version)
                     } else {
@@ -1199,7 +1224,7 @@ export default function Formation() {
 
                         setOpenSnackBar(true);
                     })
-
+                    
                 } else console.log('Aucune donnée')
             }
             setEditingBRS(false)
@@ -1340,6 +1365,29 @@ export default function Formation() {
         // }
     }
 
+
+    // A la fermeture du modal automatique, lance les requetes pour annuler les sollicitations sans réponse
+    const [isSubmitModalAuto, setIsSubmitModalAuto] = useState(false)
+    const handleCloseModalAuto = () => {
+        let time = getDateToday();
+        let newFormationList = [...formationList];
+        for (let i = 0; i < formationListToCancel.length; i++) {
+            axios({
+                method: 'put',
+                url: 'sollicitation/update',
+                data: { id_sol: formationListToCancel[i].id_sol, etat: 3, dateRespOF: null, dateTime: time, information: 'Appli AFC : Aucune réponse en ' + dateCount(new Date(formationListToCancel[i].dateMailOF), new Date(), true) + ' jours.' },
+                headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
+            }).then((response) => {
+                if (i === formationListToCancel.length - 1) { setIsSubmitModalAuto(false); setOpenModalAuto(false) }
+            })
+            newFormationList.find((v) => v.id === formationListToCancel[i].id).etat = 3;
+            newFormationList.find((v) => v.id === formationListToCancel[i].id).etat_libelle = 'L\'OF à refusé la sollicitation';
+        }
+        setIsSubmitModalAuto(false);
+        setOpenModalAuto(false);
+        setFormationList(newFormationList)
+    }
+
     return (
         <>
             <SnackBar
@@ -1451,12 +1499,28 @@ export default function Formation() {
                                             <TableCell>{row.agence_ref_libelle}</TableCell>
                                             <TableCell>{codeToName('dispositif_' + row.dispositif)}</TableCell>
                                             <TableCell>{row.commune}</TableCell>
-                                            <TableCell>{row.etat_libelle}</TableCell>
+                                            <TableCell>
+                                                <div className={classes.flex}>
+                                                    {/* Si l'of a pas encore répondu ET temps de réponse > 5 jours ET etat = 1 (En attente de réponse). Affiche icone */}
+                                                    {((row.dateMailOF !== null && row.dateRespOF === null) && dateCount(new Date(row.dateMailOF), new Date(), true) > 5 && row.etat === 1) &&
+                                                        (row.userFct === user.fonction
+                                                            ? <Tooltip title="L'OF n'a pas répondu dans le temps imparti." aria-label="comm" classes={{ tooltip: classes.tooltip }}>
+                                                                <IconButton onClick={() => setOpenModalAuto(true)}>
+                                                                    <NotificationImportantIcon className={classes.iconError} />
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                            : <Tooltip title="L'OF n'a pas répondu dans le temps imparti." aria-label="comm" classes={{ tooltip: classes.tooltip }}>
+                                                                <NotificationImportantIcon className={classes.iconError} />
+                                                            </Tooltip>)
+                                                    }
+                                                    {row.etat_libelle}
+                                                </div>
+                                            </TableCell>
                                             <TableCell>{dateFormat(row.date_entree_demandee)}</TableCell>
                                             <TableCell>{dateFormat(row.date_fin)}</TableCell>
                                             <TableCell>
                                                 <div className={classes.flex}>
-                                                    <Commentaire user={user} formation={row}/>
+                                                    <Commentaire user={user} formation={row} />
                                                     <IconButton size="small" aria-label="Editer" color="secondary" onClick={(e) => handleClickOpenMenu(e, row.id)}>
                                                         <MoreHorizIcon fontSize="small" />
                                                     </IconButton>
@@ -1496,6 +1560,14 @@ export default function Formation() {
                     </MenuItem>}
             </Menu>
 
+            {formationListToCancel &&
+                <ModalActionAuto openModal={openModalAuto}
+                    handleCloseModal={handleCloseModalAuto}
+                    formationListToCancel={formationListToCancel}
+                    isSubmit={isSubmitModalAuto}
+                    handleClose={() => setIsSubmitModalAuto(true)}
+                />}
+
             {openModalCreateSol &&
                 <ModalFormation
                     openModal={openModalCreateSol}
@@ -1507,6 +1579,7 @@ export default function Formation() {
 
                     // Formulaire
                     lotList={lotList}
+                    handleCancelFormation={handleCancelFormation}
                     dispositifList={dispositifList}
                     agence_refList={agence_refList}
                     catalogueList={catalogueList}
@@ -1528,7 +1601,6 @@ export default function Formation() {
                     lieuExecutionList={lieuExecutionList}
                     handleChangeSollicitation={handleChangeSollicitation}
                     handleValideSollicitation={handleValideSollicitation}
-                    handleCancelSollicitation={handleCancelSollicitation}
                     handleSaveConv={handleSaveConv}
                 />}
             <p>{"Si modif BRS = annul toute les soll, annulé le brs aussi"}</p>
