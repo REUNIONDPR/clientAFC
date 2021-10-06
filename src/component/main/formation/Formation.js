@@ -262,16 +262,21 @@ export default function Formation() {
         if (user.idgasi) {
             setupdateFormation({ ...updateFormation, idgasi: user.idgasi, userFct: user.fonction });
         }
-
-        switch (parseInt(user.fonction)) {
-            case 1: setMoreOptionsList(['show', 'contact', 'cancel']); break;
-            case 2: setMoreOptionsList(['show', 'contact', 'cancel']); break;
-            case 6: setMoreOptionsList(['show', 'contact', 'cancel']); break;
-            default: setMoreOptionsList(['show', 'cancel']); break;
-
-        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user])
+
+    useEffect(() => {
+        if (openMoreOptions !== '') {
+            let formation = formationList.find((v) => v.id === openMoreOptions)
+
+            switch (parseInt(user.fonction)) {
+                case 1: formation.userFct === 1 ? setMoreOptionsList(['show', 'cancel']) : setMoreOptionsList(['show']); break;
+                case 2: formation.userFct === 2 ? setMoreOptionsList(['show', 'cancel']) : setMoreOptionsList(['show']); break;
+                case 6: setMoreOptionsList(['show', 'cancel']); break;
+                default: setMoreOptionsList(['show']); break;
+            }
+        }
+    }, [openMoreOptions, formationList, user])
 
     useEffect(() => {
         axios({
@@ -330,7 +335,12 @@ export default function Formation() {
             url: 'global/findAll?table=sollicitation_etat',
             headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => {
-            setEtatList([{ etat: 'En cours d\'élaboration.', id: 0 }, ...response.data])
+            setEtatList([
+                { etat: 'En cours d\'élaboration.', id: 0 },
+                ...response.data,
+                { etat: 'Annulé OF', id: 18 },
+                { etat: 'Annulé DT', id: 19 }
+            ])
             let allEtat = response.data.filter((v) => v.id !== 20).map((v) => v.id)
             allEtat.unshift(0)
             setFilterValues({ ...filterValues, etat: allEtat })
@@ -756,7 +766,33 @@ export default function Formation() {
     }
 
     const handleCancelFormation = () => {
-        console.log('Annuler ?', updateFormation)
+
+        let id = updateFormation.id === '' ? openMoreOptions : updateFormation.id
+        let formation = updateFormation.id === '' ? formationList.find((v) => v.id === openMoreOptions) : updateFormation
+
+        if (formation.id !== '' && formation.userFct === user.fonction) {
+            axios({
+                method: 'put',
+                url: 'formation/updateEtat',
+                data: { id: id, etat: 9 },
+                headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), },
+            }).then((response) => {
+                if (response.status === 200) {
+                    setMessageSnackBar('Formation annulée');
+                    setSeverity('success');
+                } else {
+                    setMessageSnackBar('Erreur lors de l\'annulation de la formation');
+                    setSeverity('error');
+                }
+            })
+        } else if (formation.userFct !== user.fonction) {
+            setMessageSnackBar('Vous n\'êtes pas autorisé à faire ceci');
+            setSeverity('error');
+        } else {
+            setMessageSnackBar('Erreur. Formation ' + id + ' inconnu');
+            setSeverity('error');
+        }
+        setOpenSnackBar(true);
     }
 
     const handleCloseModal = () => {
@@ -838,7 +874,7 @@ export default function Formation() {
         axios({
             method: 'PUT',
             url: '/sollicitation/create',
-            data: { ...updateFormation, attributaire: sollicitation.id, information:user.nom },
+            data: { ...updateFormation, attributaire: sollicitation.id, information: user.nom },
             headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => {
 
@@ -1224,7 +1260,7 @@ export default function Formation() {
 
                         setOpenSnackBar(true);
                     })
-                    
+
                 } else console.log('Aucune donnée')
             }
             setEditingBRS(false)
@@ -1309,7 +1345,7 @@ export default function Formation() {
     }
 
     const handleChangeBRS = () => {
-        console.log("------------------ MODIF BRS ---------------- ")
+
         let dateTime = getDateToday();
         let etat = 10;
         let information = 'Modification du BRS';
@@ -1326,7 +1362,7 @@ export default function Formation() {
             data: { ...sollicitation, dateTime: dateTime, information: user.idgasi + ' : ' + information },
             headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => {
-            console.log(response.data)
+
             if (response.status === 200) {
 
                 let newSollArray = sollicitationList.map((v) => {
@@ -1488,7 +1524,7 @@ export default function Formation() {
                             <TableBody>
                                 {formationList.length > 0
                                     ? formationListDisplay.map((row) => (
-                                        <TableRow key={row.id + '_' + row.n_Article} className={row.etat === 20 ? classes.error : ''}>
+                                        <TableRow key={row.id + '_' + row.n_Article} className={row.etat > 15 ? classes.error : ''}>
                                             <TableCell component="th" scope="row">
                                                 {codeToName('lot_' + row.id_lot)}
                                             </TableCell>
@@ -1604,8 +1640,8 @@ export default function Formation() {
                     handleSaveConv={handleSaveConv}
                 />}
             <p>{"Si modif BRS = annul toute les soll, annulé le brs aussi"}</p>
-            <p>{"Gérer le temps de réponse de l'OF. Si > 5 jour ouvré passe à l'of suivant"}</p>
-            <p>{"Verifier tout les états 10 et 11 : 10 formation qu'on modifie, 11: Formation en attente de nouveau BRS"}</p>
+            <p>{"Si form etat = 10 ne pas mettre dans le BRS"}</p>
+            <p>{"SendMail de m****"}</p>
 
         </>
     )

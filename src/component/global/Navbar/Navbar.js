@@ -137,7 +137,7 @@ export default function PermanentDrawerLeft() {
       <Divider />
       <List>
         {IsPermitted(user, 'formation', 'view') &&
-          <ListItem button className='primary-h-color' component={Link} to="/home" selected={selectedIndex === 1}
+          <ListItem button className='primary-h-color' component={Link} to="/formation" selected={selectedIndex === 1}
             onClick={(event) => handleListItemClick(event, 1)}>
             <ListItemIcon><CreateNewFolderIcon /></ListItemIcon>
             <ListItemText secondary='Formation' />
