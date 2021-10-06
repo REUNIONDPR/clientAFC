@@ -45,7 +45,7 @@ const useStyles = makeStyles((theme) => ({
     },
     blockEndErrorIcon: {
         cursor: 'default',
-        fill:'red',
+        fill: 'red',
     },
     btnActionModal: {
         display: 'flex',
@@ -81,7 +81,7 @@ export default function Formulaire(props) {
         setValue({ key: k, value_old: older, value_new: newer })
         setOpen(true);
     };
-    
+
     // Disabled les champs du formulaires + btn validation si user pas habilité ou si user pas la meme fonction que le création de l'action
     const isDisabled = !(IsPermitted(props.user, 'formation', 'update') && props.user.fonction === props.updateFormation.userFct)
 
@@ -98,8 +98,8 @@ export default function Formulaire(props) {
     }
 
     return (<div className={classes.main}>
-        <Confirm open={open} handleValide={handleValideDialog} handleClose={handleCloseDialog} value={value} 
-            messsage={"Les OF devront être à nouveau sollicités."}/>
+        <Confirm open={open} handleValide={handleValideDialog} handleClose={handleCloseDialog} value={value}
+            messsage={"Les OF devront être à nouveau sollicités."} />
 
         <form noValidate autoComplete="off">
             <div className={classes.blocForm}>
@@ -426,7 +426,7 @@ export default function Formulaire(props) {
                 </>}
             </div>
             <div className={classes.btnActionModal}>
-                <Button onClick={props.handleCancelFormation} variant="outlined" color="primary">
+                <Button disabled={isDisabled} onClick={props.handleCancelFormation} variant="outlined" color="primary">
                     Annuler la formation
                 </Button>
                 {props.updateFormation.interruption_1 > 15 ||
@@ -456,12 +456,17 @@ export default function Formulaire(props) {
                                 Modifier
                             </Button>
                             : (props.updateFormation.etat === 9 || props.updateFormation.etat === 12)
-                                ? <Tooltip title="Cette action annulera le BRS édité" aria-label="cancel" classes={{ tooltip: classes.tooltip }}>
-                                    <Button disabled={props.updateFormation.etat === 20 || isDisabled} onClick={props.handleSubmit}
+                                ? isDisabled
+                                    ? <Button disabled={props.updateFormation.etat === 20 || isDisabled} onClick={props.handleSubmit}
                                         variant="contained" color="primary" startIcon={<ErrorOutlineIcon />}>
                                         Modifier
                                     </Button>
-                                </Tooltip>
+                                    : <Tooltip title="Cette action annulera le BRS édité" aria-label="cancel" classes={{ tooltip: classes.tooltip }}>
+                                        <Button disabled={props.updateFormation.etat === 20 || isDisabled} onClick={props.handleSubmit}
+                                            variant="contained" color="primary" startIcon={<ErrorOutlineIcon />}>
+                                            Modifier
+                                        </Button>
+                                    </Tooltip>
                                 : <Button disabled={props.updateFormation.etat === 20 || isDisabled} onClick={props.handleSubmit} variant="contained" color="primary">
                                     Modifier
                                 </Button>

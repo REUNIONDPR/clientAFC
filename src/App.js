@@ -107,7 +107,7 @@ function App() {
                   <PrivateRoute path='/admin' component={Admin} />
                   <PrivateRoute path='/bdd' component={Juridique} />
                   <PrivateRoute path='/brs' component={Brs} />
-                  <PrivateRoute path='/home' component={home} /> </>
+                  <PrivateRoute path='/formation' component={home} /> </>
                 )} />
               </Main>
             </Switch>
