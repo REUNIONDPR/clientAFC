@@ -12,6 +12,7 @@ import TextField from '@material-ui/core/TextField';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Cookie from 'js-cookie';
+import Skeleton from '@material-ui/lab/Skeleton';
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -25,20 +26,17 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function Filter(props) {
+    
     const classes = useStyles();
-    const [contactList, setContactList] = useState([]);
-    const [contactSelected, setContactSelected] = useState('all')
     const [apeList, setApeList] = useState([]);
-    const [apeSelected, setApeSelected] = useState('all');
     const [dispositifList, setDispositifList] = useState([]);
-    const [dispoSelected, setDispoSelected] = useState('all');   
-
+    
     useEffect(() => {
-        axios({
-            method: 'get',
-            url: 'global/findAll?table=fonction',
-            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
-        }).then((response) => setContactList(response.data.filter((v) => v.id === 1 || v.id === 2)))
+        // axios({
+        //     method: 'get',
+        //     url: 'global/findAll?table=fonction',
+        //     headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
+        // }).then((response) => setContactList(response.data.filter((v) => v.id === 1 || v.id === 2)))
 
         axios({
             method: 'get',
@@ -58,22 +56,24 @@ export default function Filter(props) {
         <TableRow>
             {/* LOT */}
             <TableCell>
-                <FormControl size="small" variant="outlined" className={classes.formControl} >
-                    <InputLabel id="demo-simple-select-outlined-label" className={classes.select_orange}>Lot</InputLabel>
-                    <Select
-                        name='id_lot'
-                        value={props.filterValues.id_lot ? props.filterValues.id_lot : 'all'}
-                        // onChange={(e) => props.handleChangeSelect(props.column.key, e.target.value)}
-                        onChange={(e) => props.handleChangeFilter(e.target.name, e.target.value)}
-                        label='Lot' >
-                        <MenuItem value="all"><em>Tous</em></MenuItem>
-                        {props.lotList.map((v) => (
-                            <MenuItem key={v.id} value={v.id} >
-                                {v.libelle}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
+                {props.lotList
+                    ? <FormControl size="small" variant="outlined" className={classes.formControl} >
+                        <InputLabel id="demo-simple-select-outlined-label" className={classes.select_orange}>Lot</InputLabel>
+                        <Select
+                            name='id_lot'
+                            value={props.filterValues.id_lot || 'all'}
+                            // onChange={(e) => props.handleChangeSelect(props.column.key, e.target.value)}
+                            onChange={(e) => props.handleChangeFilter(e.target.name, e.target.value)}
+                            label='Lot' >
+                            <MenuItem value="all"><em>Tous</em></MenuItem>
+                            {props.lotList.map((v) => (
+                                <MenuItem key={v.id} value={v.id} >
+                                    {v.libelle}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                    : <Skeleton variant="text" />}
             </TableCell>
             {/* N ARTICLE */}
             <TableCell>
@@ -90,33 +90,33 @@ export default function Filter(props) {
             <TableCell>
                 <FormControl size="small" variant="outlined">
                     <InputLabel>Contact</InputLabel>
-                    {contactList.length > 0 &&
-                        <Select
-                            onChange={(e) => { setContactSelected(e.target.value); props.handleChangeFilter(e.target.name, e.target.value) }}
-                            fullWidth
-                            value={contactSelected}
-                            name='userFct'
-                            label='Contact'
-                        >
-                            <MenuItem value="all">
-                                <em>Choisir</em>
-                            </MenuItem>
-                            {contactList.map((v) => (
-                                <MenuItem key={v.id + '_' + v.fonction} value={v.id}>{v.fonction}</MenuItem>
-                            ))}
-                        </Select>
-                    }
+                    <Select
+                        onChange={(e) => {props.handleChangeFilter(e.target.name, e.target.value)}}
+                        fullWidth
+                        value={props.filterValues.userFct || 'all'}
+                        name='userFct'
+                        label='Contact'
+                    >
+                        <MenuItem value="all">
+                            <em>Choisir</em>
+                        </MenuItem>
+                        {[{id:2, fonction:'DTSO'}, {id:1, fonction:'DTNE'}].map((v) => (
+                            <MenuItem key={v.id + '_' + v.fonction} value={v.id}>{v.fonction}</MenuItem>
+                        ))}
+
+                    </Select>
                 </FormControl>
             </TableCell>
             {/* Agence REF */}
             <TableCell>
-                <FormControl size="small" variant="outlined">
-                    <InputLabel>APE</InputLabel>
-                    {apeList.length > 0 &&
+                {apeList.length > 0
+                    ? <FormControl size="small" variant="outlined">
+                        <InputLabel>APE</InputLabel>
+
                         <Select
-                            onChange={(e) => { setApeSelected(e.target.value); props.handleChangeFilter(e.target.name, e.target.value) }}
+                            onChange={(e) => {props.handleChangeFilter(e.target.name, e.target.value)} }
                             fullWidth
-                            value={apeSelected}
+                            value={props.filterValues.agence_ref || 'all'}
                             name='agence_ref'
                             label='APE'
                         >
@@ -127,18 +127,18 @@ export default function Filter(props) {
                                 <MenuItem key={v.id + '_' + v.libelle_ape} value={v.id}>{v.libelle_ape}</MenuItem>
                             ))}
                         </Select>
-                    }
-                </FormControl>
+                    </FormControl>
+                    : <Skeleton variant="text" />}
             </TableCell>
             {/* dispositif */}
             <TableCell>
-                <FormControl size="small" variant="outlined">
-                    <InputLabel>APE</InputLabel>
-                    {dispositifList.length > 0 &&
+                {dispositifList.length > 0
+                    ? <FormControl size="small" variant="outlined">
+                        <InputLabel>APE</InputLabel>
                         <Select
-                            onChange={(e) => { setDispoSelected(e.target.value); props.handleChangeFilter(e.target.name, e.target.value) }}
+                            onChange={(e) => {props.handleChangeFilter(e.target.name, e.target.value) }}
                             fullWidth
-                            value={dispoSelected}
+                            value={props.filterValues.dispositif || 'all'}
                             name='dispositif'
                             label='Dispositif'
                         >
@@ -149,8 +149,8 @@ export default function Filter(props) {
                                 <MenuItem key={v.id + '_' + v.libelle} value={v.id}>{v.libelle}</MenuItem>
                             ))}
                         </Select>
-                    }
-                </FormControl>
+                    </FormControl>
+                    : <Skeleton variant="text" />}
             </TableCell>
             <TableCell>
             </TableCell>

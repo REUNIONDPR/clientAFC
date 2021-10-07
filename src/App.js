@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core';
 import './App.css';
 import Main from './component/main/Main';
@@ -14,6 +14,7 @@ import Cookie from 'js-cookie';
 import { frFR } from '@material-ui/core/locale';
 import Juridique from './component/main/juridique/Juridique';
 import Brs from './component/main/brs/Brs';
+import LoginPage from './component/main/login/Login';
 
 function App() {
 
@@ -53,7 +54,7 @@ function App() {
       },
     },
   }, frFR);
-  
+
   const drawerWidth = '260px';
 
   const useStyles = makeStyles((theme) => ({
@@ -66,34 +67,29 @@ function App() {
 
   const { user, logUser } = useContext(UserContext);
   const classes = useStyles();
-  const [isUser, setIsUser] = useState(false)
 
   useEffect(() => {
     if (!Cookie.get('authTokenAFC') && !user.hasOwnProperty('idgasi')) {
-      
+
       if (Cookie.get('xtidc') !== undefined) {
-        setIsUser(true)
         logUser(Cookie.get('xtidc'))
       } else {
         window.open("http://accueil.pole-emploi.intra:8501/portail/index.jspz?id=237#", "intra")
-        
-        // console.log('cookie existe pas')
 
-        Cookie.set("xtidc", 'IRLE5360');
-        setIsUser(true)
-        logUser(Cookie.get('xtidc'))
+        // Cookie.set("xtidc", 'IRLE5360');
+        // logUser(Cookie.get('xtidc'))
 
       }
-    } else setIsUser(true)
+    }
   }, [user, logUser]);
-
+  
   return (
 
     <div className="App">
 
       {/* <TestConnectSocket /> */}
       <ThemeProvider theme={theme}>
-        {isUser ?
+        {(user.idgasi && user.idgasi !== '' && Cookie.get('authTokenAFC')) ?
           <>
             <div className={classes.drawer}>
               <NavbarV />
@@ -112,7 +108,7 @@ function App() {
               </Main>
             </Switch>
           </>
-          : <p>Non reconnu : <a href="http://accueil.pole-emploi.intra:8501/portail/index.jspz?id=237#" target="_blank" rel="noreferrer">Redirection</a></p>
+          : <LoginPage logUser={logUser} />
         }
       </ThemeProvider>
 

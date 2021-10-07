@@ -37,7 +37,7 @@ export default function PartieBRS(props) {
         props.changeNArticle(n_Article_base+'-'+n_Article)
         setOpenConfirm(false)
     }
-
+    
     const handleChangeArticle = (value) => {
         let regex = new RegExp("[a-z]|[A-Z]");
         setError(regex.test(value) || isNaN(parseInt(value))) 
@@ -58,14 +58,14 @@ export default function PartieBRS(props) {
                     value={n_Article}
                     onChange={(e) => handleChangeArticle(e.target.value)}
                 />
-                <Button disabled={isDisabled || props.sollicitation.date_ValidationDDO ? true : false || error}
+                <Button disabled={isDisabled || (props.sollicitation.date_ValidationDDO ? true : false) || error}
                     onClick={() => setOpenConfirm(true)} variant="contained" color="primary">
                     Modifier
                 </Button>
             </div>
 
             <div className={classes.blockAction}>
-                <Button disabled={isDisabled || props.sollicitation.etat === 10 ? false : props.sollicitation.date_ValidationDDO ? true : false} onClick={() => props.handleValideSollicitation('DDO')} variant="contained" color="primary">
+                <Button disabled={isDisabled || (props.sollicitation.etat === 10 ? false : props.sollicitation.date_ValidationDDO ? true : false)} onClick={() => props.handleValideSollicitation('DDO')} variant="contained" color="primary">
                     Valider
                 </Button>
             </div>

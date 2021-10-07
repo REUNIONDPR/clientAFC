@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function PartieDPSR(props) {
     const classes = useStyles();
-    const isDisabled = !IsPermitted(props.user, 'sollicitation', 'updateDT')
+    const isDisabled = !IsPermitted(props.user, 'sollicitation', 'conv')
 
     return (
         <div className={classes.blockDPSR}>
@@ -27,11 +27,11 @@ export default function PartieDPSR(props) {
             <div className={classes.blockAction}>
                 <TextField disabled={isDisabled || (props.updateFormation.nConv !== '' && props.updateFormation.nConv !== null)}
                     required type="text" size="small" label="Conventionnement" variant="outlined"
-                    value={props.updateFormation.nConv ? props.updateFormation.nConv : ''}
+                    value={props.updateFormation.nConv ? props.updateFormation.nConv : props.updateFormation.nConv_tmp}
                     onChange={(e) => props.handleChangeFormation('nConv_tmp', e.target.value)}
                 />
 
-                <Button disabled={isDisabled || !(props.updateFormation.nConv !== '' && props.updateFormation.nConv !== null)} onClick={props.handleSaveConv} variant="contained" color="primary">
+                <Button disabled={isDisabled || !(props.updateFormation.nConv_tmp !== '')} onClick={props.handleSaveConv} variant="contained" color="primary">
                     Valider
                 </Button>
             </div>

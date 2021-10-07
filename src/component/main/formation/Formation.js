@@ -32,6 +32,7 @@ import Commentaire from '../../global/commentaire/Commentaire';
 import NotificationImportantIcon from '@material-ui/icons/NotificationImportant';
 import { Tooltip } from '@material-ui/core';
 import ModalActionAuto from './ModalActionAuto/ModalActionAuto';
+import Skeleton from '@material-ui/lab/Skeleton';
 
 // import { title } from 'process';
 // import Cards from './Card/Cards';
@@ -57,6 +58,9 @@ const useStyles = makeStyles((theme) => ({
     },
     error: {
         backgroundColor: theme.palette.warning.main
+    },
+    new: {
+        backgroundColor: '#d4ead4',
     },
     iconError: {
         fill: 'red'
@@ -230,6 +234,7 @@ export default function Formation() {
         date_ValidationDDO: '',
     })
 
+    const [isLoad, setIsLoad] = useState({ formation: false }) // Quand réponse axios -> key = true
     const [openModalCreateSol, setOpenModalCreateSol] = useState(false)
 
     // --------------- SnackBar
@@ -258,12 +263,6 @@ export default function Formation() {
     };
 
     // --------------- useEffect
-    useEffect(() => {
-        if (user.idgasi) {
-            setupdateFormation({ ...updateFormation, idgasi: user.idgasi, userFct: user.fonction });
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user])
 
     useEffect(() => {
         if (openMoreOptions !== '') {
@@ -279,6 +278,11 @@ export default function Formation() {
     }, [openMoreOptions, formationList, user])
 
     useEffect(() => {
+
+        if (user.idgasi) {
+            setupdateFormation({ ...updateFormation, idgasi: user.idgasi, userFct: user.fonction });
+        }
+
         axios({
             method: 'GET',
             url: `/formation/findAll`,
@@ -298,6 +302,7 @@ export default function Formation() {
                     date_nconv: v.date_nconv ? dateFormat(v.date_nconv, 'ANG') : '',
                 };
             });
+
             let solToCancel = formList.filter((v) =>
                 v.dateMailOF !== null &&
                 v.dateRespOF === null &&
@@ -305,10 +310,12 @@ export default function Formation() {
                 v.userFct === user.fonction &&
                 v.etat === 1);
 
+            // Ouvre un modal qui annulera automatiquement les formation si l'OF n'a pas répondu dans les 5 jours
             if (solToCancel.length > 0) {
                 setOpenModalAuto(true);
                 setFormationListToCancel(solToCancel);
             }
+            setIsLoad({ ...isLoad, formation: true })
             setFormationList(formList);
         });
 
@@ -341,16 +348,34 @@ export default function Formation() {
                 { etat: 'Annulé OF', id: 18 },
                 { etat: 'Annulé DT', id: 19 }
             ])
-            let allEtat = response.data.filter((v) => v.id !== 20).map((v) => v.id)
-            allEtat.unshift(0)
-            setFilterValues({ ...filterValues, etat: allEtat })
+
+            // Définir les filtres par default selon l'utilisateur.
+            if (user.fonction) {
+                let newFilter;
+                switch (user.fonction) {
+                    case 1:
+                        newFilter = { ...filterValues, userFct: 1, etat: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] };
+                        break;
+                    case 2:
+                        newFilter = { ...filterValues, userFct: 2, etat: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] };
+                        break;
+                    case 3:
+                        newFilter = { ...filterValues, etat: [9] };
+                        break;
+                    case 5:
+                        newFilter = { ...filterValues, etat: [6, 7, 8, 10, 11, 12] };
+                        break;
+                    default: newFilter = { ...filterValues, etat: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] };
+                }
+                setFilterValues(newFilter)
+            }
         })
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user]);
 
     useEffect(() => {
         setAttributaireLotSelected('all');
-        let etat = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+        // let etat = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
         if (editionBRS && filterValues.id_lot !== 'all') {
             axios({
@@ -365,7 +390,7 @@ export default function Formation() {
             setAttributaireLotList([]);
 
         }
-        setFilterValues({ ...filterValues, etat: etat, id_attributaire: 'all' })
+        setFilterValues({ ...filterValues, id_attributaire: 'all' })
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [editionBRS, filterValues.id_lot])
@@ -694,7 +719,7 @@ export default function Formation() {
                 }
                 newFormationList.push({
                     ...updateFormation, id: response.data.insertId,
-                    etat: 1,
+                    etat: 0,
                     etat_libelle: "En cours d'élaboration",
                     date_entree_fixe: updateFormation.date_entree_demandee,
                     id_sol: null,
@@ -763,21 +788,31 @@ export default function Formation() {
 
     const handleSendMailOF = () => {
         console.log('sendmail', openMoreOptions)
+        axios({
+            method:'get',
+            url:'mail/sendSollicitation',
+            data:updateFormation,
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), },
+        }).then((response) => console.log(response))
     }
 
     const handleCancelFormation = () => {
 
         let id = updateFormation.id === '' ? openMoreOptions : updateFormation.id
-        let formation = updateFormation.id === '' ? formationList.find((v) => v.id === openMoreOptions) : updateFormation
+        let newUpdateFormation = updateFormation.id === '' ? formationList.find((v) => v.id === openMoreOptions) : updateFormation
 
-        if (formation.id !== '' && formation.userFct === user.fonction) {
+        if (newUpdateFormation.id !== '' && newUpdateFormation.userFct === user.fonction) {
             axios({
                 method: 'put',
                 url: 'formation/updateEtat',
-                data: { id: id, etat: 9 },
+                data: { id: id, etat: 19 },
                 headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), },
             }).then((response) => {
                 if (response.status === 200) {
+                    newUpdateFormation.etat = 19;
+                    newUpdateFormation.etat_libelle = 'Annulé DT';
+                    let newFormationList = formationList.map((v) => v.id === newUpdateFormation.id ? newUpdateFormation : v);
+                    setFormationList(newFormationList);
                     setMessageSnackBar('Formation annulée');
                     setSeverity('success');
                 } else {
@@ -785,7 +820,7 @@ export default function Formation() {
                     setSeverity('error');
                 }
             })
-        } else if (formation.userFct !== user.fonction) {
+        } else if (newUpdateFormation.userFct !== user.fonction) {
             setMessageSnackBar('Vous n\'êtes pas autorisé à faire ceci');
             setSeverity('error');
         } else {
@@ -1141,7 +1176,7 @@ export default function Formation() {
     }
 
     const handleChangeAttribLotSelected = (id) => {
-        setFilterValues({ ...filterValues, id_attributaire: id, etat: id === 'all' ? [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] : [7, 8, 10, 11] })
+        setFilterValues({ ...filterValues, id_attributaire: id, etat: id === 'all' ? [6, 7, 8, 9, 10, 11, 12] : [7, 8, 11] })
         setAttributaireLotSelected(id)
     }
     const handleEditionBRS = () => {
@@ -1326,12 +1361,14 @@ export default function Formation() {
             axios({
                 method: 'put',
                 url: 'formation/conventionnement',
-                data: { ...sollicitation, nConv: updateFormation.nConv_tmp, date_nConv: dateTime, user: user.idgasi },
+                // data: { ...sollicitation, nConv: updateFormation.nConv_tmp, date_nConv: dateTime, user: user.idgasi }, Pourquoi change l'user ?
+                data: { ...sollicitation, nConv: updateFormation.nConv_tmp, date_nConv: dateTime },
                 headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
             }).then((response) => {
                 if (response.status === 200) {
                     const newFormationList = formationList.map((v) => v.id === updateFormation.id ?
                         { ...v, etat: 12, etat_libelle: 'Formation conventionnée', nConv: updateFormation.nConv_tmp } : v)
+                    setupdateFormation({ ...updateFormation, nConv: updateFormation.nConv_tmp, date_nConv: dateTime })
                     setFormationList(newFormationList)
                     setMessageSnackBar('N° conventionnement enregistré!');
                     setSeverity('success');
@@ -1432,7 +1469,6 @@ export default function Formation() {
                 severity={severity}
                 handleClose={handleCloseSnackbar}
             />
-
             <div className={classes.categorie} >
                 <div className={classes.categorieTitle} >
                     <div className={classes.title} >Liste des formations ({formationListDisplay.length})</div>
@@ -1486,9 +1522,6 @@ export default function Formation() {
                         </div>
                     }
 
-
-
-
                     {IsPermitted(user, 'formation', 'create') &&
                         <div className={classes.btn} >
                             <Button variant="contained" color="primary" onClick={handleShowFormation}>Créer une sollicitation</Button>
@@ -1504,8 +1537,7 @@ export default function Formation() {
                                     lotList={lotList}
                                     etatList={etatList}
                                     filterValues={filterValues}
-                                    handleChangeFilter={handleChangeFilter}
-                                />}
+                                    handleChangeFilter={handleChangeFilter} />}
                                 <TableRow>
                                     {columnTableau.map((v) =>
                                         <TableCell onClick={() => handleOrderBy(v)} className={classes.cellHead} key={'cellHead_' + v}>
@@ -1522,51 +1554,65 @@ export default function Formation() {
                                 </TableRow >
                             </TableHead >
                             <TableBody>
-                                {formationList.length > 0
-                                    ? formationListDisplay.map((row) => (
-                                        <TableRow key={row.id + '_' + row.n_Article} className={row.etat > 15 ? classes.error : ''}>
-                                            <TableCell component="th" scope="row">
-                                                {codeToName('lot_' + row.id_lot)}
-                                            </TableCell>
-                                            <TableCell component="th" scope="row">
-                                                {row.n_Article}
-                                            </TableCell>
-                                            <TableCell>{codeToName('fonction_' + row.userFct)}</TableCell>
-                                            <TableCell>{row.agence_ref_libelle}</TableCell>
-                                            <TableCell>{codeToName('dispositif_' + row.dispositif)}</TableCell>
-                                            <TableCell>{row.commune}</TableCell>
-                                            <TableCell>
-                                                <div className={classes.flex}>
-                                                    {/* Si l'of a pas encore répondu ET temps de réponse > 5 jours ET etat = 1 (En attente de réponse). Affiche icone */}
-                                                    {((row.dateMailOF !== null && row.dateRespOF === null) && dateCount(new Date(row.dateMailOF), new Date(), true) > 5 && row.etat === 1) &&
-                                                        (row.userFct === user.fonction
-                                                            ? <Tooltip title="L'OF n'a pas répondu dans le temps imparti." aria-label="comm" classes={{ tooltip: classes.tooltip }}>
-                                                                <IconButton onClick={() => setOpenModalAuto(true)}>
+                                {isLoad.formation ?
+                                    formationList.length > 0
+                                        ? formationListDisplay.map((row) => (
+                                            <TableRow key={row.id + '_' + row.n_Article} className={
+                                                row.etat > 15 ? classes.error
+                                                    : row.etat === 0 ? classes.new
+                                                        : ''}>
+                                                <TableCell component="th" scope="row">
+                                                    {codeToName('lot_' + row.id_lot)}
+                                                </TableCell>
+                                                <TableCell component="th" scope="row">
+                                                    {row.n_Article}
+                                                </TableCell>
+                                                <TableCell>{codeToName('fonction_' + row.userFct)}</TableCell>
+                                                <TableCell>{row.agence_ref_libelle}</TableCell>
+                                                <TableCell>{codeToName('dispositif_' + row.dispositif)}</TableCell>
+                                                <TableCell>{row.commune}</TableCell>
+                                                <TableCell>
+                                                    <div className={classes.flex}>
+                                                        {/* Si l'of a pas encore répondu ET temps de réponse > 5 jours ET etat = 1 (En attente de réponse). Affiche icone */}
+                                                        {((row.dateMailOF !== null && row.dateRespOF === null) && dateCount(new Date(row.dateMailOF), new Date(), true) > 5 && row.etat === 1) &&
+                                                            (row.userFct === user.fonction
+                                                                ? <Tooltip title="L'OF n'a pas répondu dans le temps imparti." aria-label="comm" classes={{ tooltip: classes.tooltip }}>
+                                                                    <IconButton onClick={() => setOpenModalAuto(true)}>
+                                                                        <NotificationImportantIcon className={classes.iconError} />
+                                                                    </IconButton>
+                                                                </Tooltip>
+                                                                : <Tooltip title="L'OF n'a pas répondu dans le temps imparti." aria-label="comm" classes={{ tooltip: classes.tooltip }}>
                                                                     <NotificationImportantIcon className={classes.iconError} />
-                                                                </IconButton>
-                                                            </Tooltip>
-                                                            : <Tooltip title="L'OF n'a pas répondu dans le temps imparti." aria-label="comm" classes={{ tooltip: classes.tooltip }}>
-                                                                <NotificationImportantIcon className={classes.iconError} />
-                                                            </Tooltip>)
-                                                    }
-                                                    {row.etat_libelle}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>{dateFormat(row.date_entree_demandee)}</TableCell>
-                                            <TableCell>{dateFormat(row.date_fin)}</TableCell>
-                                            <TableCell>
-                                                <div className={classes.flex}>
-                                                    <Commentaire user={user} formation={row} />
-                                                    <IconButton size="small" aria-label="Editer" color="secondary" onClick={(e) => handleClickOpenMenu(e, row.id)}>
-                                                        <MoreHorizIcon fontSize="small" />
-                                                    </IconButton>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>))
+                                                                </Tooltip>)
+                                                        }
+                                                        {row.etat_libelle}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>{dateFormat(row.date_entree_demandee)}</TableCell>
+                                                <TableCell>{dateFormat(row.date_fin)}</TableCell>
+                                                <TableCell>
+                                                    <div className={classes.flex}>
+                                                        <Commentaire user={user} formation={row} />
+                                                        <IconButton size="small" aria-label="Editer" color="secondary" onClick={(e) => handleClickOpenMenu(e, row.id)}>
+                                                            <MoreHorizIcon fontSize="small" />
+                                                        </IconButton>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>))
+                                        : <TableRow>
+                                            <TableCell colSpan={10}>Aucune formation</TableCell>
+                                        </TableRow>
                                     : <TableRow>
-                                        <TableCell colSpan={10}>Aucune formation</TableCell>
-                                    </TableRow>
-                                }
+                                        <TableCell><Skeleton variant="text" /></TableCell>
+                                        <TableCell><Skeleton variant="text" /></TableCell>
+                                        <TableCell><Skeleton variant="text" /></TableCell>
+                                        <TableCell><Skeleton variant="text" /></TableCell>
+                                        <TableCell><Skeleton variant="text" /></TableCell>
+                                        <TableCell><Skeleton variant="text" /></TableCell>
+                                        <TableCell><Skeleton variant="text" /></TableCell>
+                                        <TableCell><Skeleton variant="text" /></TableCell>
+                                        <TableCell><Skeleton variant="text" /></TableCell>
+                                    </TableRow>}
                             </TableBody>
                         </Table >
                     </TableContainer >
@@ -1642,7 +1688,7 @@ export default function Formation() {
             <p>{"Si modif BRS = annul toute les soll, annulé le brs aussi"}</p>
             <p>{"Si form etat = 10 ne pas mettre dans le BRS"}</p>
             <p>{"SendMail de m****"}</p>
-
+            <Button onClick={handleSendMailOF} variant='contained' color='primary'> MAIL </Button>
         </>
     )
 }

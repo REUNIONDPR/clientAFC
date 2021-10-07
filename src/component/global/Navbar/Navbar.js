@@ -20,6 +20,7 @@ import { IsPermitted } from '../../../utilities/Function';
 import Cookies from 'js-cookie';
 import Button from '@material-ui/core/Button';
 import { codeToName } from '../../../utilities/Function';
+import Skeleton from '@material-ui/lab/Skeleton';
 
 const drawerWidth = '20%';
 
@@ -45,6 +46,9 @@ const useStyles = makeStyles((theme) => ({
   },
   infoAvatar: {
     height: 60,
+    width: '80%',
+    marginLeft: 'auto',
+    marginRight: 'auto',
   },
   drawerHeader: {
     display: 'flex',
@@ -62,8 +66,10 @@ const useStyles = makeStyles((theme) => ({
     // position: 'fixed',
     // width: drawerWidth,
     backgroundColor: '#fff',
+  },
+  skeleton:{
+    marginTop:theme.spacing(1)
   }
-
 }));
 
 export default function PermanentDrawerLeft() {
@@ -128,48 +134,65 @@ export default function PermanentDrawerLeft() {
           }
 
           <div className={classes.infoAvatar}>
-            <p className='titre'>{user.nom}</p>
-            <p>{codeToName('fonction_' + user.fonction)}</p>
+
+            {user.idgasi
+              ? <>
+                <p className='titre'>{user.nom}</p>
+                <p>{codeToName('fonction_' + user.fonction)}</p>
+              </>
+              : <>
+                <Skeleton variant="text" />
+                <Skeleton variant="text" />
+              </>}
+
           </div>
         </div>
       </div>
 
       <Divider />
       <List>
-        {IsPermitted(user, 'formation', 'view') &&
-          <ListItem button className='primary-h-color' component={Link} to="/formation" selected={selectedIndex === 1}
-            onClick={(event) => handleListItemClick(event, 1)}>
-            <ListItemIcon><CreateNewFolderIcon /></ListItemIcon>
-            <ListItemText secondary='Formation' />
-          </ListItem>}
 
-        {IsPermitted(user, 'catalogue', 'view') &&
-          <ListItem button className='primary-h-color' component={Link} to="catalogue" selected={selectedIndex === 2}
-            onClick={(event) => handleListItemClick(event, 2)}>
-            <ListItemIcon><DvrIcon /></ListItemIcon>
-            <ListItemText secondary='Catalogue' />
-          </ListItem>}
+        {user.idgasi
+          ? <>
+            {IsPermitted(user, 'formation', 'view') &&
+              <ListItem button className='primary-h-color' component={Link} to="/formation" selected={selectedIndex === 1}
+                onClick={(event) => handleListItemClick(event, 1)}>
+                <ListItemIcon><CreateNewFolderIcon /></ListItemIcon>
+                <ListItemText secondary='Formation' />
+              </ListItem>}
 
-        {IsPermitted(user, 'brs', 'view') &&
-          <ListItem button className='primary-h-color' component={Link} to="brs" selected={selectedIndex === 3}
-            onClick={(event) => handleListItemClick(event, 3)}>
-            <ListItemIcon><FileCopyIcon /></ListItemIcon>
-            <ListItemText secondary='BRS' />
-          </ListItem>}
+            {IsPermitted(user, 'catalogue', 'view') &&
+              <ListItem button className='primary-h-color' component={Link} to="catalogue" selected={selectedIndex === 2}
+                onClick={(event) => handleListItemClick(event, 2)}>
+                <ListItemIcon><DvrIcon /></ListItemIcon>
+                <ListItemText secondary='Catalogue' />
+              </ListItem>}
 
-        {IsPermitted(user, 'bdd', 'view') &&
-          <ListItem button className='primary-h-color' component={Link} to="bdd" selected={selectedIndex === 4}
-            onClick={(event) => handleListItemClick(event, 4)}>
-            <ListItemIcon><StorageIcon /></ListItemIcon>
-            <ListItemText secondary='Base de donnée' />
-          </ListItem>}
+            {IsPermitted(user, 'brs', 'view') &&
+              <ListItem button className='primary-h-color' component={Link} to="brs" selected={selectedIndex === 3}
+                onClick={(event) => handleListItemClick(event, 3)}>
+                <ListItemIcon><FileCopyIcon /></ListItemIcon>
+                <ListItemText secondary='BRS' />
+              </ListItem>}
 
-        {IsPermitted(user, 'admin', 'view') &&
-          <ListItem button className='primary-h-color' component={Link} to="admin" selected={selectedIndex === 5}
-            onClick={(event) => handleListItemClick(event, 5)}>
-            <ListItemIcon><DashboardIcon /></ListItemIcon>
-            <ListItemText secondary='Admin' />
-          </ListItem>}
+            {IsPermitted(user, 'bdd', 'view') &&
+              <ListItem button className='primary-h-color' component={Link} to="bdd" selected={selectedIndex === 4}
+                onClick={(event) => handleListItemClick(event, 4)}>
+                <ListItemIcon><StorageIcon /></ListItemIcon>
+                <ListItemText secondary='Base de donnée' />
+              </ListItem>}
+
+            {IsPermitted(user, 'admin', 'view') &&
+              <ListItem button className='primary-h-color' component={Link} to="admin" selected={selectedIndex === 5}
+                onClick={(event) => handleListItemClick(event, 5)}>
+                <ListItemIcon><DashboardIcon /></ListItemIcon>
+                <ListItemText secondary='Admin' />
+              </ListItem>}
+          </>
+          : <>
+            <Skeleton className={classes.skeleton} variant="rect" height={40} />
+            <Skeleton className={classes.skeleton} variant="rect" height={40} />
+          </>}
 
       </List>
       <Divider />

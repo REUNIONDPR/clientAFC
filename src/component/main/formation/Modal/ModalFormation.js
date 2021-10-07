@@ -4,7 +4,7 @@ import Modal from '@material-ui/core/Modal';
 import Backdrop from '@material-ui/core/Backdrop';
 import Fade from '@material-ui/core/Fade';
 import IconButton from '@material-ui/core/IconButton';
-import { Tooltip, Typography } from '@material-ui/core';
+import { Tooltip } from '@material-ui/core';
 import CloseRoundedIcon from '@material-ui/icons/CloseRounded';
 // import Stepper from './Stepper';
 import Formulaire from './children/Formulaire';
@@ -12,6 +12,7 @@ import Sollicitation from './children/sollicitation/Sollicitation';
 import PartieBRS from './children/PartieBRS';
 import PartieDPSR from './children/PartieDPSR';
 import Commentaire from '../../../global/commentaire/Commentaire';
+import CardSkeleton from './children/sollicitation/card/CardSkeleton';
 // import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles((theme) => ({
@@ -61,18 +62,6 @@ const useStyles = makeStyles((theme) => ({
     bodyMain: {
         padding: theme.spacing(2, 1, 2, 0),
     },
-    formCancel: {
-        color: 'red',
-        position: 'absolute',
-        top: '40%',
-        left: '30%',
-        transform: 'rotate(-15deg)',
-        fontSize: 35,
-        border: '1px solid',
-        padding: theme.spacing(2),
-        backgroundColor: '#fff',
-        zIndex: 999,
-    },
     flexCadre: {
         display: 'flex',
         alignItems: 'center',
@@ -83,34 +72,48 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ModalCreateSol(props) {
     const classes = useStyles();
-    const [isSubmit, setIsSubmit] = useState(); // Gestion des erreurs (champs vide)
+    const [isSubmit, setIsSubmit] = useState({ 
+        formulaireSubmit:false, 
+        formulaireCancel:false,
+        responseSollicitation:false,
+        createSol:false,
+    }); // Gestion des spinner dans les boutons : 'Tu as bien appuyé sur le btn, je reflechi'
 
     useEffect(() => {
-        setIsSubmit(false)
+        setIsSubmit({...isSubmit, 
+            formulaireSubmit:false, 
+            formulaireCancel:false,
+            responseSollicitation:false,
+            createSol:false,
+        })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props])
 
     const handleSubmit = (newFormFromOther) => {
-        setIsSubmit(true)
+        setIsSubmit({...isSubmit, formulaireSubmit:true})
 
         props.updateFormation.id === ''
             ? props.handleSaveFormation(newFormFromOther)
             : props.handleEditFormation();
-
-
-        //   let action = dataRow.id === '' || dataRow.id === 0 ? 'create' : 'update';
-
-        //   switch (action) {
-        //     case 'create': props.handleSubmitClickToParent(row, action); break;
-        //     case 'update': props.handleSubmitModalClick(row, action); break;
-        //     default: props.handleErrorSubmit();
-        //   }
-
     }
 
     const handleIsSubmitting = () => {
         setIsSubmit(!isSubmit)
     }
 
+    const handleCreateSollicitation = (sollicitation) => {
+        setIsSubmit({...isSubmit, createSol:true});
+        props.handleCreateSollicitation(sollicitation)
+    }
+    const handleCancelFormation = () => {
+        setIsSubmit({...isSubmit, formulaireCancel:true});
+        props.handleCancelFormation();
+    }
+    
+    const handleResponseSollicitation = (response, sollicitation, reason) => {
+        setIsSubmit({...isSubmit, responseSollicitation:true});
+        props.handleResponseSollicitation(response, sollicitation, reason);
+    }
     return (
         <div>
             <Modal
@@ -159,7 +162,7 @@ export default function ModalCreateSol(props) {
                                     agence_refList={props.agence_refList}
                                     catalogueList={props.catalogueList}
                                     communeList={props.communeList}
-                                    handleCancelFormation={props.handleCancelFormation}
+                                    handleCancelFormation={handleCancelFormation}
                                     handleSubmit={handleSubmit}
                                     sollicitation={props.sollicitation}
                                     createNewFormationFromThis={props.createNewFormationFromThis}
@@ -171,11 +174,11 @@ export default function ModalCreateSol(props) {
                                         <Sollicitation
                                             attributaireList={props.attributaireList}
                                             updateFormation={props.updateFormation}
-                                            handleCreateSollicitation={props.handleCreateSollicitation}
+                                            handleCreateSollicitation={handleCreateSollicitation}
                                             handleSubmitSol={props.handleSubmitSol}
-                                            isSubmittingSol={props.isSubmittingSol}
+                                            isSubmittingSol={isSubmit}
                                             sollicitationList={props.sollicitationList}
-                                            handleResponseSollicitation={props.handleResponseSollicitation}
+                                            handleResponseSollicitation={handleResponseSollicitation}
                                             handlAddIcop={props.handlAddIcop}
                                             icopList={props.icopList}
                                             lieuExecutionList={props.lieuExecutionList}
@@ -205,10 +208,9 @@ export default function ModalCreateSol(props) {
                                                     user={props.user}
                                                 />}
                                         </div>
-                                        {props.updateFormation.etat === 20 &&
-                                            <Typography className={classes.formCancel}>{"Formation annulée".toUpperCase()}</Typography>
-                                        }
                                     </>
+                                    : (props.updateFormation.id !== '' && props.attributaireList.length === 0)
+                                    ? <CardSkeleton />
                                     : props.updateFormation.id !== '' && <p>Pas d'OF attaché à la formation</p>
                                 }
                             </div>

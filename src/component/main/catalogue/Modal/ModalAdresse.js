@@ -118,7 +118,7 @@ export default function ModalAdresse(props) {
             url: 'attributaire/findCommune?id_of_cata='+updateRow.id_of_cata,
             headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => setListVille(response.data));
-    }, [])
+    }, [updateRow.id_of_cata])
 
     const handleChangeCheckBox = () => {
         setCheckClose(!checkClose)
