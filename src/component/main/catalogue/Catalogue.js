@@ -45,7 +45,7 @@ export default function Catalogue() {
     // Faire une habilitation globale
     useEffect(() => {
         if (user.fonction) {
-            setAdresseHabilited(IsPermitted(user, 'adresse', 'delete'))
+            setAdresseHabilited(IsPermitted(user, 'adresse', 'crud'))
         }
     }, [user]);
 

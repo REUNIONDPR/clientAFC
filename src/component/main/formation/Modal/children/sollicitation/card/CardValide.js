@@ -70,8 +70,10 @@ export default function CardValide(props) {
         setDateIcop(e.target.value)
     }
 
-    const isDisabled = !(IsPermitted(props.user, 'sollicitation', 'updateDT') && props.user.fonction === props.updateFormation.userFct)
-  
+    const isDisabled = !(IsPermitted(props.user, 'sollicitation', 'updateDT')) ||
+        props.user.fonction !== props.updateFormation.userFct ||
+        props.updateFormation.etat > 15
+
     return (
         <>
             <Stepper steps={[

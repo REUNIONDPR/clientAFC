@@ -27,8 +27,8 @@ const useStyles = makeStyles((theme) => ({
         fontSize: '15px',
         maxWidth: 'none',
     },
-    closeMenu:{
-        textAlign:'right',
+    closeMenu: {
+        textAlign: 'right',
     },
 }));
 
@@ -67,7 +67,7 @@ export default function Commentaire(props) {
         }).then((response) => {
             if (response.status === 200) {
                 let newCommentList = [...commentList];
-                newCommentList.push({ idgasi: props.user.idgasi, commentaire: commentaire, date: date })
+                newCommentList.push({ idgasi: props.user.idgasi, commentaire: commentaire, date: date, user: props.user.nom })
                 setCommentList(newCommentList)
             } else {
                 console.log('message error')
@@ -89,6 +89,18 @@ export default function Commentaire(props) {
         }
     }
 
+    const [isHabilited, setIsHabilited] = useState(false)
+
+    useEffect(() => {
+        if (openMenu) {
+            console.log(props.user.fonction)
+            setIsHabilited((props.user.fonction === 1 || props.user.fonction === 2)
+                ? props.user.fonction === props.formation.userFct
+                : true)
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [openMenu])
+
     return (
         <>
 
@@ -107,15 +119,17 @@ export default function Commentaire(props) {
                 onClose={handleCloseOpenMenu}
             >
 
-                <List component="nav" aria-label="main">
-                    <ListItem>
-                        <TextField label=".Commentaire" type="text" size="small" name="comment"
-                            value={commentaire} variant="outlined" onChange={(e) => setCommentaire(e.target.value)} />
-                        <IconButton disabled={commentaire === ''} aria-label="save" color="primary" onClick={handleAddCommentaire}>
-                            <AddIcon />
-                        </IconButton>
-                    </ListItem>
-                    <Divider />
+                <List>
+                    {isHabilited && <>
+                        <ListItem>
+                            <TextField label=".Commentaire" type="text" size="small" name="comment" multiline
+                                value={commentaire} variant="outlined" onChange={(e) => setCommentaire(e.target.value)} />
+                            <IconButton disabled={commentaire === ''} aria-label="save" color="primary" onClick={handleAddCommentaire}>
+                                <AddIcon />
+                            </IconButton>
+                        </ListItem>
+                        <Divider />
+                    </>}
                     {commentList.length > 0
                         ? commentList.map((v, i) => (
                             <ListItem key={i}>

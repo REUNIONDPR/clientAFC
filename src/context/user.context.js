@@ -43,7 +43,7 @@ const UserContextProvider = (props) => {
     };
 
     const logUser = (idgasi) => {
-        console.log(idgasi)
+        
         fetch('/auth/logUser', {
             method: 'post',
             headers: new Headers({
@@ -53,7 +53,7 @@ const UserContextProvider = (props) => {
         })
             .then((res) => res.json())
             .then((res) => {
-                console.log(res)
+                
                 if (res.hasOwnProperty('user')) {
                     const token = res.token;
                     // const idgasi= res.user.idgasi;
@@ -69,7 +69,7 @@ const UserContextProvider = (props) => {
                     Cookies.set('authTokenAFC', token, { expires: 360 });
                     // Cookies.set('idgasi', idgasi, { expires: 360 });
                 } else {
-                    setUser({ flash: res.flash, token: false });
+                    setUser({ idgasi: '', flash:res.flash, token: false });
                 }
             });
 

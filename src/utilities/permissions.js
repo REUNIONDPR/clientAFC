@@ -2,10 +2,6 @@ const HAB = {
     "1": { // DTNE
         "catalogue": {
             "view": true,
-            "create": false,
-            "update": false,
-            "delete": false,
-            "validate": false,
         }, "formation": {
             "view": true,
             "create": true,
@@ -13,116 +9,67 @@ const HAB = {
             "delete": true,
             "validate": true,
         }, "sollicitation": {
+            "create":true,
             "updateDT": true,
-            "updateDDO": false,
-            "conv": false,
         }, "adresse": {
             "view": true,
-            "create": false,
-            "update": false,
-            "delete": false,
-            "validate": false,
         }
     },
     "2": { // DTSO
         "catalogue": {
             "view": true,
-            "create": false,
-            "update": false,
-            "delete": false,
-            "validate": false,
         }, "formation": {
             "view": true,
-            "create": false,
-            "update": false,
-            "delete": false,
-            "validate": false,
+            "create": true,
+            "update": true,
+            "delete": true,
+            "validate": true,
         }, "sollicitation": {
+            "create":true,
             "updateDT": true,
-            "updateDDO": false,
-            "conv": false,
         }, "adresse": {
             "view": true,
-            "create": false,
-            "update": false,
-            "delete": false,
-            "validate": false,
         }
     },
     "3": { // DPSR
         "catalogue": {
             "view": true,
-            "create": false,
-            "update": false,
-            "delete": false,
-            "validate": false,
         }, "formation": {
             "view": true,
-            "create": false,
-            "update": false,
-            "delete": false,
-            "validate": false,
         }, "sollicitation": {
-            "updateDT": false,
-            "updateDDO": false,
             "conv": true,
         }, "adresse": {
             "view": true,
-            "create": false,
-            "update": false,
-            "delete": false,
-            "validate": false,
         }
     },
     "4": { // JURIDIQUE
         "catalogue": {
             "view": true,
-            "create": false,
-            "update": false,
-            "delete": false,
-            "validate": false,
+            "create": true,
+            "update": true,
+            "delete": true,
+            "validate": true,
+        }, "bdd": {
+            "view": true,
         }, "formation": {
             "view": true,
-            "create": false,
-            "update": false,
-            "delete": false,
-            "validate": false,
-        }, "sollicitation": {
-            "updateDT": false,
-            "updateDDO": false,
-            "conv": false,
         }, "adresse": {
             "view": true,
-            "create": false,
-            "update": false,
-            "delete": false,
-            "validate": false,
+            "crud": true,
         }
     },
     "5": { // DDO
         "catalogue": {
             "view": true,
-            "create": false,
-            "update": false,
-            "delete": false,
-            "validate": false,
         }, "formation": {
             "view": true,
-            "create": false,
-            "update": false,
-            "delete": false,
-            "validate": false,
         }, "sollicitation": {
-            "updateDT": false,
             "updateDDO": true,
-            "conv": false,
         }, "adresse": {
             "view": true,
-            "create": false,
-            "update": false,
-            "delete": false,
-            "validate": false,
-        }
+        }, "brs": {
+            "create": true,
+        },
     },
     "6": { // DPR
         "catalogue": {
@@ -147,12 +94,12 @@ const HAB = {
             "update": true,
             "delete": true,
             "validate": true,
-        }, "brs":{
-            "create":true,
-        }, "admin":{
-            'view':true,
-        }, "bdd":{
-            "view":true,
+        }, "brs": {
+            "create": true,
+        }, "admin": {
+            'view': true,
+        }, "bdd": {
+            "view": true,
         }
     },
 }

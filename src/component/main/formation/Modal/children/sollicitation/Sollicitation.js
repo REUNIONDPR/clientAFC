@@ -4,7 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import SollicitationListAttr from './SollicitationListAttr';
-import { dateFormat, getDateTime } from '../../../../../../utilities/Function';
+import { dateFormat, getDateTime, IsPermitted } from '../../../../../../utilities/Function';
 import { useEffect, useState } from 'react';
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import CardValide from './card/CardValide';
@@ -127,7 +127,7 @@ export default function Sollicitation(props) {
                     Obj = { etat: false, error: false, text: `BRS modifié le ${myDate.date} à ${myDate.time}`, finDeSollicitation: true }
                 } else if (sol.etat === 12) {
                     Obj = { etat: false, error: false, text: `Conventionné le ${myDate.date} à ${myDate.time}`, finDeSollicitation: true }
-                } else {
+                } else if (sol.etat < 4){
                     isSolValidate = false;
                     Obj = { etat: false, error: undefined, text: `Sollicité le ${myDate.date} à ${myDate.time}`, finDeSollicitation: false }
                 }
@@ -140,7 +140,7 @@ export default function Sollicitation(props) {
 
             return {
                 ...v, ...sol,
-                disabled: props.updateFormation.etat === 20 ? true : Obj.etat,
+                disabled: props.updateFormation.etat > 15 || props.updateFormation.userFct !== props.user.fonction ? true : Obj.etat,
                 text: Obj.text,
                 texterror: Obj.error,
                 finDeSollicitation: Obj.finDeSollicitation,
@@ -155,14 +155,14 @@ export default function Sollicitation(props) {
     useEffect(() => {
         if (arrayAttrib.length > 0) {
 
-            if (sollicitationSelected === 0) {
+            if (sollicitationSelected === 0) { // Récupère une sollicitation valiude
                 let solValide = arrayAttrib.find((v) => v.isSolValidate);
                 if (!solValide) {
                     solValide = arrayAttrib.find((v) => !v.finDeSollicitation);
                 }
                 setNextSollicitation(solValide);
                 setSollicitationVisible(solValide);
-            } else {
+            } else { // Quand clique sur un attributaire de la liste, affiche l'historique de la sollicitation
                 let sol = arrayAttrib.find((v) => v.id === sollicitationSelected);
                 if (sol.finDeSollicitation && !sol.isSolValidate) {
                     // axios get histo
@@ -190,7 +190,7 @@ export default function Sollicitation(props) {
         setRadioSelected(response)
         setShowDetailRefus(response === 'refus')
     }
-
+    
     return (
         <div className={classes.blockSolAttr}>
             <div className={classes.blockAttributaire}>
@@ -216,13 +216,16 @@ export default function Sollicitation(props) {
                         </div>
 
                         {!sollicitationVisible.dateMailOF // Si OF pas encore contacté
-                            ? <div className={classes.blockSolToContact}>{props.isSubmittingSol
-                                ? <Button onClick={props.handleSubmitSol} variant="contained" color="secondary"
+                            ? <div className={classes.blockSolToContact}>{props.isSubmittingSol.createSol
+                                ? <Button variant="contained" color="secondary"
                                     endIcon={<CircularProgress size={20} className={classes.spinnerBtn} />}
                                     startIcon={<SendIcon />}>
                                     Solliciter l'OF
                                 </Button>
-                                : <Button disabled={sollicitationVisible.id !== nextSollicitation.id && props.updateFormation !== 20} onClick={() => props.handleCreateSollicitation(sollicitationVisible)} variant="contained" color="secondary"
+                                : <Button disabled={sollicitationVisible.id !== nextSollicitation.id || 
+                                    !(IsPermitted(props.user, 'sollicitation', 'create')) ||
+                                    props.updateFormation.userFct !== props.user.fonction ||
+                                    props.updateFormation.etat > 15} onClick={() => props.handleCreateSollicitation(sollicitationVisible)} variant="contained" color="secondary"
                                     startIcon={<SendIcon />}>
                                     Solliciter l'OF
                                 </Button>}
@@ -230,6 +233,7 @@ export default function Sollicitation(props) {
                             : (!sollicitationVisible.dateRespOF && sollicitationVisible.etat === 1)// Si pas encore de réponse de l'OF 
                                 ? <CardWaiting
                                     OF={sollicitationVisible.libelle}
+                                    isSubmittingSol={props.isSubmittingSol}
                                     updateFormation={props.updateFormation}
                                     date={dateFormat(sollicitationVisible.dateMailOF)}
                                     handleChangeRadioResp={handleChangeRadioResp}
