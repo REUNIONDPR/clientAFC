@@ -1685,9 +1685,9 @@ export default function Formation() {
                     handleValideSollicitation={handleValideSollicitation}
                     handleSaveConv={handleSaveConv}
                 />}
-            <p>{"Si modif BRS = annul toute les soll, annulé le brs aussi"}</p>
+            {/* <p>{"Si modif BRS = annul toute les soll, annulé le brs aussi"}</p>
             <p>{"Si form etat = 10 ne pas mettre dans le BRS"}</p>
-            <p>{"SendMail de m****"}</p>
+            <p>{"SendMail de m****"}</p> */}
             <Button onClick={handleSendMailOF} variant='contained' color='primary'> MAIL </Button>
         </>
     )
