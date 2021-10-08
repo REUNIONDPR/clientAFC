@@ -788,10 +788,10 @@ export default function Formation() {
 
     const handleSendMailOF = () => {
         console.log('sendmail', openMoreOptions)
+        let sql = Object.entries(updateFormation).map(([k, v]) => k + '=' + v).join('&')
         axios({
-            method:'get',
-            url:'mail/sendSollicitation',
-            data:updateFormation,
+            method: 'get',
+            url: 'mail/sendSollicitation?' + sql,
             headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), },
         }).then((response) => console.log(response))
     }
@@ -897,25 +897,20 @@ export default function Formation() {
     const handleCreateSollicitation = (sollicitation) => {
 
         setIsSubmittingSol(true)
-
-        // Envoi MAIL à tester
-        // axios({
-        //     method: 'POST',
-        //     url: '/mail/sendSollicitationOF',
-        //     data: updateFormation,
-        //     headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
-        // }).then((response) => console.log(response))
-
+        
         axios({
             method: 'PUT',
             url: '/sollicitation/create',
-            data: { ...updateFormation, attributaire: sollicitation.id, information: user.nom },
+            data: { ...updateFormation, attributaire: sollicitation.id_attributaire, information: user.nom },
             headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => {
 
             setIsSubmittingSol(false)
             if (response.status === 200) {
 
+                let newUpdateFormation = { ...updateFormation, etat: 1, etat_libelle: 'Mail envoyé à l\'OF', 
+                    id_sol: response.data.insertId,
+                    id_attributaire: sollicitation.id_attributaire }
                 // if (updateFormation.etat === 1) {
                 //     axios({
                 //         method: 'PUT',
@@ -928,6 +923,21 @@ export default function Formation() {
                 // update etat formation -> Sollicitation en cours
                 // updateEtatFormation(2, 'Sollicitation en cours', '');
 
+                // Envoi du mail
+                axios({
+                    method: 'put',
+                    url: 'mail/sendSollicitation',
+                    data:{...newUpdateFormation, 
+                        ...sollicitation,
+                        id_formation:newUpdateFormation.id,
+                        date_entree_demandee:getDateTime(newUpdateFormation.date_entree_demandee).date, 
+                    },
+                    headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), },
+                }).then((response) => {
+                    console.log(response)
+                })
+
+
                 let time = getDateToday();
                 let newTime = time.replace(' ', 'T') + '.000';
 
@@ -939,7 +949,7 @@ export default function Formation() {
 
                 let newSol = ({
                     id_sol: response.data.insertId,
-                    attributaire: sollicitation.id,
+                    attributaire: sollicitation.id_attributaire,
                     dateMailOF: date,
                     dateRespOF: '',
                     date_ValidationDT: '',
@@ -953,10 +963,9 @@ export default function Formation() {
                 let newSollArray = [...sollicitationList];
                 newSollArray.push(newSol)
 
-                const newFormationList = formationList.map((v) => v.id === updateFormation.id ?
-                    { ...updateFormation, etat: 1, etat_libelle: 'Mail envoyé à l\'OF', id_sol: response.data.insertId } : v)
+                const newFormationList = formationList.map((v) => v.id === updateFormation.id ? newUpdateFormation : v)
 
-                setupdateFormation({ ...updateFormation, etat: 1, etat_libelle: 'Mail envoyé à l\'OF', id_sol: response.data.insertId })
+                setupdateFormation(newUpdateFormation)
                 setSollicitation(newSol)
                 setFormationList(newFormationList)
                 setSollicitationList(newSollArray)
