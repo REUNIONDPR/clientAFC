@@ -1371,12 +1371,12 @@ export default function Formation() {
                 method: 'put',
                 url: 'formation/conventionnement',
                 // data: { ...sollicitation, nConv: updateFormation.nConv_tmp, date_nConv: dateTime, user: user.idgasi }, Pourquoi change l'user ?
-                data: { ...sollicitation, nConv: updateFormation.nConv_tmp, date_nConv: dateTime },
+                data: { ...sollicitation, nConv: updateFormation.nConv_tmp, dateTime: dateTime, user:updateFormation.idgasi },
                 headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
             }).then((response) => {
                 if (response.status === 200) {
 
-                    sendMailNotification('conventionnement', {formation: updateFormation})
+                    sendMailNotification('conventionnement', {formation: updateFormation, dateTime: dateTime})
                     
                     const newFormationList = formationList.map((v) => v.id === updateFormation.id ?
                         { ...v, etat: 12, etat_libelle: 'Formation conventionnée', nConv: updateFormation.nConv_tmp } : v)
