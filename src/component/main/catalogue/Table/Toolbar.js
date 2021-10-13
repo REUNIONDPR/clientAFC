@@ -7,10 +7,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import Toolbar from '@material-ui/core/Toolbar';
 import Tooltip from '@material-ui/core/Tooltip';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
 import ListRoundedIcon from '@material-ui/icons/ListRounded';
 import { useState } from 'react';
 import { codeToName } from '../../../../utilities/Function';
@@ -46,80 +42,47 @@ const useToolbarStyles = makeStyles({
 export default function ToolbarPersonnalize(props) {
 
     const classes = useToolbarStyles();
-    const [openFilter, setOpenFilter] = useState(false)
     const [openListCol, setOpenListCol] = useState(false);
-    // ----------------- Filtres
-    const filters = props.filters;
 
     return (
         <Toolbar className='primary-color-gradient'>
             <div className={classes.toolbarFilter} >
                 <div className={classes.toolbarTitle}>
-                    {openFilter
-                        ? <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-                            {
-                                Object.values(filters).map((filter, key) => (
-                                    <FormControl variant="outlined" size="small" className='toolbar-select' key={key.toString()}>
-                                        <InputLabel id="demo-simple-select-outlined-label">{filter.name}</InputLabel>
-                                        <Select
-                                            labelId="demo-simple-select-outlined-label"
-                                            value={filter.valueSelected[filter.varName] ? filter.valueSelected[filter.varName] : 'none'}
-                                            onChange={(event) => props.handleChangeFilter(filter.varName, event.target.value)}
-                                            label={filter.name}
-                                        >
-                                            <MenuItem value="none">{filter.displayName}</MenuItem>
-                                            {
-                                                filter.data.map((v) => (
-                                                    <MenuItem key={v.value.toString()} value={v.value}>{v.libelle}</MenuItem>
-                                                ))
-                                            }
-                                        </Select>
-                                    </FormControl>
-                                ))}
-                        </Typography>
-                        : <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-                            {props.propsTableName}
-                        </Typography>
-                    }
+                    <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
+                        {props.propsTableName}
+                    </Typography>
                 </div>
 
                 <div className={classes.toolbarIcon}>
-                    {openFilter
-                        ? <Tooltip title="Fermer">
-                            <IconButton aria-label="fermer" color='inherit' onClick={() => setOpenFilter(!openFilter)}>
-                                <CloseIcon />
+
+                    {props.nbFilter > 0
+                        ? <Tooltip title={'Effacer tout les filtres'}>
+                            <IconButton aria-label="filtre" color='primary' onClick={props.handleCleanFilter}>
+                                <Badge badgeContent={props.nbFilter} color="secondary"><FilterListIcon /></Badge>
                             </IconButton>
                         </Tooltip>
-                        :
-                        <Tooltip title="Filtre">
-
-                            <IconButton aria-label="filtre" color='inherit' onClick={() => setOpenFilter(!openFilter)}>
-                                {props.nbFilter > 0
-                                    ? <Badge badgeContent={props.nbFilter} color="secondary"><FilterListIcon /></Badge>
-                                    : <FilterListIcon />
-                                }
+                        : <Tooltip title={'Aucun filtre'}>
+                            <IconButton aria-label="filtre" color='primary' >
+                                <FilterListIcon />
                             </IconButton>
+                        </Tooltip> }
 
-                        </Tooltip>}
-
-                    {
-                        IsPermitted(props.user, 'catalogue', 'create') &&
+                    {IsPermitted(props.user, 'catalogue', 'create') &&
                         <Tooltip title="Créer">
-                            <IconButton aria-label="Créer" color='inherit' onClick={() => props.btnAddAction()}>
+                            <IconButton aria-label="Créer" color='primary' onClick={() => props.btnAddAction()}>
                                 <AddIcon />
                             </IconButton>
-                        </Tooltip>
-                    }
+                        </Tooltip> }
 
                     <div style={{ position: 'relative' }}>
 
                         {openListCol
                             ? <Tooltip title="Fermer">
-                                <IconButton aria-label="fermer" color='inherit' onClick={() => setOpenListCol(!openListCol)}>
+                                <IconButton aria-label="fermer" color='primary' onClick={() => setOpenListCol(!openListCol)}>
                                     <CloseIcon />
                                 </IconButton>
                             </Tooltip>
-                            : <Tooltip title="Colonnes"><IconButton aria-label="delete" color="inherit" onClick={() => setOpenListCol(!openListCol)}>
+                            : <Tooltip title="Colonnes"><IconButton aria-label="delete" color="primary" onClick={() => setOpenListCol(!openListCol)}>
                                 <ListRoundedIcon />
                             </IconButton></Tooltip>}
                         <Grow in={openListCol}>

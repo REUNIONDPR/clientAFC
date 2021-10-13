@@ -32,6 +32,7 @@ import { Tooltip } from '@material-ui/core';
 import ModalActionAuto from './ModalActionAuto/ModalActionAuto';
 import Skeleton from '@material-ui/lab/Skeleton';
 import Toolbar from '@material-ui/core/Toolbar';
+import InboxIcon from '@material-ui/icons/MoveToInbox';
 
 // import { title } from 'process';
 // import Cards from './Card/Cards';
@@ -74,6 +75,8 @@ const useStyles = makeStyles((theme) => ({
         fill: 'red'
     },
     cellHead: {
+        borderLeft: '1px solid rgba(224, 224, 224, 1);',
+        whiteSpace: 'nowrap',
         cursor: 'pointer',
         '&:hover': {
             backgroundColor: theme.palette.action.hover,
@@ -121,13 +124,6 @@ const useStyles = makeStyles((theme) => ({
             marginRight: theme.spacing(2)
         },
     },
-    formControlLot: {
-        width: 300,
-    },
-    formControlOf: {
-        width: 300,
-    }
-
 }));
 
 export default function Formation() {
@@ -958,7 +954,7 @@ export default function Formation() {
                     etat: 1,
                     id_dateIcop: '',
                     id_formation: updateFormation.id,
-                    lieu_execution: '',
+                    lieu_execution: 'all',
                 })
                 let newSollArray = [...sollicitationList];
                 newSollArray.push(newSol)
@@ -1159,6 +1155,9 @@ export default function Formation() {
                     setSollicitation({ ...sol, etat: etat, etat_libelle: etat_libelle })
                     setSollicitationList(newSollArray)
 
+                    if (etat === 5 || etat === 6) {
+                        sendMailNotification('formationValiderBrs', { formation: newUpdateFormation })
+                    }
 
                     setMessageSnackBar('Sollicitation validée.');
                     setSeverity('success');
@@ -1371,13 +1370,13 @@ export default function Formation() {
                 method: 'put',
                 url: 'formation/conventionnement',
                 // data: { ...sollicitation, nConv: updateFormation.nConv_tmp, date_nConv: dateTime, user: user.idgasi }, Pourquoi change l'user ?
-                data: { ...sollicitation, nConv: updateFormation.nConv_tmp, dateTime: dateTime, user:updateFormation.idgasi },
+                data: { ...sollicitation, nConv: updateFormation.nConv_tmp, dateTime: dateTime, user: updateFormation.idgasi },
                 headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
             }).then((response) => {
                 if (response.status === 200) {
 
-                    sendMailNotification('conventionnement', {formation: updateFormation, dateTime: dateTime})
-                    
+                    sendMailNotification('conventionnement', { formation: updateFormation, dateTime: dateTime })
+
                     const newFormationList = formationList.map((v) => v.id === updateFormation.id ?
                         { ...v, etat: 12, etat_libelle: 'Formation conventionnée', nConv: updateFormation.nConv_tmp } : v)
                     setupdateFormation({ ...updateFormation, nConv: updateFormation.nConv_tmp, date_nConv: dateTime })
@@ -1419,9 +1418,9 @@ export default function Formation() {
                         return { ...v, etat: etat, date_etat: dateTime, reason: information }
                     } else return v;
                 })
-
                 // UpdateFotmation et etat de la formation
                 let newUpdateFormation = { ...updateFormation, etat: etat, etat_libelle: etat_libelle }
+                sendMailNotification('modificationBRS', {formation:newUpdateFormation})
                 setupdateFormation(newUpdateFormation)
                 setFormationList(
                     formationList.map((v) => v.id === updateFormation.id
@@ -1481,11 +1480,29 @@ export default function Formation() {
                 data: { ...data, target: target },
                 headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
             })
-        }else console.log('Aucune notification à envoyé')
+        } else console.log('Aucune notification à envoyé')
     }
+
+    const handleExport = () => {
+        let sql = Object.entries(filterValues).filter(([k, v]) => v !== 'all' && v !== '').map(([k, v]) => `${k}=${v}`).join('&')
+
+        axios({
+            method: 'get',
+            url: 'formation/export?' + sql,
+            responseType: "blob",
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
+        }).then((response) => {
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", `Formation.xlsx`);
+            document.body.appendChild(link);
+            link.click();
+        }).catch((error) => { console.log(error); setOpenSnackBar(true); });
+    }
+
     return (
         <>
-            <Button onClick={sendMailNotification}>Click</Button>
             <SnackBar
                 open={openSnackBar}
                 message={messageSnackBar}
@@ -1499,9 +1516,10 @@ export default function Formation() {
 
                     {IsPermitted(user, 'brs', 'create') &&
                         <div className={classes.blockBRS}>
-                            <FormControl size="small" variant="outlined" className={classes.formControlLot} >
-                                <InputLabel id="demo-simple-select-outlined-label" className={classes.select_orange}>Lot</InputLabel>
+                            <FormControl size="small" variant="outlined" >
+                                <InputLabel id="demo-simple-select-outlined-label">Lot</InputLabel>
                                 <Select
+                                    className={classes.selectDO}
                                     name='id_lot'
                                     value={filterValues.id_lot ? filterValues.id_lot : 'all'}
                                     // onChange={(e) => props.handleChangeSelect(props.column.key, e.target.value)}
@@ -1516,9 +1534,10 @@ export default function Formation() {
                                 </Select>
                             </FormControl>
 
-                            <FormControl size="small" variant="outlined" className={classes.formControlOf} >
-                                <InputLabel className={classes.select_orange}>OF</InputLabel>
+                            <FormControl size="small" variant="outlined">
+                                <InputLabel className={classes.selectDO}>OF</InputLabel>
                                 <Select
+                                    className={classes.selectDO}
                                     name='OF'
                                     value={attributaireLotSelected}
                                     // onChange={(e) => props.handleChangeSelect(props.column.key, e.target.value)}
@@ -1543,13 +1562,20 @@ export default function Formation() {
 
                     {IsPermitted(user, 'formation', 'create') &&
                         <div className={classes.btn} >
-                            <Button variant="contained" color="primary" onClick={handleShowFormation}>Créer une sollicitation</Button>
+                            <Button variant="contained" color="primary" onClick={handleShowFormation}>Créer une action</Button>
                         </div>}
+
+                    {formationListDisplay.length > 0 &&
+                        <Tooltip title="Exporter le tableau" aria-label="cancel" classes={{ tooltip: classes.tooltip }}>
+                            <IconButton color="primary" onClick={handleExport}>
+                                <InboxIcon />
+                            </IconButton>
+                        </Tooltip>}
 
                 </Toolbar>
 
                 <TableContainer className={`${classes.containerTable} scrollBar-personnalize`}>
-                    <Table size="small" className={classes.table} aria-label="simple table">
+                    <Table size="small" className={classes.table} aria-label="simple table" stickyHeader>
                         <TableHead>
                             {formationList.length > 0 && <Filter
                                 data={formationList}

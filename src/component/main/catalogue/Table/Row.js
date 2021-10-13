@@ -19,6 +19,11 @@ const StyledTableRow = withStyles((theme) => ({
 
 
 const useStyles = makeStyles((theme) => ({
+    communeBlock: {
+        width: '400px',
+        display: 'flex',
+        flexWrap: 'wrap',
+    },
     adresseBlock: {
         display: "flex",
         alignItems: "center",
@@ -26,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
     adresseCell: {
         display: "flex",
         alignItems: "center",
-        justifyContent: "space-between",
+        // justifyContent: "space-between",
     },
     adresse: {
         width: '200px',
@@ -95,23 +100,23 @@ export default function Row(props) {
         <React.Fragment>
             <StyledTableRow >
 
-            <ActionTable row={row} />
+                <ActionTable row={row} />
                 {props.columns && props.columns.map((col, i) => (
                     props.checkColumnsVisible && (props.checkColumnsVisible.indexOf(col) !== -1 && (
                         col === 'adresse'
                             ? <TableCell className={classes.center} key={row.id.toString() + '_' + col + '_' + i}>
                                 <div className={classes.adresseCell}>
                                     <div className={classes.adresseBlock}>
-                                        {row[col] && row[col].map((a) => (
+                                        {row[col] && row[col].map((a, ai) => (
                                             <DivAdress
-                                                key={row.id + '_' + a.id}
+                                                key={row.id + '_' + a.id + '_' + ai}
                                                 adresseHabilited={props.adresseHabilited}
                                                 id={row.id + '_' + a.id}
                                                 label={a.adresse + ' - ' + a.commune}
                                                 handleDeleteAdresse={() => { props.handleDeleteAdresse(row, { id: a.id, adresse: a.adresse, commune: a.commune }) }} />
                                         ))}
                                     </div>
-                                    {(props.adresseHabilited && row.id_of_cata && row.id_of_cata_commune) && 
+                                    {(props.adresseHabilited && row.id_of_cata && row.id_of_cata_commune) &&
                                         <Tooltip classes={{ tooltip: classes.tooltip }} title="Ajouter une adresse">
                                             <IconButton aria-label="Ajouter" color="primary" onClick={() => props.handleOpenModalAdresse(row)}>
                                                 <AddIcon />
@@ -122,15 +127,17 @@ export default function Row(props) {
                             :
                             col === 'commune'
                                 ? <TableCell className={classes.center} key={row.id.toString() + '_' + col}>
-                                    {row[col] && row[col] !== '' && row[col].split('|') &&
-                                        row[col].split('|').map((c) => (
-                                            <Chip
-                                                key={'chip_row_' + row.id_of_cata + c.split(':')[0]}
-                                                label={c.split(':')[1]}
-                                                color="secondary"
-                                                variant="outlined"
-                                            />))
-                                    }
+                                    <div className={classes.communeBlock}>
+                                        {row[col] && row[col] !== '' && row[col].split('|') &&
+                                            row[col].split('|').map((c, i) => (
+                                                <Chip
+                                                    key={'chip_row_' + row.id_of_cata + i + c.split(':')[0]}
+                                                    label={c.split(':')[1]}
+                                                    color="secondary"
+                                                    variant="outlined"
+                                                />))
+                                        }
+                                    </div>
                                 </TableCell>
                                 : col === 'lot' || col === 'objectif_form' || col === 'niveau_form'
                                     ? <TableCell key={row.id.toString() + '_' + col} className='nowrap'>{codeToName(col + '_' + row[col])}</TableCell>

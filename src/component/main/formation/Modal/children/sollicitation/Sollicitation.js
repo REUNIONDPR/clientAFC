@@ -99,7 +99,7 @@ export default function Sollicitation(props) {
 
             let sol = props.sollicitationList.find((s) => s.attributaire === v.id) || {}
             let isSolValidate = false;
-
+            
             if (sol.hasOwnProperty('date_etat')) {
                 let myDate = getDateTime(sol.date_etat)
                 if (firstSol) firstSol = false; // Ne plus avoir accès aux sollicitations suivantes
@@ -153,7 +153,7 @@ export default function Sollicitation(props) {
     }, [props.sollicitationList])
 
     useEffect(() => {
-        console.log(props.attributaireList)
+        
         if (arrayAttrib.length > 0) {
 
             if (sollicitationSelected === 0) { // Récupère une sollicitation valide
