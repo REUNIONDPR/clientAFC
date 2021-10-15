@@ -23,6 +23,9 @@ const useStyles = makeStyles((theme) => ({
     minW: {
         minWidth: 100,
     },
+    formControlLot:{
+        width:'300px',
+    }
 }));
 
 export default function Filter(props) {
@@ -57,7 +60,7 @@ export default function Filter(props) {
             {/* LOT */}
             <TableCell>
                 {props.lotList
-                    ? <FormControl size="small" variant="outlined" className={classes.formControl} >
+                    ? <FormControl size="small" variant="outlined" className={classes.formControlLot} >
                         <InputLabel id="demo-simple-select-outlined-label" className={classes.select_orange}>Lot</InputLabel>
                         <Select
                             name='id_lot'

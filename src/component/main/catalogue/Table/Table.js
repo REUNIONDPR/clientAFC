@@ -12,13 +12,18 @@ import { codeToName } from '../../../../utilities/Function';
 import SnackBar from '../../../global/SnackBar/SnackBar';
 import ToolbarPersonnalize from './Toolbar';
 import Row from './Row';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
+
 import './table.css';
 
 const useStyles = makeStyles((theme) => ({
   table: {
-    maxHeight: 650,
+    maxHeight: 680,
     [theme.breakpoints.down(1550)]: {
-      maxHeight: '80vh',
+      maxHeight: '70vh',
     },
   },
   PaperContainerTable: {
@@ -28,10 +33,16 @@ const useStyles = makeStyles((theme) => ({
   cellHead: {
     borderLeft: '1px solid rgba(224, 224, 224, 1);',
     whiteSpace: 'nowrap',
+    padding: theme.spacing(2)
   },
   mwidth: {
     minWidth: 230,
   },
+  filter:{
+    padding:theme.spacing(2),
+    backgroundColor:'#fafafa',
+    border: '1px solid rgba(224, 224, 224)',
+  }
 }))
 
 export default function TablePersonnalize(props) {
@@ -84,6 +95,7 @@ export default function TablePersonnalize(props) {
     }
     setCheckAll(!checkAll)
   }
+
   // ----------------------------
   return (
     <Paper className={classes.PaperContainerTable} >
@@ -96,22 +108,42 @@ export default function TablePersonnalize(props) {
       />
 
       <ToolbarPersonnalize
-        filters={props.filter} propsTableName={propsTableName}
+        propsTableName={propsTableName}
         nbFilter={props.nbFilter}
-        handleChangeFilter={props.handleChangeFilter}
         user={props.user}
+        handleCleanFilter={props.handleCleanFilter}
         handleToggle={handleToggle}
         handleCheckAll={handleCheckAll} checkAll={checkAll}
         columns={props.columns}
         checkColumnsVisible={checkColumnsVisible}
         btnAddAction={props.handleOpenModal}
       />
-
+      <div className={classes.filter} >
+        {props.filter && Object.values(props.filter).map((filter, key) => (
+          <FormControl variant="outlined" size="small" key={key} >
+            <InputLabel id="demo-simple-select-outlined-label">{filter.name}</InputLabel>
+            <Select
+              value={filter.valueSelected[filter.varName] ? filter.valueSelected[filter.varName] : 'none'}
+              onChange={(event) => props.handleChangeFilter(filter.varName, event.target.value)}
+              label={filter.name}
+            >
+              <MenuItem value="all">{filter.displayName}</MenuItem>
+              {
+                filter.data.map((v) => (
+                  <MenuItem key={v.value.toString()} value={v.value}>{v.libelle}</MenuItem>
+                ))
+              }
+            </Select>
+          </FormControl>))}
+      </div>
       <TableContainer className={`${classes.table} scrollBar-personnalize`}>
+
+
+
         <Table aria-label="collapsible table" size="small" stickyHeader>
           <TableHead>
             <TableRow>
-            <TableCell align="center" className={classes.cellHead} key='actionT'>Action</TableCell>
+              <TableCell align="center" className={classes.cellHead} key='actionT'>Action</TableCell>
               {props.columns.map((col) => (
                 checkColumnsVisible.indexOf(col) !== -1 &&
                 <TableCell align="center"

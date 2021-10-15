@@ -23,10 +23,11 @@ import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import Tooltip from '@material-ui/core/Tooltip';
-import { getDateToday } from "../../../utilities/Function";
+import { getDateToday, IsPermitted } from "../../../utilities/Function";
 import { UserContext } from '../../../context/user.context';
 import SnackBar from '../../global/SnackBar/SnackBar';
 import UpdateIcon from '@material-ui/icons/Update';
+import Toolbar from '@material-ui/core/Toolbar';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -53,6 +54,9 @@ const useStyles = makeStyles((theme) => ({
     titleFiltre: {
         backgroundColor: theme.palette.background.paper,
         padding: theme.spacing(1),
+        '& > *':{
+            margin:theme.spacing(2)
+        }
     },
     listItem: {
         backgroundColor: theme.palette.background.paper,
@@ -110,7 +114,7 @@ export default function Brs() {
     useEffect(() => {
         if (BrsList.length > 0) {
             let array = [];
-            
+
             array = BrsList.filter((v) => {
 
                 for (let key in filterValues) {
@@ -126,10 +130,10 @@ export default function Brs() {
                             } else if (value === 1) {
                                 console.log(v['modifie_brs'] !== 1 && v['nouveauBRS'] !== 0)
                                 if (v['modifie_brs'] === 1) {
-                                    if (v['nouveauBRS'] !== 0){
+                                    if (v['nouveauBRS'] !== 0) {
                                         return false;
                                     }
-                                }else{
+                                } else {
                                     return false
                                 }
                             } else if (value === 2) {
@@ -206,6 +210,17 @@ export default function Brs() {
                 headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
             }).then((response) => {
                 if (response.status === 200) {
+
+                    sendMailNotification('conventionnement', {
+                        formation:
+                        {
+                            id: sollicitation.id_formation,
+                            intitule: sollicitation.intitule_form_marche,
+                            nConv_tmp: sollicitation.nConv_tmp
+                        },
+                        dateTime: dateTime
+                    })
+
                     setSollicitationList([...sollicitationList.map((v) =>
                         v.id_formation === id ? { ...sollicitation, nConv: sollicitation.nConv_tmp } : v)]);
                     setMessageSnackBar('N° conventionnement enregistré!');
@@ -217,6 +232,17 @@ export default function Brs() {
                 setOpenSnackBar(true);
             })
         }
+    }
+
+    const sendMailNotification = (target = '', data = {}) => {
+        if (target !== '' && Object.keys(data).length > 0) {
+            axios({
+                method: 'put',
+                url: 'mail/sendNotification',
+                data: { ...data, target: target },
+                headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
+            })
+        } else console.log('Aucune notification à envoyé')
     }
 
     const etatList = [{ id: 0, libelle: 'Valide' }, { id: 1, libelle: 'En cours de réédition' }, { id: 2, libelle: 'Remplacé' }]
@@ -231,9 +257,9 @@ export default function Brs() {
                 handleClose={handleCloseSnackbar}
             />
 
-            <div className={classes.categorieTitle} >
-                <div className={classes.title} >Liste des BRS</div>
-            </div>
+            <Toolbar className={`${classes.toolbar} primary-color-gradient`}>
+                <div>Bon de Réservation de Session</div>
+            </Toolbar>
             <div className={classes.titleFiltre} >
 
                 <FormControl size="small" variant="outlined" className={classes.formControl} >
@@ -289,9 +315,9 @@ export default function Brs() {
                                     <IconButton color="primary" disabled>
                                         <InboxIcon />
                                     </IconButton>
-                                    <IconButton color="secondary" disabled >
+                                    {IsPermitted(user, 'sollicitation', 'conv') && <IconButton color="secondary" disabled >
                                         <ExpandMore />
-                                    </IconButton>
+                                    </IconButton>}
                                 </ListItem>
                                 : (b.modifie_brs === 1 && b.nouveauBRS !== 0)
                                     // Si le BRS est nul et non avenue
@@ -308,14 +334,14 @@ export default function Brs() {
                                             </IconButton>
                                         </Tooltip>
 
-                                        <Tooltip title={open === b.id ? "Fermer" : "Ouvrir"} aria-label="cancel" classes={{ tooltip: classes.tooltip }}>
+                                        {IsPermitted(user, 'sollicitation', 'conv') && <Tooltip title={open === b.id ? "Fermer" : "Ouvrir"} aria-label="cancel" classes={{ tooltip: classes.tooltip }}>
                                             <IconButton color="secondary" onClick={() => { open !== b.id && setLoading(b.id); handleOpenBRS(b.id) }} >
                                                 {loading === b.id ? <CircularProgress size={20} /> : open === b.id ? <ExpandLess /> : <ExpandMore />}
                                             </IconButton>
-                                        </Tooltip>
+                                        </Tooltip>}
                                     </ListItem>
                             }
-                            <Collapse in={open === b.id} timeout="auto" unmountOnExit>
+                            {IsPermitted(user, 'sollicitation', 'conv') && <Collapse in={open === b.id} timeout="auto" unmountOnExit>
                                 <Table>
                                     <TableBody>
                                         {loading === b.id
@@ -344,7 +370,7 @@ export default function Brs() {
                                             )}
                                     </TableBody>
                                 </Table>
-                            </Collapse>
+                            </Collapse>}
                             <Divider />
                         </div>))
                     : <ListItem className={classes.listItem}>

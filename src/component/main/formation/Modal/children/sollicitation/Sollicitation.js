@@ -99,7 +99,7 @@ export default function Sollicitation(props) {
 
             let sol = props.sollicitationList.find((s) => s.attributaire === v.id) || {}
             let isSolValidate = false;
-
+            
             if (sol.hasOwnProperty('date_etat')) {
                 let myDate = getDateTime(sol.date_etat)
                 if (firstSol) firstSol = false; // Ne plus avoir accès aux sollicitations suivantes
@@ -139,7 +139,7 @@ export default function Sollicitation(props) {
             }
 
             return {
-                ...v, ...sol,
+                ...v, id: null, id_attributaire:v.id, ...sol,
                 disabled: props.updateFormation.etat > 15 || props.updateFormation.userFct !== props.user.fonction ? true : Obj.etat,
                 text: Obj.text,
                 texterror: Obj.error,
@@ -153,9 +153,10 @@ export default function Sollicitation(props) {
     }, [props.sollicitationList])
 
     useEffect(() => {
+        
         if (arrayAttrib.length > 0) {
 
-            if (sollicitationSelected === 0) { // Récupère une sollicitation valiude
+            if (sollicitationSelected === 0) { // Récupère une sollicitation valide
                 let solValide = arrayAttrib.find((v) => v.isSolValidate);
                 if (!solValide) {
                     solValide = arrayAttrib.find((v) => !v.finDeSollicitation);

@@ -54,7 +54,7 @@ export default function LoginPage(props) {
     }
 
     useInterval(() => {
-        Cookie.get('xtidc') && window.location.reload()
+        (Cookie.get('xtidc') && Cookie.get('xtidc') !== '') && window.location.reload()
         count > 0 && setCount(count - 1)
     }, 1000);
 

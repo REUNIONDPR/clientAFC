@@ -5,10 +5,10 @@ import Button from '@material-ui/core/Button';
 export default function Admin(props){
 
     const handleEditionBRS = () => {
-        console.log('azd')
+        
         axios({
-            method:'GET',
-            url:'stocks/lotattr',
+            method:'PUT',
+            url:'admin/updateTable',
             headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => console.log(response))
     }

@@ -18,6 +18,7 @@ import { codeToName } from '../../../utilities/Function';
 import EditIcon from '@material-ui/icons/Edit';
 import IconButton from '@material-ui/core/IconButton';
 import ModalJuridique from './modal/ModalJuridique';
+import Toolbar from '@material-ui/core/Toolbar';
 
 const useStyles = makeStyles((theme) => ({
     juridiqueContainer: {
@@ -32,6 +33,10 @@ const useStyles = makeStyles((theme) => ({
         '& > *': {
             marginLeft: theme.spacing(2)
         }
+    },
+    toolbar:{
+        display:'flex',
+        justifyContent:'space-between',
     }
 }))
 
@@ -100,30 +105,36 @@ export default function Juridique(props) {
     }, [baseSelected])
 
     return (<>
-        <div className={classes.btnAction} >
-            <FormControl size="small" variant="outlined">
-                {/* <FormControlLabel>Choisir une base</FormControlLabel> */}
-                <InputLabel id="demo-simple-select-outlined-label">Base</InputLabel>
-                <Select
-                    name='bdd'
-                    value={baseSelected}
-                    // onChange={(e) => props.handleChangeSelect(props.column.key, e.target.value)}
-                    onChange={(e) => handleChangeBaseSelected(e.target.value)}
-                    label='Lot' >
 
-                    {['lot', 'attributaire', 'niveau', 'objectif', 'dispositif', 'ape', 'commune'].map((v) => (
-                        <MenuItem key={v} value={v} >
-                            {v.charAt(0).toUpperCase() + v.slice(1)}
-                        </MenuItem>
-                    ))}
-                </Select>
-            </FormControl>
-            <Button disabled={data.length === 0} variant="contained" color="primary" onClick={
-                () => handleOpenModal(true,
-                    () => { let Obj = { ...data[0] }; for (let k in Obj) Obj[k] = ''; return Obj; })}>Ajouter : {codeToName(baseSelected)}</Button>
-        </div>
 
         <Paper className={classes.juridiqueContainer}>
+
+            <Toolbar className={`${classes.toolbar} primary-color-gradient`}>
+                <div>Base de données</div>
+                <div className={classes.btnAction} >
+                    <FormControl size="small" variant="outlined">
+                        {/* <FormControlLabel>Choisir une base</FormControlLabel> */}
+                        <InputLabel id="demo-simple-select-outlined-label">BDD</InputLabel>
+                        <Select
+                            name='BDD'
+                            value={baseSelected}
+                            // onChange={(e) => props.handleChangeSelect(props.column.key, e.target.value)}
+                            onChange={(e) => handleChangeBaseSelected(e.target.value)}
+                            label='BDD' >
+
+                            {['lot', 'attributaire', 'niveau', 'objectif', 'dispositif', 'ape', 'commune'].map((v) => (
+                                <MenuItem key={v} value={v} >
+                                    {v.charAt(0).toUpperCase() + v.slice(1)}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                    <Button disabled={data.length === 0} variant="contained" color="primary" onClick={
+                        () => handleOpenModal(true,
+                            () => { let Obj = { ...data[0] }; for (let k in Obj) Obj[k] = ''; return Obj; })}>Ajouter : {codeToName(baseSelected)}</Button>
+                </div>
+            </Toolbar>
+
             <TableContainer component={Paper} className={`${classes.containerTable} scrollBar-personnalize`}>
                 <Table size="small" className={classes.table} aria-label="simple table">
                     <TableHead>

@@ -40,6 +40,8 @@ const HAB = {
             "conv": true,
         }, "adresse": {
             "view": true,
+        }, "brs" : {
+            "view":true,
         }
     },
     "4": { // JURIDIQUE
@@ -69,6 +71,7 @@ const HAB = {
             "view": true,
         }, "brs": {
             "create": true,
+            "view": true,
         },
     },
     "6": { // DPR

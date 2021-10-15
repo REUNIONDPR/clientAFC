@@ -26,13 +26,13 @@ import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
-import Switch from '@material-ui/core/Switch';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Commentaire from '../../global/commentaire/Commentaire';
 import NotificationImportantIcon from '@material-ui/icons/NotificationImportant';
 import { Tooltip } from '@material-ui/core';
 import ModalActionAuto from './ModalActionAuto/ModalActionAuto';
 import Skeleton from '@material-ui/lab/Skeleton';
+import Toolbar from '@material-ui/core/Toolbar';
+import InboxIcon from '@material-ui/icons/MoveToInbox';
 
 // import { title } from 'process';
 // import Cards from './Card/Cards';
@@ -49,7 +49,16 @@ const useStyles = makeStyles((theme) => ({
     containerTable: {
         maxHeight: '80vh',
         overflow: 'scroll',
-    }, table: {
+    },
+    toolbar: {
+        borderRadius: '4px 4px 0 0',
+        display: 'flex',
+        justifyContent: 'space-between',
+    },
+    PaperContainerTable: {
+        borderRadius: 4,
+    },
+    table: {
         minWidth: 650,
     },
     flex: {
@@ -66,6 +75,8 @@ const useStyles = makeStyles((theme) => ({
         fill: 'red'
     },
     cellHead: {
+        borderLeft: '1px solid rgba(224, 224, 224, 1);',
+        whiteSpace: 'nowrap',
         cursor: 'pointer',
         '&:hover': {
             backgroundColor: theme.palette.action.hover,
@@ -86,14 +97,6 @@ const useStyles = makeStyles((theme) => ({
     tooltip: {
         fontSize: '15px',
         maxWidth: 'none',
-    },
-    categorie: {
-        marginTop: 20,
-    },
-    categorieTitle: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
     },
     title: {
         display: 'flex',
@@ -121,13 +124,6 @@ const useStyles = makeStyles((theme) => ({
             marginRight: theme.spacing(2)
         },
     },
-    formControlLot: {
-        width: 300,
-    },
-    formControlOf: {
-        width: 300,
-    }
-
 }));
 
 export default function Formation() {
@@ -155,7 +151,7 @@ export default function Formation() {
     });
     ;
     // 'Ouvrir' le menu d'édition de BRS (pour la DDO)
-    const [editionBRS, setEditionBRS] = useState(false)
+    // const [editionBRS, setEditionBRS] = useState(false)
 
     // Annule les sollicitation sans réponse > 5 jrs
     const [formationListToCancel, setFormationListToCancel] = useState([]);
@@ -377,7 +373,7 @@ export default function Formation() {
         setAttributaireLotSelected('all');
         // let etat = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
-        if (editionBRS && filterValues.id_lot !== 'all') {
+        if (user.fonction === 5 && filterValues.id_lot !== 'all') {
             axios({
                 method: 'GET',
                 url: 'sollicitation/OFValidePourBRS?id_lot=' + filterValues.id_lot,
@@ -386,14 +382,11 @@ export default function Formation() {
         } else if (filterValues.id_lot === 'all') {
             setFilterValues({ ...filterValues, id_attributaire: 'all' })
             setAttributaireLotList([]);
-        } else if (!editionBRS) {
-            setAttributaireLotList([]);
-
         }
         setFilterValues({ ...filterValues, id_attributaire: 'all' })
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [editionBRS, filterValues.id_lot])
+    }, [filterValues.id_lot])
 
     useEffect(() => {
         if (formationList.length > 0) {
@@ -788,10 +781,10 @@ export default function Formation() {
 
     const handleSendMailOF = () => {
         console.log('sendmail', openMoreOptions)
+        let sql = Object.entries(updateFormation).map(([k, v]) => k + '=' + v).join('&')
         axios({
-            method:'get',
-            url:'mail/sendSollicitation',
-            data:updateFormation,
+            method: 'get',
+            url: 'mail/sendSollicitation?' + sql,
             headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), },
         }).then((response) => console.log(response))
     }
@@ -898,24 +891,21 @@ export default function Formation() {
 
         setIsSubmittingSol(true)
 
-        // Envoi MAIL à tester
-        // axios({
-        //     method: 'POST',
-        //     url: '/mail/sendSollicitationOF',
-        //     data: updateFormation,
-        //     headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
-        // }).then((response) => console.log(response))
-
         axios({
             method: 'PUT',
             url: '/sollicitation/create',
-            data: { ...updateFormation, attributaire: sollicitation.id, information: user.nom },
+            data: { ...updateFormation, attributaire: sollicitation.id_attributaire, information: user.nom },
             headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
         }).then((response) => {
 
             setIsSubmittingSol(false)
             if (response.status === 200) {
 
+                let newUpdateFormation = {
+                    ...updateFormation, etat: 1, etat_libelle: 'Mail envoyé à l\'OF',
+                    id_sol: response.data.insertId,
+                    id_attributaire: sollicitation.id_attributaire
+                }
                 // if (updateFormation.etat === 1) {
                 //     axios({
                 //         method: 'PUT',
@@ -928,6 +918,22 @@ export default function Formation() {
                 // update etat formation -> Sollicitation en cours
                 // updateEtatFormation(2, 'Sollicitation en cours', '');
 
+                // Envoi du mail
+                axios({
+                    method: 'put',
+                    url: 'mail/sendSollicitation',
+                    data: {
+                        ...newUpdateFormation,
+                        ...sollicitation,
+                        id_formation: newUpdateFormation.id,
+                        date_entree_demandee: getDateTime(newUpdateFormation.date_entree_demandee).date,
+                    },
+                    headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), },
+                }).then((response) => {
+                    console.log(response)
+                })
+
+
                 let time = getDateToday();
                 let newTime = time.replace(' ', 'T') + '.000';
 
@@ -939,7 +945,7 @@ export default function Formation() {
 
                 let newSol = ({
                     id_sol: response.data.insertId,
-                    attributaire: sollicitation.id,
+                    attributaire: sollicitation.id_attributaire,
                     dateMailOF: date,
                     dateRespOF: '',
                     date_ValidationDT: '',
@@ -948,15 +954,14 @@ export default function Formation() {
                     etat: 1,
                     id_dateIcop: '',
                     id_formation: updateFormation.id,
-                    lieu_execution: '',
+                    lieu_execution: 'all',
                 })
                 let newSollArray = [...sollicitationList];
                 newSollArray.push(newSol)
 
-                const newFormationList = formationList.map((v) => v.id === updateFormation.id ?
-                    { ...updateFormation, etat: 1, etat_libelle: 'Mail envoyé à l\'OF', id_sol: response.data.insertId } : v)
+                const newFormationList = formationList.map((v) => v.id === updateFormation.id ? newUpdateFormation : v)
 
-                setupdateFormation({ ...updateFormation, etat: 1, etat_libelle: 'Mail envoyé à l\'OF', id_sol: response.data.insertId })
+                setupdateFormation(newUpdateFormation)
                 setSollicitation(newSol)
                 setFormationList(newFormationList)
                 setSollicitationList(newSollArray)
@@ -1150,6 +1155,9 @@ export default function Formation() {
                     setSollicitation({ ...sol, etat: etat, etat_libelle: etat_libelle })
                     setSollicitationList(newSollArray)
 
+                    if (etat === 5 || etat === 6) {
+                        sendMailNotification('formationValiderBrs', { formation: newUpdateFormation })
+                    }
 
                     setMessageSnackBar('Sollicitation validée.');
                     setSeverity('success');
@@ -1170,10 +1178,6 @@ export default function Formation() {
     const [attributaireLotSelected, setAttributaireLotSelected] = useState('all');
     const [attributaireLotList, setAttributaireLotList] = useState([]);
     const [editingBRS, setEditingBRS] = useState(false)
-
-    const handleToggleEditionBRS = () => {
-        setEditionBRS(!editionBRS)
-    }
 
     const handleChangeAttribLotSelected = (id) => {
         setFilterValues({ ...filterValues, id_attributaire: id, etat: id === 'all' ? [6, 7, 8, 9, 10, 11, 12] : [7, 8, 11] })
@@ -1278,8 +1282,12 @@ export default function Formation() {
                                 },
                                 headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
                             })
+
                             // Créer fichier BRS et Download
                             createBRS(lot, n_brs, filename, brs, attrib, rowsTable)
+
+                            // Envoi un mail de notification à la DT
+                            sendMailNotification('DT_BRS_Edite', { array_id_sol: array_id_sol, filename: filename, dateTime: time })
 
                             setMessageSnackBar('Données mises à jours. Le téléchargement vas commencer');
                             setSeverity('success');
@@ -1362,10 +1370,13 @@ export default function Formation() {
                 method: 'put',
                 url: 'formation/conventionnement',
                 // data: { ...sollicitation, nConv: updateFormation.nConv_tmp, date_nConv: dateTime, user: user.idgasi }, Pourquoi change l'user ?
-                data: { ...sollicitation, nConv: updateFormation.nConv_tmp, date_nConv: dateTime },
+                data: { ...sollicitation, nConv: updateFormation.nConv_tmp, dateTime: dateTime, user: updateFormation.idgasi },
                 headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
             }).then((response) => {
                 if (response.status === 200) {
+
+                    sendMailNotification('conventionnement', { formation: updateFormation, dateTime: dateTime })
+
                     const newFormationList = formationList.map((v) => v.id === updateFormation.id ?
                         { ...v, etat: 12, etat_libelle: 'Formation conventionnée', nConv: updateFormation.nConv_tmp } : v)
                     setupdateFormation({ ...updateFormation, nConv: updateFormation.nConv_tmp, date_nConv: dateTime })
@@ -1407,9 +1418,9 @@ export default function Formation() {
                         return { ...v, etat: etat, date_etat: dateTime, reason: information }
                     } else return v;
                 })
-
                 // UpdateFotmation et etat de la formation
                 let newUpdateFormation = { ...updateFormation, etat: etat, etat_libelle: etat_libelle }
+                sendMailNotification('modificationBRS', { formation: newUpdateFormation })
                 setupdateFormation(newUpdateFormation)
                 setFormationList(
                     formationList.map((v) => v.id === updateFormation.id
@@ -1461,6 +1472,35 @@ export default function Formation() {
         setFormationList(newFormationList)
     }
 
+    const sendMailNotification = (target = '', data = {}) => {
+        if (target !== '' && Object.keys(data).length > 0) {
+            axios({
+                method: 'put',
+                url: 'mail/sendNotification',
+                data: { ...data, target: target },
+                headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
+            })
+        } else console.log('Aucune notification à envoyé')
+    }
+
+    const handleExport = () => {
+        let sql = Object.entries(filterValues).filter(([k, v]) => v !== 'all' && v !== '').map(([k, v]) => `${k}=${v}`).join('&')
+
+        axios({
+            method: 'get',
+            url: 'formation/export?' + sql,
+            responseType: "blob",
+            headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
+        }).then((response) => {
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", `Formation.xlsx`);
+            document.body.appendChild(link);
+            link.click();
+        }).catch((error) => { console.log(error); setOpenSnackBar(true); });
+    }
+
     return (
         <>
             <SnackBar
@@ -1469,16 +1509,17 @@ export default function Formation() {
                 severity={severity}
                 handleClose={handleCloseSnackbar}
             />
-            <div className={classes.categorie} >
-                <div className={classes.categorieTitle} >
-                    <div className={classes.title} >Liste des formations ({formationListDisplay.length})</div>
-                    {IsPermitted(user, 'brs', 'create') &&
-                        <div className={classes.blockBRS}>
+            <Paper className={classes.PaperContainerTable} >
+                <Toolbar className={`${classes.toolbar} primary-color-gradient`}>
 
-                            {(editionBRS) && <>
-                                <FormControl size="small" variant="outlined" className={classes.formControlLot} >
-                                    <InputLabel id="demo-simple-select-outlined-label" className={classes.select_orange}>Lot</InputLabel>
+                    <div>Liste des formations ({formationListDisplay.length})</div>
+                    <div className={classes.flex}>
+                        {IsPermitted(user, 'brs', 'create') &&
+                            <div className={classes.blockBRS}>
+                                <FormControl size="small" variant="outlined" >
+                                    <InputLabel id="demo-simple-select-outlined-label">Lot</InputLabel>
                                     <Select
+                                        className={classes.selectDO}
                                         name='id_lot'
                                         value={filterValues.id_lot ? filterValues.id_lot : 'all'}
                                         // onChange={(e) => props.handleChangeSelect(props.column.key, e.target.value)}
@@ -1493,9 +1534,10 @@ export default function Formation() {
                                     </Select>
                                 </FormControl>
 
-                                <FormControl size="small" variant="outlined" className={classes.formControlOf} >
-                                    <InputLabel className={classes.select_orange}>OF</InputLabel>
+                                <FormControl size="small" variant="outlined">
+                                    <InputLabel className={classes.selectDO}>OF</InputLabel>
                                     <Select
+                                        className={classes.selectDO}
                                         name='OF'
                                         value={attributaireLotSelected}
                                         // onChange={(e) => props.handleChangeSelect(props.column.key, e.target.value)}
@@ -1510,114 +1552,116 @@ export default function Formation() {
                                     </Select>
                                 </FormControl>
 
-                                <Button disabled={!editionBRS || editingBRS ||
+                                <Button disabled={editingBRS ||
                                     filterValues.id_lot === 'all' ||
                                     attributaireLotSelected === 'all'}
                                     variant="contained" color="primary" onClick={() => { setEditingBRS(true); handleEditionBRS() }}>Edititer</Button>
-                            </>}
-                            <FormControlLabel
-                                control={<Switch checked={editionBRS} onChange={handleToggleEditionBRS} name="checkedA" />}
-                                label=" Mode édition BRS"
-                            />
-                        </div>
-                    }
 
-                    {IsPermitted(user, 'formation', 'create') &&
-                        <div className={classes.btn} >
-                            <Button variant="contained" color="primary" onClick={handleShowFormation}>Créer une sollicitation</Button>
-                        </div>}
-                </div>
+                            </div>
+                        }
 
-                <Paper>
-                    <TableContainer component={Paper} className={`${classes.containerTable} scrollBar-personnalize`}>
-                        <Table size="small" className={classes.table} aria-label="simple table">
-                            <TableHead>
-                                {formationList.length > 0 && <Filter
-                                    data={formationList}
-                                    lotList={lotList}
-                                    etatList={etatList}
-                                    filterValues={filterValues}
-                                    handleChangeFilter={handleChangeFilter} />}
-                                <TableRow>
-                                    {columnTableau.map((v) =>
-                                        <TableCell onClick={() => handleOrderBy(v)} className={classes.cellHead} key={'cellHead_' + v}>
-                                            <div className={classes.flex} >
-                                                {(ascOrder.key === v) &&
-                                                    (!ascOrder.ASC
-                                                        ? <ArrowDownwardIcon fontSize="small" />
-                                                        : <ArrowUpwardIcon fontSize="small" />)}
-                                                <span>{codeToName(v)}</span>
-                                            </div>
-                                        </TableCell>
-                                    )}
-                                    <TableCell align="right"></TableCell>
-                                </TableRow >
-                            </TableHead >
-                            <TableBody>
-                                {isLoad.formation ?
-                                    formationList.length > 0
-                                        ? formationListDisplay.map((row) => (
-                                            <TableRow key={row.id + '_' + row.n_Article} className={
-                                                row.etat > 15 ? classes.error
-                                                    : row.etat === 0 ? classes.new
-                                                        : ''}>
-                                                <TableCell component="th" scope="row">
-                                                    {codeToName('lot_' + row.id_lot)}
-                                                </TableCell>
-                                                <TableCell component="th" scope="row">
-                                                    {row.n_Article}
-                                                </TableCell>
-                                                <TableCell>{codeToName('fonction_' + row.userFct)}</TableCell>
-                                                <TableCell>{row.agence_ref_libelle}</TableCell>
-                                                <TableCell>{codeToName('dispositif_' + row.dispositif)}</TableCell>
-                                                <TableCell>{row.commune}</TableCell>
-                                                <TableCell>
-                                                    <div className={classes.flex}>
-                                                        {/* Si l'of a pas encore répondu ET temps de réponse > 5 jours ET etat = 1 (En attente de réponse). Affiche icone */}
-                                                        {((row.dateMailOF !== null && row.dateRespOF === null) && dateCount(new Date(row.dateMailOF), new Date(), true) > 5 && row.etat === 1) &&
-                                                            (row.userFct === user.fonction
-                                                                ? <Tooltip title="L'OF n'a pas répondu dans le temps imparti." aria-label="comm" classes={{ tooltip: classes.tooltip }}>
-                                                                    <IconButton onClick={() => setOpenModalAuto(true)}>
-                                                                        <NotificationImportantIcon className={classes.iconError} />
-                                                                    </IconButton>
-                                                                </Tooltip>
-                                                                : <Tooltip title="L'OF n'a pas répondu dans le temps imparti." aria-label="comm" classes={{ tooltip: classes.tooltip }}>
+                        {IsPermitted(user, 'formation', 'create') &&
+                            <div className={classes.btn} >
+                                <Button variant="contained" color="primary" onClick={handleShowFormation}>Créer une action</Button>
+                            </div>}
+
+                        {formationListDisplay.length > 0 &&
+                            <Tooltip title="Exporter le tableau" aria-label="cancel" classes={{ tooltip: classes.tooltip }}>
+                                <IconButton color="primary" onClick={handleExport}>
+                                    <InboxIcon />
+                                </IconButton>
+                            </Tooltip>}
+                    </div>
+                </Toolbar>
+
+                <TableContainer className={`${classes.containerTable} scrollBar-personnalize`}>
+                    <Table size="small" className={classes.table} aria-label="simple table" stickyHeader>
+                        <TableHead>
+                            {formationList.length > 0 && <Filter
+                                data={formationList}
+                                lotList={lotList}
+                                etatList={etatList}
+                                filterValues={filterValues}
+                                handleChangeFilter={handleChangeFilter} />}
+                            <TableRow>
+                                {columnTableau.map((v) =>
+                                    <TableCell onClick={() => handleOrderBy(v)} className={classes.cellHead} key={'cellHead_' + v}>
+                                        <div className={classes.flex} >
+                                            {(ascOrder.key === v) &&
+                                                (!ascOrder.ASC
+                                                    ? <ArrowDownwardIcon fontSize="small" />
+                                                    : <ArrowUpwardIcon fontSize="small" />)}
+                                            <span>{codeToName(v)}</span>
+                                        </div>
+                                    </TableCell>
+                                )}
+                                <TableCell align="right"></TableCell>
+                            </TableRow >
+                        </TableHead >
+                        <TableBody>
+                            {isLoad.formation ?
+                                formationList.length > 0
+                                    ? formationListDisplay.map((row) => (
+                                        <TableRow key={row.id + '_' + row.n_Article} className={
+                                            row.etat > 15 ? classes.error
+                                                : row.etat === 0 ? classes.new
+                                                    : ''}>
+                                            <TableCell component="th" scope="row">
+                                                {codeToName('lot_' + row.id_lot)}
+                                            </TableCell>
+                                            <TableCell component="th" scope="row">
+                                                {row.n_Article}
+                                            </TableCell>
+                                            <TableCell>{codeToName('fonction_' + row.userFct)}</TableCell>
+                                            <TableCell>{row.agence_ref_libelle}</TableCell>
+                                            <TableCell>{codeToName('dispositif_' + row.dispositif)}</TableCell>
+                                            <TableCell>{row.commune}</TableCell>
+                                            <TableCell>
+                                                <div className={classes.flex}>
+                                                    {/* Si l'of a pas encore répondu ET temps de réponse > 5 jours ET etat = 1 (En attente de réponse). Affiche icone */}
+                                                    {((row.dateMailOF !== null && row.dateRespOF === null) && dateCount(new Date(row.dateMailOF), new Date(), true) > 5 && row.etat === 1) &&
+                                                        (row.userFct === user.fonction
+                                                            ? <Tooltip title="L'OF n'a pas répondu dans le temps imparti." aria-label="comm" classes={{ tooltip: classes.tooltip }}>
+                                                                <IconButton onClick={() => setOpenModalAuto(true)}>
                                                                     <NotificationImportantIcon className={classes.iconError} />
-                                                                </Tooltip>)
-                                                        }
-                                                        {row.etat_libelle}
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>{dateFormat(row.date_entree_demandee)}</TableCell>
-                                                <TableCell>{dateFormat(row.date_fin)}</TableCell>
-                                                <TableCell>
-                                                    <div className={classes.flex}>
-                                                        <Commentaire user={user} formation={row} />
-                                                        <IconButton size="small" aria-label="Editer" color="secondary" onClick={(e) => handleClickOpenMenu(e, row.id)}>
-                                                            <MoreHorizIcon fontSize="small" />
-                                                        </IconButton>
-                                                    </div>
-                                                </TableCell>
-                                            </TableRow>))
-                                        : <TableRow>
-                                            <TableCell colSpan={10}>Aucune formation</TableCell>
-                                        </TableRow>
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                            : <Tooltip title="L'OF n'a pas répondu dans le temps imparti." aria-label="comm" classes={{ tooltip: classes.tooltip }}>
+                                                                <NotificationImportantIcon className={classes.iconError} />
+                                                            </Tooltip>)
+                                                    }
+                                                    {row.etat_libelle}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>{dateFormat(row.date_entree_demandee)}</TableCell>
+                                            <TableCell>{dateFormat(row.date_fin)}</TableCell>
+                                            <TableCell>
+                                                <div className={classes.flex}>
+                                                    <Commentaire user={user} formation={row} />
+                                                    <IconButton size="small" aria-label="Editer" color="secondary" onClick={(e) => handleClickOpenMenu(e, row.id)}>
+                                                        <MoreHorizIcon fontSize="small" />
+                                                    </IconButton>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>))
                                     : <TableRow>
-                                        <TableCell><Skeleton variant="text" /></TableCell>
-                                        <TableCell><Skeleton variant="text" /></TableCell>
-                                        <TableCell><Skeleton variant="text" /></TableCell>
-                                        <TableCell><Skeleton variant="text" /></TableCell>
-                                        <TableCell><Skeleton variant="text" /></TableCell>
-                                        <TableCell><Skeleton variant="text" /></TableCell>
-                                        <TableCell><Skeleton variant="text" /></TableCell>
-                                        <TableCell><Skeleton variant="text" /></TableCell>
-                                        <TableCell><Skeleton variant="text" /></TableCell>
-                                    </TableRow>}
-                            </TableBody>
-                        </Table >
-                    </TableContainer >
-                </Paper >
-            </div >
+                                        <TableCell colSpan={10}>Aucune formation</TableCell>
+                                    </TableRow>
+                                : <TableRow>
+                                    <TableCell><Skeleton variant="text" /></TableCell>
+                                    <TableCell><Skeleton variant="text" /></TableCell>
+                                    <TableCell><Skeleton variant="text" /></TableCell>
+                                    <TableCell><Skeleton variant="text" /></TableCell>
+                                    <TableCell><Skeleton variant="text" /></TableCell>
+                                    <TableCell><Skeleton variant="text" /></TableCell>
+                                    <TableCell><Skeleton variant="text" /></TableCell>
+                                    <TableCell><Skeleton variant="text" /></TableCell>
+                                    <TableCell><Skeleton variant="text" /></TableCell>
+                                </TableRow>}
+                        </TableBody>
+                    </Table >
+                </TableContainer >
+            </Paper >
 
             <Menu
                 id="long-menu"
@@ -1688,7 +1732,7 @@ export default function Formation() {
             {/* <p>{"Si modif BRS = annul toute les soll, annulé le brs aussi"}</p>
             <p>{"Si form etat = 10 ne pas mettre dans le BRS"}</p>
             <p>{"SendMail de m****"}</p> */}
-            <Button onClick={handleSendMailOF} variant='contained' color='primary'> MAIL </Button>
+            {/* <Button onClick={handleSendMailOF} variant='contained' color='primary'> MAIL </Button> */}
         </>
     )
 }

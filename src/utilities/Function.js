@@ -112,6 +112,7 @@ export function IsPermitted(user, target, action) {
 }
 
 export function getDateToday() {
+  // Retourne dateTime de maintenant
   let currentDate = new Date();
   let datetime = currentDate.getFullYear().toString().padStart(2, '0') + '-' +
     (currentDate.getMonth() + 1).toString().padStart(2, '0') + '-' +
@@ -123,6 +124,7 @@ export function getDateToday() {
 }
 
 export function getDateTime(date, format = 'FR') {
+  // Retourne objet avec date et heure d'un format DateTime
   // 'Indian/Reunion'
   // if (!date || date === '0000-00-00' || !date.includes('T')) { return {data:'', time:''}; }
   let currentDate = new Date(date);
