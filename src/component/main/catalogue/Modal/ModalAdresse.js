@@ -192,7 +192,7 @@ export default function ModalAdresse(props) {
                                     <div className={classes.blocFormBtn}>
                                         <Button disabled={adresse.adresse === 'all'}
                                             onClick={() => {
-                                                props.handleAddAdresse(updateRow, listAdresse.filter((v) => v.id === adresse.adresse)[0])
+                                                props.handleAddAdresse(updateRow, listAdresse.find((v) => v.id === adresse.adresse))
                                                 if (checkClose) { props.handleCloseModal(updateRow) } else removeAddFromList(adresse)
                                             }}
                                             variant="contained" color="primary" >
@@ -222,7 +222,7 @@ export default function ModalAdresse(props) {
                                                 props.handleCreateAdresse(updateRow, {
                                                     id: '',
                                                     adresse: textAdresse,
-                                                }, { id: adresse.ville, commune: listVille.filter((v) => v.id === adresse.ville)[0].libelle })
+                                                }, { id: adresse.ville, commune: listVille.find((v) => v.id === adresse.ville).libelle })
                                                 if (checkClose) { props.handleCloseModal(updateRow) } else setTextAdresse('')
                                             }}
                                             variant="contained" color="primary" >

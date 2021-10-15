@@ -116,7 +116,7 @@ export default function Row(props) {
                                                 handleDeleteAdresse={() => { props.handleDeleteAdresse(row, { id: a.id, adresse: a.adresse, commune: a.commune }) }} />
                                         ))}
                                     </div>
-                                    {(props.adresseHabilited && row.id_of_cata && row.id_of_cata_commune) &&
+                                    {(props.adresseHabilited && row.id_of_cata && row['commune']) &&
                                         <Tooltip classes={{ tooltip: classes.tooltip }} title="Ajouter une adresse">
                                             <IconButton aria-label="Ajouter" color="primary" onClick={() => props.handleOpenModalAdresse(row)}>
                                                 <AddIcon />

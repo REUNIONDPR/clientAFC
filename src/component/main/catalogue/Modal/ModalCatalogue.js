@@ -546,11 +546,17 @@ export default function ModalCatalogue(props) {
                                             ))}
                                           </Select>}
                                       </FormControl>
-                                      <Tooltip title="Enregistrer" aria-label="save" classes={{ tooltip: classes.tooltip }}>
-                                        <IconButton aria-label="save" color="secondary" onClick={() => handleSaveAddNewCommune(dataRow, addCommune)}>
+                                      {addCommune.id_commune && (addCommune.id_commune !== 'all'
+                                        ? <Tooltip title="Enregistrer" aria-label="save" classes={{ tooltip: classes.tooltip }}>
+                                          <IconButton aria-label="save" color="secondary"
+                                            onClick={() => handleSaveAddNewCommune(dataRow, addCommune)}>
+                                            <SaveIcon />
+                                          </IconButton>
+                                        </Tooltip>
+                                        : <IconButton disabled aria-label="save" color="secondary">
                                           <SaveIcon />
-                                        </IconButton>
-                                      </Tooltip>
+                                        </IconButton>)
+                                      }
                                     </>
                                     : <Tooltip title="Ajouter une commune" aria-label="add" classes={{ tooltip: classes.tooltip }}>
                                       <IconButton aria-label="add" color="secondary" onClick={() => handleAddNewCommune(v.id)}>

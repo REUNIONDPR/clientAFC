@@ -1420,7 +1420,7 @@ export default function Formation() {
                 })
                 // UpdateFotmation et etat de la formation
                 let newUpdateFormation = { ...updateFormation, etat: etat, etat_libelle: etat_libelle }
-                sendMailNotification('modificationBRS', {formation:newUpdateFormation})
+                sendMailNotification('modificationBRS', { formation: newUpdateFormation })
                 setupdateFormation(newUpdateFormation)
                 setFormationList(
                     formationList.map((v) => v.id === updateFormation.id
@@ -1513,65 +1513,65 @@ export default function Formation() {
                 <Toolbar className={`${classes.toolbar} primary-color-gradient`}>
 
                     <div>Liste des formations ({formationListDisplay.length})</div>
+                    <div className={classes.flex}>
+                        {IsPermitted(user, 'brs', 'create') &&
+                            <div className={classes.blockBRS}>
+                                <FormControl size="small" variant="outlined" >
+                                    <InputLabel id="demo-simple-select-outlined-label">Lot</InputLabel>
+                                    <Select
+                                        className={classes.selectDO}
+                                        name='id_lot'
+                                        value={filterValues.id_lot ? filterValues.id_lot : 'all'}
+                                        // onChange={(e) => props.handleChangeSelect(props.column.key, e.target.value)}
+                                        onChange={(e) => handleChangeFilter(e.target.name, e.target.value)}
+                                        label='Lot' >
+                                        <MenuItem value="all"><em>Tous</em></MenuItem>
+                                        {lotList.map((v) => (
+                                            <MenuItem key={v.id} value={v.id} >
+                                                {v.libelle}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
 
-                    {IsPermitted(user, 'brs', 'create') &&
-                        <div className={classes.blockBRS}>
-                            <FormControl size="small" variant="outlined" >
-                                <InputLabel id="demo-simple-select-outlined-label">Lot</InputLabel>
-                                <Select
-                                    className={classes.selectDO}
-                                    name='id_lot'
-                                    value={filterValues.id_lot ? filterValues.id_lot : 'all'}
-                                    // onChange={(e) => props.handleChangeSelect(props.column.key, e.target.value)}
-                                    onChange={(e) => handleChangeFilter(e.target.name, e.target.value)}
-                                    label='Lot' >
-                                    <MenuItem value="all"><em>Tous</em></MenuItem>
-                                    {lotList.map((v) => (
-                                        <MenuItem key={v.id} value={v.id} >
-                                            {v.libelle}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
+                                <FormControl size="small" variant="outlined">
+                                    <InputLabel className={classes.selectDO}>OF</InputLabel>
+                                    <Select
+                                        className={classes.selectDO}
+                                        name='OF'
+                                        value={attributaireLotSelected}
+                                        // onChange={(e) => props.handleChangeSelect(props.column.key, e.target.value)}
+                                        onChange={(e) => handleChangeAttribLotSelected(e.target.value)}
+                                        label='OF' >
+                                        <MenuItem value="all"><em>Tous</em></MenuItem>
+                                        {attributaireLotList.map((v) => (
+                                            <MenuItem key={'selectOF_EditBRS_' + v.id} value={v.id} >
+                                                {v.libelle}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
 
-                            <FormControl size="small" variant="outlined">
-                                <InputLabel className={classes.selectDO}>OF</InputLabel>
-                                <Select
-                                    className={classes.selectDO}
-                                    name='OF'
-                                    value={attributaireLotSelected}
-                                    // onChange={(e) => props.handleChangeSelect(props.column.key, e.target.value)}
-                                    onChange={(e) => handleChangeAttribLotSelected(e.target.value)}
-                                    label='OF' >
-                                    <MenuItem value="all"><em>Tous</em></MenuItem>
-                                    {attributaireLotList.map((v) => (
-                                        <MenuItem key={'selectOF_EditBRS_' + v.id} value={v.id} >
-                                            {v.libelle}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
+                                <Button disabled={editingBRS ||
+                                    filterValues.id_lot === 'all' ||
+                                    attributaireLotSelected === 'all'}
+                                    variant="contained" color="primary" onClick={() => { setEditingBRS(true); handleEditionBRS() }}>Edititer</Button>
 
-                            <Button disabled={editingBRS ||
-                                filterValues.id_lot === 'all' ||
-                                attributaireLotSelected === 'all'}
-                                variant="contained" color="primary" onClick={() => { setEditingBRS(true); handleEditionBRS() }}>Edititer</Button>
+                            </div>
+                        }
 
-                        </div>
-                    }
+                        {IsPermitted(user, 'formation', 'create') &&
+                            <div className={classes.btn} >
+                                <Button variant="contained" color="primary" onClick={handleShowFormation}>Créer une action</Button>
+                            </div>}
 
-                    {IsPermitted(user, 'formation', 'create') &&
-                        <div className={classes.btn} >
-                            <Button variant="contained" color="primary" onClick={handleShowFormation}>Créer une action</Button>
-                        </div>}
-
-                    {formationListDisplay.length > 0 &&
-                        <Tooltip title="Exporter le tableau" aria-label="cancel" classes={{ tooltip: classes.tooltip }}>
-                            <IconButton color="primary" onClick={handleExport}>
-                                <InboxIcon />
-                            </IconButton>
-                        </Tooltip>}
-
+                        {formationListDisplay.length > 0 &&
+                            <Tooltip title="Exporter le tableau" aria-label="cancel" classes={{ tooltip: classes.tooltip }}>
+                                <IconButton color="primary" onClick={handleExport}>
+                                    <InboxIcon />
+                                </IconButton>
+                            </Tooltip>}
+                    </div>
                 </Toolbar>
 
                 <TableContainer className={`${classes.containerTable} scrollBar-personnalize`}>

@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
   table: {
     maxHeight: 680,
     [theme.breakpoints.down(1550)]: {
-      maxHeight: '75vh',
+      maxHeight: '70vh',
     },
   },
   PaperContainerTable: {

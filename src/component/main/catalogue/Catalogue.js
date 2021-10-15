@@ -41,7 +41,7 @@ export default function Catalogue() {
     const [rows, setRows] = useState([]); // Resultat de la requete
     const [displayRows, setDisplayRows] = useState([]); // Copie de rows pour immutabilité
     const [adresseHabilited, setAdresseHabilited] = useState(false);
-    
+
     const [deleteClick, setDeleteClick] = useState(false); // Demande confirmation pour la suppression d'une formation
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -92,14 +92,14 @@ export default function Catalogue() {
 
     // ---------------------------------- Action sur les filtres
     const [nbFilter, setNbFilter] = useState(0);
-    const [filterSelected, setFilterSelected] = useState({id_lot:'all'});
+    const [filterSelected, setFilterSelected] = useState({ id_lot: 'all' });
 
     const handleChangeFilter = (key, value) => {
         setFilterSelected({ ...filterSelected, [key]: value });
     };
 
     const handleCleanFilter = () => {
-        setFilterSelected({id_lot:'all'});
+        setFilterSelected({ id_lot: 'all' });
     }
 
     useEffect(() => {
@@ -174,7 +174,6 @@ export default function Catalogue() {
             id: '',
             id_lot: 'all',
             id_of_cata: '',
-            id_of_cata_commune: '',
             adresse: [],
             list_of: [],
             n_Article: '',
@@ -325,8 +324,7 @@ export default function Catalogue() {
     }
 
     const handleSaveNewOf = (updatedRowFromCata, rowOF) => {
-        // // Ajouter un ligne au tableau avec attribut of / priorite
-
+        // Ajouter un ligne au tableau avec attribut of / priorite
         axios({
             method: 'put',
             url: '/catalogue/add_of',
@@ -346,16 +344,14 @@ export default function Catalogue() {
                     obj.id_of_cata = response.data.insertId;
                     obj.priorite = rowOF.priorite;
                     obj.list_of = newRowOf;
-
                     newDataRow = updateRowsTableAfterPutAxios(obj, 'of')
                 } else { // Si plusieurs OF - ajoute une ligne au tableau Catalogue
-
                     newDataRow = [...rows];
                     // Classer les lignes par orders de priorite ?
-                    let indexToAddNewRow = rows.lastIndexOf((v) => v.id === updatedRowFromCata.id) + 1
+                    let indexToAddNewRow = rows.findIndex((v) => v.id === updatedRowFromCata.id) + 1
+                    
                     let newListOF = [...updatedRowFromCata.list_of]
                     newListOF.push({ ...rowOF, id: response.data.insertId })
-
                     updatedRowFromCata.list_of.push({ ...rowOF, id: response.data.insertId })
                     let rowToAdd = {
                         ...updatedRowFromCata,
@@ -363,11 +359,14 @@ export default function Catalogue() {
                         list_of: newListOF,
                         id_of_cata: response.data.insertId,
                         priorite: rowOF.priorite,
+                        adresse: [],
+                        commune: null,
                     }
+
                     newDataRow.splice((indexToAddNewRow > rows.length) ? rows.length : indexToAddNewRow, 0, rowToAdd)
                     setUpdateRowCatalogue({ ...updatedRowFromCata, list_of: newListOF })
-                }
-                setRows(newDataRow)
+                } setRows(newDataRow)
+
             }
         })
     }
@@ -453,9 +452,7 @@ export default function Catalogue() {
             setOpenSnackBar(true);
         })
     }
-
-
-
+    
     const handleSaveAddNewCommune = (updateRowCatalogue, commune) => {
         axios({
             method: 'put',
@@ -464,7 +461,6 @@ export default function Catalogue() {
             headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), },
         }).then((response) => {
             if (response.status === 200) {
-
                 // MaJ Le modal Catalogue
                 let newListOf = updateRowCatalogue.list_of.map((v) => v.id === commune.id_of_cata
                     ? v.commune
@@ -473,7 +469,6 @@ export default function Catalogue() {
                     : v)
                 let newRow = {
                     ...updateRowCatalogue,
-                    id_of_cata_commune: response.data.insertId,
                     commune: updateRowCatalogue.commune
                         ? updateRowCatalogue.commune + ' | ' + commune.id_commune + ':' + commune.commune
                         : commune.id_commune + ':' + commune.commune,
@@ -493,9 +488,9 @@ export default function Catalogue() {
                 setMessageSnackBar('Echec de de l\'ajout de la commune.');
                 setSeverity('error');
             }
-            setOpenSnackBar(true);
         })
     }
+
     const handleDeleteCommune = (updateRowCatalogue, id_of_attr, id_commune) => {
         axios({
             method: 'put',
@@ -545,7 +540,6 @@ export default function Catalogue() {
             id: '',
             id_lot: 'all',
             id_of_cata: '',
-            id_of_cata_commune: '',
             adresse: [],
             list_of: [],
             n_Article: '',
@@ -566,10 +560,11 @@ export default function Catalogue() {
 
     // ---------------------------------- Ajouter une adresse
     const handleAddAdresse = (updatedRow, adresse) => {
+        // console.log(updatedRow, adresse)
         axios({
             method: 'put',
             url: '/attributaire/addAdresse',
-            data: { id_of_cata_commune: updatedRow.id_of_cata_commune, id_adresse: adresse.id },
+            data: { id_commune: adresse.id_commune, id_of_cata: updatedRow.id_of_cata, id_adresse: adresse.id },
             headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), },
         }).then((response) => {
             if (response.status === 200) {
@@ -631,7 +626,7 @@ export default function Catalogue() {
             headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), },
         }).then((response) => {
             if (response.status === 200) {
-                let objAdresse = { id: response.data.insertId, adresse: adresse.adresse, commune: ville.commune }
+                let objAdresse = { id: response.data.insertId, adresse: adresse.adresse, commune: ville.commune, id_commune: ville.id }
                 handleAddAdresse(updatedRow, objAdresse)
             } else {
                 setMessageSnackBar('Erreur lors de la création de l\'adresse.');
@@ -687,7 +682,7 @@ export default function Catalogue() {
                     handleSubmitClickToParent={handleSubmitClickCatalogue}
                     handleEditSubmitClickToParent={handleEditSubmitClickCatalogue}
                     handleDeleteClick={handleDeleteClickCatalogue}
-
+                    
                     handleSaveAddNewCommune={handleSaveAddNewCommune}
                     handleDeleteCommune={handleDeleteCommune}
 
