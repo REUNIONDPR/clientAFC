@@ -162,6 +162,7 @@ export default function Formation() {
     const [etatList, setEtatList] = useState([]);
     const [dispositifList, setDispositifList] = useState([]);
     const [catalogueList, setCatalogueList] = useState([]);
+    const [bassinList, setBassinList] = useState([])
     const [agence_refList, setAgence_refList] = useState([])
     const [communeList, setCommuneList] = useState([]);
     const [icopList, setIcopList] = useState([]);
@@ -177,6 +178,7 @@ export default function Formation() {
     // Objet formation pour le modal
     const [updateFormation, setupdateFormation] = useState({
         id: '',
+        bassin: 'all',
         id_lot: 'all',
         id_cata: 'all',
         intitule: '',
@@ -461,11 +463,14 @@ export default function Formation() {
         if (formation && formation.id_lot !== 'all') {
             axios({
                 method: 'GET',
+                url: '/lot/findBassin?id_lot=' + formation.id_lot,
+                headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
+            }).then((response) => setBassinList(response.data))
+            axios({
+                method: 'GET',
                 url: '/catalogue/find?field=id_lot&data=' + formation.id_lot,
                 headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
-            }).then((response) => {
-                setCatalogueList(response.data);
-            });
+            }).then((response) => setCatalogueList(response.data));
         }
 
         // Si id_cata !== 'all' = récupère les communes possible (selon les attributaires)
@@ -516,9 +521,14 @@ export default function Formation() {
 
         switch (k) {
             case 'id_lot':
-                setupdateFormation({ ...updateFormation, [k]: v, id_cata: 'all' })
+                setupdateFormation({ ...updateFormation, [k]: v, id_cata: 'all', bassin: 'all' })
                 if (v !== 'all') {
-                    // Get formation du lot concerné
+                    // Get formation & bassin du lot concerné
+                    axios({
+                        method: 'GET',
+                        url: '/lot/findBassin?id_lot=' + v,
+                        headers: { Authorization: 'Bearer ' + Cookie.get('authTokenAFC'), }
+                    }).then((response) => setBassinList(response.data))
                     axios({
                         method: 'GET',
                         url: '/catalogue/find?field=id_lot&data=' + v,
@@ -847,6 +857,7 @@ export default function Formation() {
         setupdateFormation({
             id: '',
             id_lot: 'all',
+            bassin: 'all',
             id_cata: 'all',
             intitule: '',
             idgasi: user.idgasi,
@@ -1709,6 +1720,7 @@ export default function Formation() {
                     dispositifList={dispositifList}
                     agence_refList={agence_refList}
                     catalogueList={catalogueList}
+                    bassinList={bassinList}
                     communeList={communeList}
                     handleChangeFormation={handleChangeFormation}
                     handleSaveFormation={handleSaveFormation}

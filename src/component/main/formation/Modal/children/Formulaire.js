@@ -121,7 +121,7 @@ export default function Formulaire(props) {
             props.handleChangeFormation('id_commune', props.communeList.find((v) => v.libelle === value.value_new).id, true)
         } else props.handleChangeFormation(value.key, value.value_new, true)
     }
-
+    
     return (
         <div className={classes.main}>
             {(props.updateFormation.id !== '' &&
@@ -159,6 +159,26 @@ export default function Formulaire(props) {
                             </Select>
                         }
                     </FormControl>
+
+                    <FormControl size="small" variant="outlined"
+                        disabled={props.updateFormation.id_lot === 'all' || props.updateFormation.id !== ''}>
+                        <InputLabel>Bassin</InputLabel>
+                        {props.bassinList && <Select
+                            value={props.updateFormation.bassin}
+                            onChange={(e) => props.handleChangeFormation(e.target.name, e.target.value)}
+                            fullWidth
+                            name='bassin'
+                            label='Bassin *'
+                        >
+                            <MenuItem value="all">
+                                    <em>Choisir</em>
+                                </MenuItem>
+                            {props.bassinList.map((v) => (
+                                <MenuItem key={v.id + '_' + v.bassin} value={v.bassin}>{v.bassin}</MenuItem>
+                            ))}
+                        </Select> }
+                    </FormControl>
+
                     <FormControl size="small" variant="outlined" error={props.updateFormation.id_cata === 'all' ? true : false}
                         disabled={props.updateFormation.id_lot === 'all' || props.updateFormation.id !== ''}>
                         <InputLabel>Catlogue</InputLabel>

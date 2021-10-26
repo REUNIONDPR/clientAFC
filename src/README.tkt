@@ -1,0 +1,9 @@
+L'application n'est pas conforme
+
+J'ai fais une erreur dans la conception des données.
+Tel qu'il est écrit, un lot peut avoir un ou plusieurs attributaires avec un ordre de priorité.
+Or il y a un détail que je n'ai pas pris en compte et qu'il faut mettre en place... :
+Un lot peux avoir un ou plusieurs attributaire sur un bassin
+Ainsi, le lot 8 SO n'a pas forcément les même attributaire que le lot 8 NE.
+
+A part ça, l'application semble terminer. Peut être quelques petits soucis ici et là à revoir.
