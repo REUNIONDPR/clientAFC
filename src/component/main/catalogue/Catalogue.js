@@ -19,6 +19,7 @@ export default function Catalogue() {
 
     const columns = [
         'lot',
+        'bassin',
         'n_Article',
         'intitule_form_marche',
         'intitule_form_base_article',
@@ -92,7 +93,7 @@ export default function Catalogue() {
 
     // ---------------------------------- Action sur les filtres
     const [nbFilter, setNbFilter] = useState(0);
-    const [filterSelected, setFilterSelected] = useState({ id_lot: 'all' });
+    const [filterSelected, setFilterSelected] = useState({ id_lot: 'all', bassin:'all' });
 
     const handleChangeFilter = (key, value) => {
         setFilterSelected({ ...filterSelected, [key]: value });
@@ -111,6 +112,8 @@ export default function Catalogue() {
                     if (filterSelected[key] === 'all' || filterSelected[key] === '') continue;
                     if (key === 'id_lot') {
                         if (v[key].toString() !== filterSelected[key].toString()) return false;
+                    } else if (key === 'bassin') {
+                        if (!v[key].includes(filterSelected[key])) return false;
                     } else {
                         return false;
                     }
@@ -649,6 +652,10 @@ export default function Catalogue() {
                             'name': 'Lot',
                             'displayName': 'Tout les lots',
                             'handleChange': handleChangeFilter, 'data': lotList, valueSelected: filterSelected, varName: 'id_lot'
+                        },{
+                            'name': 'Bassin',
+                            'displayName': 'Tous',
+                            'handleChange': handleChangeFilter, 'data': [{value:'SO',libelle:'SO'},{value:'NE',libelle:'NE'},{value:'NE/SO',libelle:'NE/SO'}], valueSelected: filterSelected, varName: 'bassin'
                         },
                     ]}
                 nbFilter={nbFilter}

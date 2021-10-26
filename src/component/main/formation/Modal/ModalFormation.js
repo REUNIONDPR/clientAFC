@@ -160,6 +160,7 @@ export default function ModalCreateSol(props) {
                                     lotList={props.lotList}
                                     dispositifList={props.dispositifList}
                                     agence_refList={props.agence_refList}
+                                    bassinList={props.bassinList}
                                     catalogueList={props.catalogueList}
                                     communeList={props.communeList}
                                     handleCancelFormation={handleCancelFormation}

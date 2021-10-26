@@ -38,10 +38,13 @@ const useStyles = makeStyles((theme) => ({
   mwidth: {
     minWidth: 230,
   },
-  filter:{
-    padding:theme.spacing(2),
-    backgroundColor:'#fafafa',
+  filter: {
+    padding: theme.spacing(2),
+    backgroundColor: '#fafafa',
     border: '1px solid rgba(224, 224, 224)',
+    '& > *': {
+      marginRight: theme.spacing(1),
+    }
   }
 }))
 
